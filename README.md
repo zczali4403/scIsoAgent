@@ -1,6 +1,6 @@
-# IsoAgent User Guide
+# scIsoAgent User Guide
 
-`IsoAgent` is a long-read single-cell RNA-seq workflow assistant for this project.
+`scIsoAgent` is a long-read single-cell RNA-seq workflow assistant for this project.
 
 It supports:
 
@@ -27,9 +27,9 @@ prompt_example.txt
 
 Keep this structure unchanged.
 
-## What IsoAgent Can Do
+## What scIsoAgent Can Do
 
-IsoAgent currently supports:
+scIsoAgent currently supports:
 
 - ONT long-read single-cell RNA-seq
 - PacBio CCS long-read single-cell RNA-seq
@@ -96,7 +96,7 @@ Examples:
 
 ## How Outputs Are Organized 📁
 
-IsoAgent uses one top-level `results` directory for a workflow run.
+scIsoAgent uses one top-level `results` directory for a workflow run.
 
 You confirm that root once, and each step then creates its own subdirectory under it.
 

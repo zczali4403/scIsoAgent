@@ -13,7 +13,7 @@ Use these when you want the agent to decide how to continue.
 
 Example:
 
-I want to run a long-read single-cell RNA-seq analysis with IsoAgent. Please help me start from raw data.
+I want to run a long-read single-cell RNA-seq analysis with scIsoAgent. Please help me start from raw data.
 
 Example:
 
