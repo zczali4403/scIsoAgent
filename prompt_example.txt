@@ -1,0 +1,192 @@
+# Prompt Examples For Users
+
+This file contains simple user-side prompt examples.
+
+These examples are intentionally short.
+In most cases, you do not need to provide every parameter in the first message.
+The agent should continue by asking follow-up questions step by step.
+
+
+## 1. Top-Level Entry
+
+Use these when you want the agent to decide how to continue.
+
+Example:
+
+I want to run a long-read single-cell RNA-seq analysis with IsoAgent. Please help me start from raw data.
+
+Example:
+
+I already have some upstream outputs. Please help me continue the workflow from the right downstream step.
+
+Example:
+
+I am not sure whether I should start from upstream or downstream. Please help me figure out the correct next step.
+
+
+## 2. Upstream Workflow
+
+### 2.1 Start ONT Upstream Workflow
+
+I want to run the upstream ONT workflow. Please guide me step by step.
+
+
+### 2.2 Start PacBio Upstream Workflow
+
+I want to run the upstream PacBio workflow. Please guide me step by step.
+
+
+### 2.3 Run Only BLAZE
+
+I only want to run BLAZE for my ONT data.
+
+
+### 2.4 Run Only minimap2
+
+I only want to run minimap2 alignment.
+
+
+### 2.5 Run Only samtools
+
+I want to run samtools sorting and indexing on my alignment output.
+
+
+### 2.6 Run IsoQuant
+
+I want to run IsoQuant on my data.
+
+
+### 2.7 Run FLAIR
+
+I want to run FLAIR on my ONT data.
+
+
+### 2.8 Run bambu
+
+I want to run bambu on my data.
+
+
+## 3. Downstream Workflow
+
+### 3.1 Start Downstream Workflow
+
+I want to start the downstream workflow from my existing upstream outputs.
+
+
+### 3.2 Resource Setup
+
+I want to run resource setup.
+
+
+### 3.3 Split Gene Count Matrix By Sample
+
+I want to split the merged gene count matrix by sample.
+
+
+### 3.4 Remove Empty Droplets
+
+I want to run empty-droplet removal.
+
+
+### 3.5 Run QC Pipeline
+
+I want to run the QC pipeline after empty-droplet removal.
+
+
+### 3.6 Merge Gene-Level Objects
+
+I want to merge my QC-completed gene-level Seurat objects.
+
+
+### 3.7 Generate Isoform Objects
+
+I want to generate per-sample isoform Seurat objects.
+
+
+### 3.8 Merge Isoform Objects
+
+I want to merge my per-sample isoform Seurat objects.
+
+
+### 3.9 Add Isoform Assay To Gene Object
+
+I want to add the merged isoform assay into the merged gene Seurat object.
+
+
+## 4. Annotation And Visualization
+
+### 4.1 Start Annotation
+
+I want to annotate my merged Seurat object.
+
+
+### 4.2 Draw Features
+
+I want to draw some genes on my Seurat object.
+
+
+### 4.3 Draw Isoform Features
+
+I want to draw some isoforms on my Seurat object.
+
+
+## 5. Isoform-Focused Downstream Analysis
+
+### 5.1 Explore Isoforms Of Interest
+
+I want to explore isoforms of interest in my Seurat object.
+
+
+### 5.2 Isoform Classification
+
+I want to run isoform classification.
+
+
+### 5.3 Isoform Diversity Profiling
+
+I want to profile isoform diversity.
+
+
+### 5.4 Differential Transcript Usage
+
+I want to run differential transcript usage analysis.
+
+
+## 6. Continue From Existing Results
+
+### 6.1 Continue From Existing Upstream Outputs
+
+I already completed upstream quantification. Please help me continue into downstream analysis.
+
+
+### 6.2 Continue From A Merged Seurat Object
+
+I already have a merged Seurat object. Please help me decide which downstream analysis to do next.
+
+
+## 7. Useful Variants
+
+These are still short, but a little more specific.
+
+Example:
+
+I want to run IsoQuant. Please ask me for the required inputs step by step.
+
+Example:
+
+I want to run annotation. Please keep it interactive and guide me through the decisions.
+
+Example:
+
+I want to draw features on my merged object. Please keep the plotting session open in case I want to add more features.
+
+Example:
+
+I want to continue from my existing results directory instead of starting from scratch.
+
+
+## 8. Minimal Template
+
+If you want a reusable short template, use this:
+
+I want to run `[step or workflow name]`. Please guide me step by step and ask me for the required inputs.

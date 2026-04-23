@@ -1,0 +1,274 @@
+---
+name: merge-iso-obj
+description: Merges per-sample isoform-level Seurat objects produced by generate-iso-obj, previews sample structure in UMAP, and optionally applies Harmony-based batch correction before saving the final merged isoform Seurat object.
+---
+
+# Merge Iso Obj
+
+Use this skill when the user has already generated one isoform-level Seurat object per sample and now wants to merge them into a single downstream isoform object.
+
+This skill is for isoform-level sample merging and optional batch correction only. It does not cover generating per-sample isoform objects, gene-level QC, cell type annotation, marker discovery, or trajectory analysis.
+
+## Use This Skill When
+
+- the user has one `*_isoform_subset.rds` per sample from `generate-iso-obj`
+- the user wants to merge multiple per-sample isoform Seurat objects
+- the user wants to inspect whether batch effects are visible in the merged isoform object
+- the user wants optional Harmony-based batch correction on the merged isoform object
+
+## Project Source
+
+Execution source of truth:
+
+- `../scripts/merge_remove_batch.r`
+
+Prefer calling that script directly.
+
+Related upstream skill:
+
+- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/generate-iso-obj/SKILL.md`
+
+## Current Scope
+
+This skill currently includes:
+
+1. resolving one isoform-level Seurat-object RDS per sample
+2. merging all per-sample isoform objects into one Seurat object
+3. running preprocessing to PCA
+4. generating a PCA elbow plot
+5. asking the user to confirm `npc`
+6. generating a no-batch-correction preview UMAP by sample and by cluster
+7. asking the user whether batch correction is needed
+8. if Harmony is requested, running Harmony and generating a Harmony elbow plot
+9. asking the user to confirm `harmony_npc`
+10. running final neighbors, clusters, and UMAP
+11. saving the final merged isoform Seurat object and final UMAP plots
+
+## Mandatory Rules
+
+1. Treat this skill as a staged workflow, not as a one-shot merge command.
+2. First confirm which conda environment should be used.
+3. First resolve the per-sample isoform Seurat-object RDS inputs.
+4. The per-sample RDS paths may be provided by the user directly, or auto-detected from prior `generate-iso-obj` outputs and then confirmed by the user.
+5. Do not silently assume auto-detected inputs without showing the resolved sample-to-file mapping and asking the user to confirm it.
+6. Prefer calling `../scripts/merge_remove_batch.r` with an explicit `--stage`.
+7. When using this script for isoform-level merging, pass `--object_label=isoform`.
+8. Before the preview UMAP stage, first generate the PCA elbow plot and ask the user to confirm `npc`.
+9. After the preview UMAP is generated, ask the user whether batch correction is needed. Do not run Harmony by default.
+10. If Harmony is requested, first generate the Harmony elbow plot and ask the user to confirm `harmony_npc` before `FindNeighbors`.
+11. When Harmony is used, use the script's Harmony workflow as the execution source of truth rather than composing ad hoc integration code.
+12. Before execution, explicitly state that the current script is shared with the gene-level merge step but is being applied here to isoform-level Seurat objects.
+13. Before executing any substantial command or script block, show the exact final command and wait for confirmation.
+14. Do not claim completion until the expected RDS, UMAP PDFs, and summary tables exist and are non-empty.
+
+## Entry Procedure
+
+At the start of an isoform merge request:
+
+1. Ask which conda environment should be used.
+2. Resolve the per-sample isoform Seurat-object RDS files:
+   - either ask the user to provide them directly
+   - or auto-detect likely outputs from `generate-iso-obj` and ask the user to confirm the resolved paths
+3. Derive the merge output directory from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
+4. Confirm the output prefix for the merged isoform object.
+5. Use `11_merge_iso_obj` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
+6. Optionally infer sample names from the input file names, then ask the user to confirm them if they will be used as the sample labels.
+7. Validate that all declared input files exist before drafting commands.
+
+Only after those are clear should the pipeline enter the first merge stage.
+
+## Workflow Stages
+
+### 1. PCA Elbow Plot
+
+Merge the per-sample isoform objects and run:
+
+- `NormalizeData`
+- `FindVariableFeatures`
+- `ScaleData`
+- `RunPCA`
+
+Then generate the PCA elbow plot.
+
+Recommended script stage:
+
+- `--stage=elbow`
+
+### 2. User-Confirmed PCA Dimensions
+
+After the PCA elbow plot is generated, ask the user to confirm:
+
+- `npc`
+
+Do not proceed to UMAP preview before this confirmation.
+
+### 3. No-Batch-Correction Preview
+
+Using the user-confirmed `npc`, run:
+
+- `FindNeighbors(reduction = "pca", dims = 1:npc)`
+- `FindClusters`
+- `RunUMAP(reduction = "pca", dims = 1:npc)`
+
+Then generate:
+
+- UMAP colored by sample
+- UMAP colored by cluster
+
+Recommended script stage:
+
+- `--stage=preview`
+
+### 4. User Decision On Batch Correction
+
+After the preview UMAP is generated, ask the user whether batch correction is needed.
+
+If the answer is no:
+
+- proceed directly to finalization with `--remove_batch=false`
+
+If the answer is yes:
+
+- proceed to Harmony elbow plotting
+
+### 5. Harmony Elbow Plot
+
+If batch correction is requested, run Harmony first using the PCA dimensions selected above, then generate the Harmony elbow plot.
+
+Recommended script stage:
+
+- `--stage=harmony-elbow`
+
+After the Harmony elbow plot is generated, ask the user to confirm:
+
+- `harmony_npc`
+
+Do not proceed to Harmony-based `FindNeighbors` before this confirmation.
+
+### 6. Finalization
+
+If batch correction is not requested:
+
+- save the merged isoform Seurat object after the non-Harmony neighbors/clusters/UMAP workflow
+
+If batch correction is requested:
+
+- run `FindNeighbors`, `FindClusters`, and `RunUMAP` on the Harmony reduction using the user-confirmed `harmony_npc`
+- save the batch-corrected merged isoform Seurat object
+- save final UMAPs colored by sample and by cluster
+
+Recommended script stage:
+
+- `--stage=finalize`
+
+## Expected Inputs
+
+Typical inputs for this skill may include:
+
+- one isoform-level Seurat-object RDS per sample
+- conda environment name
+- output directory
+- output prefix
+- optional explicit sample names
+
+## Script Interface
+
+Preferred execution pattern uses staged commands.
+
+PCA elbow plot:
+
+```bash
+conda run -n <env_name> Rscript ../scripts/merge_remove_batch.r \
+  --stage=elbow \
+  --input_rds_files=/abs/path/to/sample1_isoform_subset.rds,/abs/path/to/sample2_isoform_subset.rds \
+  --output_dir=/abs/path/to/merge_iso_obj \
+  --output_prefix=merged_isoform_samples \
+  --sample_names=sample1,sample2 \
+  --object_label=isoform
+```
+
+Preview UMAP before batch correction:
+
+```bash
+conda run -n <env_name> Rscript ../scripts/merge_remove_batch.r \
+  --stage=preview \
+  --input_rds_files=/abs/path/to/sample1_isoform_subset.rds,/abs/path/to/sample2_isoform_subset.rds \
+  --output_dir=/abs/path/to/merge_iso_obj \
+  --output_prefix=merged_isoform_samples \
+  --sample_names=sample1,sample2 \
+  --object_label=isoform \
+  --npc=30 \
+  --cluster_res=0.5
+```
+
+Harmony elbow plot:
+
+```bash
+conda run -n <env_name> Rscript ../scripts/merge_remove_batch.r \
+  --stage=harmony-elbow \
+  --input_rds_files=/abs/path/to/sample1_isoform_subset.rds,/abs/path/to/sample2_isoform_subset.rds \
+  --output_dir=/abs/path/to/merge_iso_obj \
+  --output_prefix=merged_isoform_samples \
+  --sample_names=sample1,sample2 \
+  --object_label=isoform \
+  --npc=30 \
+  --batch_method=harmony
+```
+
+Finalize without batch correction:
+
+```bash
+conda run -n <env_name> Rscript ../scripts/merge_remove_batch.r \
+  --stage=finalize \
+  --input_rds_files=/abs/path/to/sample1_isoform_subset.rds,/abs/path/to/sample2_isoform_subset.rds \
+  --output_dir=/abs/path/to/merge_iso_obj \
+  --output_prefix=merged_isoform_samples \
+  --sample_names=sample1,sample2 \
+  --object_label=isoform \
+  --npc=30 \
+  --cluster_res=0.5 \
+  --remove_batch=false
+```
+
+Finalize with Harmony:
+
+```bash
+conda run -n <env_name> Rscript ../scripts/merge_remove_batch.r \
+  --stage=finalize \
+  --input_rds_files=/abs/path/to/sample1_isoform_subset.rds,/abs/path/to/sample2_isoform_subset.rds \
+  --output_dir=/abs/path/to/merge_iso_obj \
+  --output_prefix=merged_isoform_samples \
+  --sample_names=sample1,sample2 \
+  --object_label=isoform \
+  --npc=30 \
+  --harmony_npc=20 \
+  --cluster_res=0.5 \
+  --remove_batch=true \
+  --batch_method=harmony
+```
+
+## Expected Deliverables
+
+For a normal successful run, produce:
+
+- `<output_prefix>_sample_summary.tsv`
+- `<output_prefix>_run_summary.tsv`
+- `<output_prefix>_elbowplot.pdf`
+- `<output_prefix>_preview_by_sample_umap.pdf`
+- `<output_prefix>_preview_by_cluster_umap.pdf`
+- when Harmony is requested:
+  - `<output_prefix>_harmony_elbowplot.pdf`
+- final outputs:
+  - `<output_prefix>.rds`
+  - `<output_prefix>_by_sample_umap.pdf`
+  - `<output_prefix>_by_cluster_umap.pdf`
+
+## Response Style
+
+Be operational and staged:
+
+- say which per-sample isoform RDS files are being merged
+- say which `npc` and `cluster_res` are in use
+- after preview, explicitly ask whether batch correction is needed
+- if Harmony is chosen, explicitly ask for `harmony_npc` after showing the Harmony elbow plot
+- show the exact command before execution

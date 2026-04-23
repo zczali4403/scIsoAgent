@@ -1,0 +1,43 @@
+# Local tool artifacts
+.codex
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*~
+
+# Jupyter
+.ipynb_checkpoints/
+
+# R
+.Rhistory
+.RData
+.Rproj.user/
+
+# Local env files
+.env
+.venv/
+venv/
+
+# Local cache / temp dirs
+tmp/
+temp/
+cache/

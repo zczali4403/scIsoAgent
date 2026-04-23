@@ -1,0 +1,52 @@
+---
+name: flair-quantification
+description: Runs project-specific ONT-only FLAIR transcriptome generation, optional multi-sample combine, quantification, and post-quantification single-cell matrix recovery with recover_sc_matrix.py.
+---
+
+# FLAIR Quantification
+
+Use this skill when the selected Step 4 tool is `FLAIR`.
+
+Source document:
+
+- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/skills/tools/flair_quantification.md`
+
+## Use This Skill When
+
+- the user selected `FLAIR`
+- the platform is `ONT`
+- aligned BAM and original raw reads are both available
+- the goal is isoform discovery plus FLAIR-style quantification
+
+## Mandatory Rules
+
+1. Do not use this skill for PacBio.
+2. Ask FLAIR-specific questions only when the workflow reaches the FLAIR step.
+3. First ask how samples should be organized:
+   - one sample per run
+   - or multi-sample comparative run
+4. Reuse the existing aligned BAM from the workflow rather than defaulting to realignment.
+5. Confirm splice-junction support source explicitly.
+6. If the workflow uses `flair combine`, require the command to include `-c` / `--convert_gtf`.
+7. In this project, do not treat `-c` as optional once `flair combine` is selected, because the combined transcriptome should also be converted to GTF.
+8. Run every FLAIR command block inside a persistent `tmux` session.
+9. Confirm all command blocks before execution, including `intronProspector`, `flair transcriptome`, optional `flair combine`, `flair quantify`, and matrix recovery, and show the planned `tmux` session name.
+10. After launch, do not exit that `tmux` session until the active FLAIR command block has finished.
+11. Execute confirmed FLAIR commands directly in the shell or in `tmux`; do not generate temporary `.sh` wrappers unless the user explicitly asks for them.
+12. Resolve the FLAIR output subdirectory automatically from the already confirmed workflow-level results root and ask the user to confirm the resolved path rather than asking for a new output directory.
+13. Use `04_flair` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
+13. When showing a `flair combine` command for confirmation, explicitly check that `-c` or `--convert_gtf` is present.
+14. After `flair quantify`, run the project script:
+   - `../scripts/recover_sc_matrix.py`
+15. Before matrix recovery, verify read names follow:
+   - `barcode_umi#read_uuid_strand`
+16. In multi-sample runs, run `../scripts/recover_sc_matrix.py` only on the per-sample `isoform.read.map.txt` files produced by `flair quantify`.
+17. Do not use the multi-sample `combine` result as the input for `recover_sc_matrix.py`.
+
+## Output Handling
+
+Derive transcriptome, quantify, combine, and matrix-recovery outputs under the workflow-level results root.
+
+If `flair combine` is used, expect both the combined transcriptome output and the converted GTF output because `-c` / `--convert_gtf` is required in this project.
+
+For multi-sample runs, matrix recovery is a per-sample post-quantification step tied to each sample's `isoform.read.map.txt` output from `flair quantify`.
