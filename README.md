@@ -16,7 +16,7 @@ The repository mainly includes:
 - `skills/`: workflow modules
 - `scripts/`: analysis scripts and helper scripts
 
-Typical layout:
+Typical repository layout:
 
 ```text
 README.md
@@ -25,7 +25,8 @@ skills/
 prompt_example.txt
 ```
 
-Keep this structure unchanged.
+For actual workflow use, the important requirement is that `skills/` and `scripts/` remain sibling directories.
+`README.md` and `prompt_example.txt` are user-facing documentation files.
 
 ## What scIsoAgent Can Do
 
