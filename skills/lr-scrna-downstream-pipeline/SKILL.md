@@ -30,6 +30,7 @@ This downstream pipeline currently includes the following planned modules:
 8. isoform classification
 9. isoform diversity profiling
 10. differential transcript usage
+11. final run summary and discussion-style interpretation
 
 This is a living workflow definition. The module list, order, and boundaries may be revised as the project matures.
 
@@ -83,6 +84,7 @@ Use this default order unless the user explicitly requests a different entry poi
 8. isoform classification
 9. isoform diversity profiling
 10. differential transcript usage
+11. final run summary and discussion-style interpretation
 
 This ordering is a default, not a rigid law. Some analyses may start from an intermediate stage if validated prior outputs already exist.
 
@@ -257,6 +259,22 @@ Current dispatch rule for this stage:
 - if the task is IsoformSwitchAnalyzeR- or DEXSeq-based differential transcript usage analysis, including DTU FASTA preparation, pseudobulk aggregation, GTF subsetting, DTU testing, or switch plotting, read:
   - `../differential-transcript-usage/SKILL.md`
 
+### 11. Final Summary
+
+Use this module when the user wants a final synthesis after analysis outputs have been generated.
+
+Typical goals:
+
+- summarize what each completed stage produced
+- integrate evidence from plots and summary tables
+- highlight the major technical and biological findings
+- draft discussion-style interpretation if requested
+
+Current dispatch rule for this stage:
+
+- if the task is summarizing a completed workflow run, interpreting saved outputs across steps, or drafting discussion-style takeaways from existing result files, read:
+  - `../summary/SKILL.md`
+
 ## Module Dispatch Rules
 
 When a downstream request enters a concrete module:
@@ -295,6 +313,8 @@ Current downstream module skills already available:
   - `../profiling-isoform-diversity/SKILL.md`
 - differential transcript usage:
   - `../differential-transcript-usage/SKILL.md`
+- final run summary and discussion-style interpretation:
+  - `../summary/SKILL.md`
 
 ## Expected Inputs
 
@@ -324,6 +344,7 @@ For a normal successful downstream run, deliver only the artifacts relevant to t
 - isoform classification outputs
 - isoform diversity summaries
 - DTU result tables and supporting summaries
+- a final cross-step summary and optional discussion-style interpretation
 
 ## Response Style
 

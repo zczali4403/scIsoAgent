@@ -78,6 +78,7 @@ Downstream analysis currently includes:
 - isoform classification
 - isoform diversity analysis
 - differential transcript usage
+- final cross-step summary and optional discussion-style interpretation
 
 ## How To Use It 🚀
 
@@ -86,6 +87,7 @@ In normal use:
 - tell the agent what you want to do
 - say whether you are starting from raw data or from existing outputs
 - provide the main input paths
+- make sure the required Docker image is available locally
 - confirm the proposed command before execution
 
 Examples:
@@ -94,6 +96,58 @@ Examples:
 - "Start downstream analysis from this merged Seurat object"
 - "Run only IsoQuant on these aligned BAM files"
 - "Plot these genes on the merged object"
+
+## Docker Environment
+
+scIsoAgent expects the workflow environment to come from the published Docker image.
+
+### 1. Pull Docker image
+
+```bash
+docker pull chengzhizhaofd/scisoagent:latest
+```
+
+### 2. Run the Docker container
+
+Run scIsoAgent in interactive mode:
+
+```bash
+docker run -it --name scisoagent chengzhizhaofd/scisoagent:latest /bin/bash
+```
+
+Recommended: mount a local project directory
+
+```bash
+docker run -it \
+  -v /path/to/your/project:/work \
+  --name scisoagent \
+  chengzhizhaofd/scisoagent:latest /bin/bash
+```
+
+Inside the container, work under:
+
+```text
+/work
+```
+
+Typical workflow inside the container:
+
+```bash
+cd /work
+git clone <your-repo-url>
+cd <repo-name>
+npm install -g @mariozechner/pi-coding-agent
+cd /work
+pi
+```
+
+`pi-coding-agent` is required to launch scIsoAgent inside the container.
+
+Start `pi` from `/work` so the agent can discover the repository content from the mounted working directory.
+
+After that, work inside the repository directory and keep `skills/` and `scripts/` as sibling directories.
+
+Use this image as the default execution environment for both upstream and downstream analysis. The required analysis software has been packaged into this image.
 
 ## How Outputs Are Organized 📁
 
@@ -136,7 +190,7 @@ Note: input files do not need to live under a repository-owned `data/` directory
 - reference annotation GTF or GFF
 - quantified transcript or gene matrices
 - Seurat RDS objects
-- a conda environment with the required tools installed
+- Docker installed locally with access to `chengzhizhaofd/scisoagent:latest`
 
 For downstream work, it is also helpful to know:
 

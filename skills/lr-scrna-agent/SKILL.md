@@ -76,6 +76,7 @@ Downstream analysis currently includes:
 8. isoform classification
 9. isoform diversity profiling
 10. differential transcript usage
+11. final summary of completed outputs
 
 ## Mandatory Operating Rules
 
@@ -155,6 +156,7 @@ Route to the downstream entry skill if the user is asking for:
 - isoform classification
 - isoform diversity profiling
 - differential transcript usage
+- final workflow summary from saved outputs
 
 Use:
 
