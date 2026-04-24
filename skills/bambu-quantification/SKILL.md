@@ -7,9 +7,9 @@ description: Runs project-specific bambu single-cell transcript discovery and qu
 
 Use this skill when the selected Step 4 tool is `bambu`.
 
-Source document:
+Primary skill file:
 
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/skills/tools/bambu_quantification.md`
+- `./SKILL.md`
 
 ## Use This Skill When
 

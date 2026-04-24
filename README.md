@@ -1,13 +1,13 @@
 # scIsoAgent User Guide
 
-`scIsoAgent` is a long-read single-cell RNA-seq workflow assistant for this project.
+`scIsoAgent` is a portable workflow assistant for long-read single-cell RNA-seq analysis.
 
 It supports:
 
 - upstream processing from raw ONT or PacBio reads
 - downstream analysis from quantified outputs and Seurat objects
 
-This repository is the portable workflow bundle used by the project.
+This repository is a portable workflow bundle for long-read single-cell RNA-seq analysis.
 
 ## What This Bundle Contains 📦
 
@@ -97,7 +97,7 @@ Examples:
 
 ## How Outputs Are Organized 📁
 
-scIsoAgent uses one top-level `results` directory for a workflow run.
+scIsoAgent uses one top-level `results` directory for a workflow run. This is a runtime output directory and may be created when a run starts.
 
 You confirm that root once, and each step then creates its own subdirectory under it.
 
@@ -127,6 +127,8 @@ Typical default subdirectory names:
 ## What You Should Prepare 📝
 
 Depending on the task, you may need some or all of the following:
+
+Note: input files do not need to live under a repository-owned `data/` directory. Users can organize inputs wherever they want and pass the real paths at runtime.
 
 - raw FASTQ files
 - aligned BAM files
@@ -181,7 +183,7 @@ Do not copy only `skills/` without `scripts/`.
 
 ## Summary ✅
 
-Use this workflow bundle if you want a structured way to run long-read scRNA-seq analysis in this project.
+Use this workflow bundle if you want a structured way to run long-read scRNA-seq analysis in this repository.
 
 The basic pattern is:
 

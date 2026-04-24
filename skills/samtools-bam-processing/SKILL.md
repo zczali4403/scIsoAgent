@@ -7,9 +7,9 @@ description: Runs project-specific samtools sorting, indexing, quick structural 
 
 Use this skill after alignment output exists and downstream tools require a sorted and indexed BAM.
 
-Source document:
+Primary skill file:
 
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/skills/tools/samtools_bam_processing.md`
+- `./SKILL.md`
 
 ## Use This Skill When
 

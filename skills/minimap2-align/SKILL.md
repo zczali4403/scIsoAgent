@@ -7,9 +7,9 @@ description: Runs project-specific minimap2 splice-aware alignment for long-read
 
 Use this skill for the genome-alignment step in the project workflow.
 
-Source document:
+Primary skill file:
 
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/skills/tools/minimap2_align.md`
+- `./SKILL.md`
 
 ## Use This Skill When
 

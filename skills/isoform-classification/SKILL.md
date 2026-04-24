@@ -28,12 +28,12 @@ This skill uses:
 
 Primary local helper script:
 
-- `../scripts/isoform_classification_helpers.r`
+- `../../scripts/isoform_classification_helpers.r`
 
 At the start of the R analysis session, prefer:
 
 ```r
-source("../scripts/isoform_classification_helpers.r")
+source("../../scripts/isoform_classification_helpers.r")
 ```
 
 Then call helper functions from that script instead of repeatedly rewriting the same classification-summary code in the terminal.
@@ -62,7 +62,7 @@ At the start of an isoform-classification request:
 8. Use `14_isoform_classification` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
 9. Run the SQANTI3 preprocessing and classification commands first.
 10. Then start one persistent `tmux` R session and keep it open for all remaining analysis.
-11. In that session, `source("../scripts/isoform_classification_helpers.r")`.
+11. In that session, `source("../../scripts/isoform_classification_helpers.r")`.
 
 ## Workflow
 
@@ -168,7 +168,7 @@ Prefer using:
 ## Mandatory Rules
 
 1. Run SQANTI3 first, then do the R-based analysis in one persistent `tmux` R session.
-2. At the beginning of the R session, first `source("../scripts/isoform_classification_helpers.r")`.
+2. At the beginning of the R session, first `source("../../scripts/isoform_classification_helpers.r")`.
 3. Prefer calling helper functions from `isoform_classification_helpers.r` instead of rewriting the same blocks manually in the terminal.
 4. Do not assume the Seurat grouping column; confirm it.
 5. Do not assume the thresholds for celltype-specific isoforms; ask the user.

@@ -7,9 +7,9 @@ description: Runs project-specific ONT-only FLAIR transcriptome generation, opti
 
 Use this skill when the selected Step 4 tool is `FLAIR`.
 
-Source document:
+Primary skill file:
 
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/skills/tools/flair_quantification.md`
+- `./SKILL.md`
 
 ## Use This Skill When
 
@@ -37,10 +37,10 @@ Source document:
 13. Use `04_flair` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
 13. When showing a `flair combine` command for confirmation, explicitly check that `-c` or `--convert_gtf` is present.
 14. After `flair quantify`, run the project script:
-   - `../scripts/recover_sc_matrix.py`
+   - `../../scripts/recover_sc_matrix.py`
 15. Before matrix recovery, verify read names follow:
    - `barcode_umi#read_uuid_strand`
-16. In multi-sample runs, run `../scripts/recover_sc_matrix.py` only on the per-sample `isoform.read.map.txt` files produced by `flair quantify`.
+16. In multi-sample runs, run `../../scripts/recover_sc_matrix.py` only on the per-sample `isoform.read.map.txt` files produced by `flair quantify`.
 17. Do not use the multi-sample `combine` result as the input for `recover_sc_matrix.py`.
 
 ## Output Handling

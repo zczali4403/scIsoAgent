@@ -21,14 +21,14 @@ This skill is for combining existing merged gene and isoform Seurat objects only
 
 Execution source of truth:
 
-- `../scripts/add_iso_to_gene.r`
+- `../../scripts/add_iso_to_gene.r`
 
 Prefer calling that script directly.
 
 Related upstream skills:
 
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/merge-remove-batch/SKILL.md`
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/merge-iso-obj/SKILL.md`
+- `../merge-remove-batch/SKILL.md`
+- `../merge-iso-obj/SKILL.md`
 
 ## Current Scope
 
@@ -48,7 +48,7 @@ This skill currently includes:
 1. First confirm which conda environment should be used.
 2. First resolve the merged gene Seurat RDS path.
 3. First resolve the merged isoform Seurat RDS path.
-4. Prefer calling `../scripts/add_iso_to_gene.r` directly rather than composing inline R code.
+4. Prefer calling `../../scripts/add_iso_to_gene.r` directly rather than composing inline R code.
 5. Use this step only after both the merged gene object and merged isoform object already exist.
 6. Before execution, confirm the output RDS path.
 7. If the user wants custom assay or reduction names, collect them before building the final command.
@@ -126,7 +126,7 @@ Typical inputs for this skill may include:
 Preferred execution pattern:
 
 ```bash
-conda run -n <env_name> Rscript ../scripts/add_iso_to_gene.r \
+conda run -n <env_name> Rscript ../../scripts/add_iso_to_gene.r \
   --gene_rds=/abs/path/to/merged_gene.rds \
   --isoform_rds=/abs/path/to/merged_isoform.rds \
   --output_rds=/abs/path/to/gene_with_isoform.rds \

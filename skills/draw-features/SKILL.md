@@ -20,8 +20,8 @@ This skill is for feature visualization only. It does not cover QC, merging, ann
 
 Execution source of truth:
 
-- `../scripts/draw_features.r`
-- `../scripts/draw_features_helpers.r`
+- `../../scripts/draw_features.r`
+- `../../scripts/draw_features_helpers.r`
 
 Use the helper script as the source of truth for persistent R sessions.
 Use the one-off script only for genuine one-shot plotting.
@@ -47,7 +47,7 @@ This skill currently supports:
 6. If the user wants a specific reduction, confirm it before plotting.
 7. Before execution, show the exact final command and wait for confirmation.
 8. Do not claim completion until the expected PDF and summary outputs exist and are non-empty.
-9. For multiple plots from the same object, repeated shell loops or repeated `Rscript ../scripts/draw_features.r ...` calls are not allowed.
+9. For multiple plots from the same object, repeated shell loops or repeated `Rscript ../../scripts/draw_features.r ...` calls are not allowed.
 10. For multiple plots from the same object, use one persistent `R` session until the user says they are done plotting.
 11. If the user first provides one batch of genes or isoforms, draw that batch and then keep the same `R` session open.
 12. After finishing one batch, explicitly ask the user whether they want to draw additional genes or isoforms.
@@ -105,7 +105,7 @@ In this mode:
 
 - open one R terminal
 - load the needed libraries
-- `source("../scripts/draw_features_helpers.r")`
+- `source("../../scripts/draw_features_helpers.r")`
 - read the Seurat RDS once, preferably with `read_feature_plot_object()`
 - wait for the user to provide the next gene or isoform, assay, and reduction
 - use `plot_feature_batch()` to draw the requested batch
@@ -125,7 +125,7 @@ Use this mode when the user only wants one plot batch.
 Preferred command pattern:
 
 ```bash
-conda run -n <env_name> Rscript ../scripts/draw_features.r \
+conda run -n <env_name> Rscript ../../scripts/draw_features.r \
   --input_rds=/abs/path/to/seurat_object.rds \
   --features=Sox9,Neurog3,Fev,Rbp4 \
   --output_file=/abs/path/to/feature_plot.pdf \

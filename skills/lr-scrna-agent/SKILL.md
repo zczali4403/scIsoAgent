@@ -5,7 +5,7 @@ description: Orchestrates the full long-read single-cell RNA-seq workflow for th
 
 # Long-Read scRNA Agent
 
-Use this skill as the top-level entry point for the whole long-read single-cell RNA-seq workflow in `/home4/zcz/zcz_proj1/IsoAgent/agent_proj`.
+Use this skill as the top-level entry point for the whole long-read single-cell RNA-seq workflow in this repository.
 
 This skill covers both:
 
@@ -39,9 +39,9 @@ Supported workflow layers:
 This top-level skill should route to:
 
 - upstream entry:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/lr-scrna-upstream-agent/SKILL.md`
+  - `../lr-scrna-upstream-pipeline/SKILL.md`
 - downstream entry:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/lr-scrna-downstream-pipeline/SKILL.md`
+  - `../lr-scrna-downstream-pipeline/SKILL.md`
 
 ## Upstream Coverage
 
@@ -83,9 +83,9 @@ Follow these rules exactly:
 
 1. First determine whether the user is asking for upstream work, downstream work, or continuation from upstream into downstream.
 2. If the request is upstream, immediately route conceptually to:
-   - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/lr-scrna-upstream-agent/SKILL.md`
+   - `../lr-scrna-upstream-pipeline/SKILL.md`
 3. If the request is downstream, immediately route conceptually to:
-   - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/lr-scrna-downstream-pipeline/SKILL.md`
+   - `../lr-scrna-downstream-pipeline/SKILL.md`
 4. If the user has just completed upstream work and now wants downstream analysis, reuse validated upstream artifacts instead of forcing the user to restate them.
 5. Ask questions progressively. Do not front-load later-stage parameters.
 6. Before running any substantial command, show the exact final command and wait for confirmation.
@@ -103,25 +103,24 @@ Follow these rules exactly:
 
 At the start of a new request:
 
-1. Read `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/README.md`.
-2. Confirm the overall intent:
+1. Confirm the overall intent:
    - upstream only
    - downstream only
    - or full workflow / cross-stage continuation
-3. Confirm one top-level results root under `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/results` and reuse it for later skill-specific subdirectories.
-4. If the request starts from raw data, also confirm:
+2. Confirm one top-level results root under `results` and reuse it for later skill-specific subdirectories.
+3. If the request starts from raw data, also confirm:
    - platform: `ONT` or `PacBio`
    - sample or run name
    - raw read file path
    - reference genome FASTA path
    - annotation GTF/GFF path
-5. If the request starts from upstream outputs, confirm which validated outputs already exist, such as:
+4. If the request starts from upstream outputs, confirm which validated outputs already exist, such as:
    - gene-by-cell matrix
    - transcript-by-cell or isoform-by-cell matrix
    - transcript annotation or extended annotation
    - Seurat RDS objects
    - cluster labels or reduced dimensions if they already exist
-6. Validate that all declared input files exist before building commands.
+5. Validate that all declared input files exist before building commands.
 
 Only after that should this skill hand off to the appropriate workflow entry skill.
 
@@ -140,7 +139,7 @@ Route to the upstream entry skill if the user is asking for:
 
 Use:
 
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/lr-scrna-upstream-agent/SKILL.md`
+- `../lr-scrna-upstream-pipeline/SKILL.md`
 
 ### Route To Downstream
 
@@ -159,7 +158,7 @@ Route to the downstream entry skill if the user is asking for:
 
 Use:
 
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/lr-scrna-downstream-pipeline/SKILL.md`
+- `../lr-scrna-downstream-pipeline/SKILL.md`
 
 ### Route Across Stages
 
@@ -172,16 +171,14 @@ If the user starts with upstream and then continues into downstream:
 
 ## Project References And Working Paths
 
-- project overview:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/README.md`
 - upstream entry:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/lr-scrna-upstream-agent/SKILL.md`
+  - `../lr-scrna-upstream-pipeline/SKILL.md`
 - downstream entry:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/lr-scrna-downstream-pipeline/SKILL.md`
+  - `../lr-scrna-downstream-pipeline/SKILL.md`
 - input data directory:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/data`
+  - `../../data`
 - output root:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/results`
+  - `../../results`
 
 ## What To Deliver
 

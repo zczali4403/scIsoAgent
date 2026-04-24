@@ -46,7 +46,7 @@ For automatic annotation, it also uses:
 
 Primary local helper script:
 
-- `../scripts/annotation_helpers.r`
+- `../../scripts/annotation_helpers.r`
 
 loaded from:
 
@@ -56,7 +56,7 @@ loaded from:
 At the start of the annotation session, prefer:
 
 ```r
-source("../scripts/annotation_helpers.r")
+source("../../scripts/annotation_helpers.r")
 ```
 
 Then call helper functions from that script instead of repeatedly rewriting the same annotation code in the terminal.
@@ -68,7 +68,7 @@ At the start of an annotation request:
 1. Confirm which conda environment should be used.
 2. Start one persistent `tmux` R session and keep it open for the whole annotation workflow.
 3. Resolve the merged Seurat RDS path to annotate.
-4. In that session, `source("../scripts/annotation_helpers.r")`.
+4. In that session, `source("../../scripts/annotation_helpers.r")`.
 5. Read the Seurat object once in that session.
 6. Derive the output directory for annotation artifacts from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
 7. Use `13_annotation` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
@@ -83,7 +83,7 @@ At the start of an annotation request:
 
 Within the persistent R session:
 
-- `source("../scripts/annotation_helpers.r")`
+- `source("../../scripts/annotation_helpers.r")`
 - load the helper-managed libraries
 - read the Seurat object RDS
 
@@ -175,7 +175,7 @@ Prefer using:
 
 During either automatic or manual annotation, if the user wants to inspect specific genes or isoforms, use:
 
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/draw-features/SKILL.md`
+- `../draw-features/SKILL.md`
 
 Use that skill inside the same annotation session context to support annotation decisions.
 
@@ -256,7 +256,7 @@ Prefer using:
 ## Mandatory Rules
 
 1. Keep the whole workflow in one persistent `tmux` R session until the user says to exit.
-2. At the beginning of the session, first `source("../scripts/annotation_helpers.r")`.
+2. At the beginning of the session, first `source("../../scripts/annotation_helpers.r")`.
 3. Prefer calling helper functions from `annotation_helpers.r` instead of rewriting the same blocks manually in the terminal.
 4. First show the cluster UMAP before annotation decisions.
 5. First compute cluster-level marker genes and isoforms before asking the user to choose annotation mode.

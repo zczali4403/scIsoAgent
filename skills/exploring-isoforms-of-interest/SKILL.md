@@ -48,12 +48,12 @@ Likely libraries needed in the session include:
 
 Primary local helper script:
 
-- `../scripts/exploring_isoforms_helpers.r`
+- `../../scripts/exploring_isoforms_helpers.r`
 
 At the start of the exploration session, prefer:
 
 ```r
-source("../scripts/exploring_isoforms_helpers.r")
+source("../../scripts/exploring_isoforms_helpers.r")
 ```
 
 Then call helper functions from that script instead of repeatedly rewriting the same exploration code in the terminal.
@@ -65,7 +65,7 @@ At the start of an isoform exploration request:
 1. Confirm which conda environment should be used.
 2. Start one persistent `tmux` R session and keep it open for the whole workflow.
 3. Resolve the Seurat-object RDS path to explore.
-4. In that session, `source("../scripts/exploring_isoforms_helpers.r")`.
+4. In that session, `source("../../scripts/exploring_isoforms_helpers.r")`.
 5. Read the Seurat object once in that session.
 6. Confirm which metadata column should be used for grouping, for example:
    - `celltype`
@@ -85,7 +85,7 @@ At the start of an isoform exploration request:
 
 Within the persistent R session:
 
-- `source("../scripts/exploring_isoforms_helpers.r")`
+- `source("../../scripts/exploring_isoforms_helpers.r")`
 - read the Seurat RDS
 - ensure the grouping metadata column is available
 - if needed, copy current identities into a metadata column such as `celltype`
@@ -168,7 +168,7 @@ Prefer using:
 
 If detailed feature plotting control is needed, use:
 
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/draw-features/SKILL.md`
+- `../draw-features/SKILL.md`
 
 For quick plotting directly in this exploration workflow, helper support is also available via:
 
@@ -205,7 +205,7 @@ Prefer using:
 ## Mandatory Rules
 
 1. Keep the whole workflow in one persistent `tmux` R session until the user says to exit.
-2. At the beginning of the session, first `source("../scripts/exploring_isoforms_helpers.r")`.
+2. At the beginning of the session, first `source("../../scripts/exploring_isoforms_helpers.r")`.
 3. Prefer calling helper functions from `exploring_isoforms_helpers.r` instead of rewriting the same blocks manually in the terminal.
 4. Do not reload the Seurat object for every subtask.
 5. Do not assume the grouping column; confirm it.

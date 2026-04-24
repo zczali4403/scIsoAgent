@@ -21,14 +21,14 @@ Keep the same `tmux` R terminal alive until the user explicitly says to exit thi
 
 This skill depends on these project scripts:
 
-- `../scripts/find_diversity.R`
-- `../scripts/profiling_isoform_diversity_helpers.r`
+- `../../scripts/find_diversity.R`
+- `../../scripts/profiling_isoform_diversity_helpers.r`
 
 At the start of the diversity session, prefer:
 
 ```r
-source("../scripts/find_diversity.R")
-source("../scripts/profiling_isoform_diversity_helpers.r")
+source("../../scripts/find_diversity.R")
+source("../../scripts/profiling_isoform_diversity_helpers.r")
 ```
 
 ## Use This Skill When
@@ -47,7 +47,7 @@ At the start of an isoform-diversity request:
 1. Confirm which conda environment should be used.
 2. Start one persistent `tmux` R session and keep it open for the whole workflow.
 3. Resolve the Seurat-object RDS path to analyze.
-4. In that session, first `source("../scripts/find_diversity.R")`, then `source("../scripts/profiling_isoform_diversity_helpers.r")`.
+4. In that session, first `source("../../scripts/find_diversity.R")`, then `source("../../scripts/profiling_isoform_diversity_helpers.r")`.
 5. Read the Seurat object once in that session.
 6. Confirm which metadata column should be used for celltype selection, for example:
    - `celltype`
@@ -165,7 +165,7 @@ Use the provided `color_palette_21` for transcript colors.
 ## Mandatory Rules
 
 1. Keep the whole workflow in one persistent `tmux` R session until the user says to exit.
-2. At the beginning of the session, first `source("../scripts/find_diversity.R")`, then `source("../scripts/profiling_isoform_diversity_helpers.r")`.
+2. At the beginning of the session, first `source("../../scripts/find_diversity.R")`, then `source("../../scripts/profiling_isoform_diversity_helpers.r")`.
 3. Prefer helper functions from `profiling_isoform_diversity_helpers.r` for loading objects, subsetting cell types, running diversity analysis, entropy summaries, and pie-chart plotting instead of rewriting the same code inline.
 4. Do not reload the Seurat object for every subtask.
 5. Do not assume the target cell type; ask the user.

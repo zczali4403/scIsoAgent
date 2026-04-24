@@ -50,7 +50,7 @@ This is a living workflow definition. The module list, order, and boundaries may
 
 At the start of a new downstream analysis request:
 
-1. Confirm one top-level downstream results root under `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/results`.
+1. Confirm one top-level downstream results root under `results`.
 2. After that root is confirmed, derive per-skill and per-step output subdirectories automatically under it instead of repeatedly asking the user to provide new output directories.
 3. Show each resolved output path to the user for confirmation before execution.
 2. Confirm the upstream source and available inputs, such as:
@@ -121,7 +121,7 @@ Typical goals:
 Current dispatch rule for this stage:
 
 - if the task is splitting the merged gene matrix into per-sample matrices, read:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/split-gene-count-by-sample/SKILL.md`
+  - `../split-gene-count-by-sample/SKILL.md`
 
 ### 3. Quality Control
 
@@ -139,9 +139,9 @@ Project rule:
 Current dispatch rule for this stage:
 
 - if the task is workflow-level downstream QC, read:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/QC-pipeline/SKILL.md`
+  - `../qc-pipeline/SKILL.md`
 - if the task is empty droplet removal, read:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/remove-droplets/SKILL.md`
+  - `../remove-droplets/SKILL.md`
 
 Do not silently assume the exact QC method or threshold set. These may differ across datasets and may later move into additional dedicated QC skills.
 
@@ -159,7 +159,7 @@ Typical goals:
 Current dispatch rule for this stage:
 
 - if the task is merging QC-completed per-sample Seurat objects or deciding whether to remove batch effects, read:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/merge-remove-batch/SKILL.md`
+  - `../merge-remove-batch/SKILL.md`
 
 ### 5. Isoform Expression Matrix Integration
 
@@ -175,11 +175,11 @@ Typical goals:
 Current dispatch rule for this stage:
 
 - if the task is creating per-sample isoform Seurat objects from transcript barcode-feature-matrix files and matching them to gene-level QC-retained cells, read:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/generate-iso-obj/SKILL.md`
+  - `../generate-iso-obj/SKILL.md`
 - if the task is merging per-sample isoform Seurat objects after `generate-iso-obj`, read:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/merge-iso-obj/SKILL.md`
+  - `../merge-iso-obj/SKILL.md`
 - if the task is adding the merged isoform assay and isoform UMAP back into the merged gene object, read:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/add-iso-to-gene/SKILL.md`
+  - `../add-iso-to-gene/SKILL.md`
 
 ### 6. Identifying Cell Types
 
@@ -195,7 +195,7 @@ Typical evidence sources may include:
 Current dispatch rule for this stage:
 
 - if the task is cluster-to-celltype annotation on the merged Seurat object, read:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/annotation/SKILL.md`
+  - `../annotation/SKILL.md`
 
 ### 7. Exploring Isoforms of Interest
 
@@ -210,9 +210,9 @@ Typical outputs may include:
 Current dispatch rule for this stage:
 
 - if the task is plotting genes or isoforms on a Seurat reduction such as `UMAP` or `isoform_umap`, read:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/draw-features/SKILL.md`
+  - `../draw-features/SKILL.md`
 - if the task is focused exploratory analysis of selected genes or isoforms, including isoform-count summaries, top isoform-rich genes, selected-gene isoform inspection, or IsoVis export preparation, read:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/exploring-isoforms-of-interest/SKILL.md`
+  - `../exploring-isoforms-of-interest/SKILL.md`
 
 ### 8. Isoform Classification
 
@@ -229,7 +229,7 @@ Current focus in this project includes:
 Current dispatch rule for this stage:
 
 - if the task is SQANTI-based isoform structural classification plus downstream summary of structural categories, subcategories, coding status, or celltype-specific isoforms, read:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/isoform-classification/SKILL.md`
+  - `../isoform-classification/SKILL.md`
 
 ### 9. Profiling Isoform Diversity
 
@@ -244,7 +244,7 @@ Examples of possible goals:
 Current dispatch rule for this stage:
 
 - if the task is entropy-based isoform diversity analysis in a selected cell type, including entropy heatmaps, high- and low-entropy gene summaries, or per-cell isoform proportion pie charts, read:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/profiling-isoform-diversity/SKILL.md`
+  - `../profiling-isoform-diversity/SKILL.md`
 
 ### 10. Differential Transcript Usage
 
@@ -255,7 +255,7 @@ Keep DTU clearly distinct from ordinary differential gene expression. Do not col
 Current dispatch rule for this stage:
 
 - if the task is IsoformSwitchAnalyzeR- or DEXSeq-based differential transcript usage analysis, including DTU FASTA preparation, pseudobulk aggregation, GTF subsetting, DTU testing, or switch plotting, read:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/differential-transcript-usage/SKILL.md`
+  - `../differential-transcript-usage/SKILL.md`
 
 ## Module Dispatch Rules
 
@@ -268,33 +268,33 @@ When a downstream request enters a concrete module:
 Current downstream module skills already available:
 
 - resource file creation:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/resource-setup/SKILL.md`
+  - `../resource-setup/SKILL.md`
 - split gene count matrix by sample:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/split-gene-count-by-sample/SKILL.md`
+  - `../split-gene-count-by-sample/SKILL.md`
 - downstream QC workflow:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/QC-pipeline/SKILL.md`
+  - `../qc-pipeline/SKILL.md`
 - empty droplet removal:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/remove-droplets/SKILL.md`
+  - `../remove-droplets/SKILL.md`
 - sample merging and optional batch correction:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/merge-remove-batch/SKILL.md`
+  - `../merge-remove-batch/SKILL.md`
 - isoform object generation:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/generate-iso-obj/SKILL.md`
+  - `../generate-iso-obj/SKILL.md`
 - isoform object merging:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/merge-iso-obj/SKILL.md`
+  - `../merge-iso-obj/SKILL.md`
 - add merged isoform assay back to merged gene object:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/add-iso-to-gene/SKILL.md`
+  - `../add-iso-to-gene/SKILL.md`
 - feature plotting on Seurat reductions:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/draw-features/SKILL.md`
+  - `../draw-features/SKILL.md`
 - cell type annotation:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/annotation/SKILL.md`
+  - `../annotation/SKILL.md`
 - focused isoform exploration:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/exploring-isoforms-of-interest/SKILL.md`
+  - `../exploring-isoforms-of-interest/SKILL.md`
 - isoform classification:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/isoform-classification/SKILL.md`
+  - `../isoform-classification/SKILL.md`
 - isoform diversity profiling:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/profiling-isoform-diversity/SKILL.md`
+  - `../profiling-isoform-diversity/SKILL.md`
 - differential transcript usage:
-  - `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/differential-transcript-usage/SKILL.md`
+  - `../differential-transcript-usage/SKILL.md`
 
 ## Expected Inputs
 

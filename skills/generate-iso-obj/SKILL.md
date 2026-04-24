@@ -20,14 +20,14 @@ This skill is for creating and filtering isoform Seurat objects only. It does no
 
 Execution source of truth:
 
-- `../scripts/generate_iso_obj.r`
+- `../../scripts/generate_iso_obj.r`
 
 Prefer calling that script directly.
 
 Related upstream skills:
 
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/QC-pipeline/SKILL.md`
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/resource-setup/SKILL.md`
+- `../qc-pipeline/SKILL.md`
+- `../resource-setup/SKILL.md`
 
 ## Current Scope
 
@@ -48,8 +48,8 @@ This skill currently includes:
 2. First resolve the per-sample transcript barcode-feature-matrix inputs.
 3. First resolve the matched per-sample gene-level Seurat RDS inputs that came after empty-droplet removal and QC.
 4. The sample order across `barcodes_paths`, `features_paths`, `matrix_paths`, and `gene_rds_paths` must match exactly.
-5. Prefer calling `../scripts/generate_iso_obj.r` directly rather than composing inline R code.
-6. When `sample_names` are not explicitly provided, infer them from `barcodes_paths` using the same rule as `../scripts/resource_file_creation.r` so gene and isoform barcode prefixes stay consistent.
+5. Prefer calling `../../scripts/generate_iso_obj.r` directly rather than composing inline R code.
+6. When `sample_names` are not explicitly provided, infer them from `barcodes_paths` using the same rule as `../../scripts/resource_file_creation.r` so gene and isoform barcode prefixes stay consistent.
 7. Do not silently assume auto-detected inputs without showing the resolved sample-to-file mapping and asking the user to confirm it.
 8. Before execution, show the exact final command and wait for confirmation.
 9. Do not claim completion until the expected violin plots, isoform RDS outputs, and summary table exist and are non-empty for every sample.
@@ -129,7 +129,7 @@ Typical inputs for this skill may include:
 Preferred execution pattern:
 
 ```bash
-conda run -n <env_name> Rscript ../scripts/generate_iso_obj.r \
+conda run -n <env_name> Rscript ../../scripts/generate_iso_obj.r \
   --barcodes_paths=/abs/path/to/sample1.barcodes.tsv,/abs/path/to/sample2.barcodes.tsv \
   --features_paths=/abs/path/to/sample1.features.tsv,/abs/path/to/sample2.features.tsv \
   --matrix_paths=/abs/path/to/sample1.matrix.mtx,/abs/path/to/sample2.matrix.mtx \

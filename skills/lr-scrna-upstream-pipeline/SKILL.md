@@ -7,9 +7,9 @@ description: Orchestrates project-specific upstream long-read single-cell RNA-se
 
 Use this skill when the user wants workflow-level orchestration for upstream long-read single-cell RNA-seq analysis in this project.
 
-Source workflow document:
+Primary skill file:
 
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/skills/workflows/lr_scrna_upstream_pipeline.md`
+- `./SKILL.md`
 
 ## Use This Skill When
 
@@ -21,7 +21,7 @@ Source workflow document:
 ## Mandatory Rules
 
 1. First confirm the platform explicitly: `ONT` or `PacBio`.
-2. First confirm one top-level results root name under `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/results`.
+2. First confirm one top-level results root name under `results`.
 3. Ask questions progressively, only when each step is reached.
 4. At Step 4, explicitly ask which compatible tool to use.
 5. Run every long-running upstream step inside a persistent `tmux` session.
@@ -40,11 +40,11 @@ Source workflow document:
 
 ## Tool Skills To Load
 
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/blaze-demultiplex/SKILL.md`
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/minimap2-align/SKILL.md`
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/samtools-bam-processing/SKILL.md`
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/isoquant-quantification/SKILL.md`
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/bambu-quantification/SKILL.md`
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/flair-quantification/SKILL.md`
+- `../blaze-demultiplex/SKILL.md`
+- `../minimap2-align/SKILL.md`
+- `../samtools-bam-processing/SKILL.md`
+- `../isoquant-quantification/SKILL.md`
+- `../bambu-quantification/SKILL.md`
+- `../flair-quantification/SKILL.md`
 
 Read the relevant tool skill only when the workflow reaches that step.

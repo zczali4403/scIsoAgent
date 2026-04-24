@@ -7,9 +7,9 @@ description: Runs project-specific BLAZE demultiplexing for ONT long-read single
 
 Use this skill for the ONT barcode and UMI preprocessing step.
 
-Source document:
+Primary skill file:
 
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/skills/tools/blaze_demultiplex.md`
+- `./SKILL.md`
 
 ## Use This Skill When
 

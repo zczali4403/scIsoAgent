@@ -19,14 +19,14 @@ This skill is the QC workflow entry point. It covers staged QC plotting, thresho
 
 ## Project Source
 
-- `../scripts/QC_pipeline.r`
+- `../../scripts/QC_pipeline.r`
 
 Use the R script as the execution source of truth.
 
 Related upstream/downstream skill:
 
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/remove-droplets/SKILL.md`
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/merge-remove-batch/SKILL.md`
+- `../remove-droplets/SKILL.md`
+- `../merge-remove-batch/SKILL.md`
 
 ## Current Scope
 
@@ -56,7 +56,7 @@ This QC pipeline currently includes:
 4. The input Seurat-object RDS path may be provided by the user directly, or auto-detected from the most recent `remove-droplets` result and then confirmed by the user.
 5. Do not silently assume an auto-detected RDS path without showing the resolved path and asking the user to confirm it.
 6. First confirm the input Seurat object after empty-droplet removal.
-7. Prefer calling `../scripts/QC_pipeline.r` with an explicit `--stage` rather than composing ad hoc inline R code.
+7. Prefer calling `../../scripts/QC_pipeline.r` with an explicit `--stage` rather than composing ad hoc inline R code.
 8. Use the same initial empty-droplet-filtered Seurat-object RDS as the input to every QC stage.
 9. Do not require the user to pass a stage-specific intermediate RDS from the previous step.
 10. Before filtering, generate the pre-filter QC plots and then ask the user to confirm filtering thresholds.
@@ -214,7 +214,7 @@ Typical inputs for this skill may include:
 
 After this skill has been completed for each sample and singlets have been retained, the next multi-sample downstream step is typically:
 
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/merge-remove-batch/SKILL.md`
+- `../merge-remove-batch/SKILL.md`
 
 Use that skill when the user wants to:
 
@@ -229,7 +229,7 @@ Preferred execution pattern uses staged commands.
 Pre-filter plotting:
 
 ```bash
-conda run -n <env_name> Rscript ../scripts/QC_pipeline.r \
+conda run -n <env_name> Rscript ../../scripts/QC_pipeline.r \
   --stage=pre-filter \
   --input_rds=/abs/path/to/removed_empty_sample.rds \
   --output_dir=/abs/path/to/QC_pipeline \
@@ -239,7 +239,7 @@ conda run -n <env_name> Rscript ../scripts/QC_pipeline.r \
 Filtering plus PCA:
 
 ```bash
-conda run -n <env_name> Rscript ../scripts/QC_pipeline.r \
+conda run -n <env_name> Rscript ../../scripts/QC_pipeline.r \
   --stage=filter-pca \
   --input_rds=/abs/path/to/removed_empty_sample.rds \
   --output_dir=/abs/path/to/QC_pipeline \
@@ -254,7 +254,7 @@ conda run -n <env_name> Rscript ../scripts/QC_pipeline.r \
 Clustering and UMAP:
 
 ```bash
-conda run -n <env_name> Rscript ../scripts/QC_pipeline.r \
+conda run -n <env_name> Rscript ../../scripts/QC_pipeline.r \
   --stage=cluster-umap \
   --input_rds=/abs/path/to/removed_empty_sample.rds \
   --output_dir=/abs/path/to/QC_pipeline \
@@ -271,7 +271,7 @@ conda run -n <env_name> Rscript ../scripts/QC_pipeline.r \
 Doublet detection:
 
 ```bash
-conda run -n <env_name> Rscript ../scripts/QC_pipeline.r \
+conda run -n <env_name> Rscript ../../scripts/QC_pipeline.r \
   --stage=doublet \
   --input_rds=/abs/path/to/removed_empty_sample.rds \
   --output_dir=/abs/path/to/QC_pipeline \

@@ -20,13 +20,13 @@ This skill is for post-QC sample merging and optional batch correction only. It 
 
 Execution source of truth:
 
-- `../scripts/merge_remove_batch.r`
+- `../../scripts/merge_remove_batch.r`
 
 Prefer calling that script directly.
 
 Related upstream skill:
 
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/.pi/skills/QC-pipeline/SKILL.md`
+- `../qc-pipeline/SKILL.md`
 
 ## Current Scope
 
@@ -51,7 +51,7 @@ This skill currently includes:
 3. First resolve the per-sample singlet Seurat-object RDS inputs.
 4. The per-sample RDS paths may be provided by the user directly, or auto-detected from prior QC outputs and then confirmed by the user.
 5. Do not silently assume auto-detected inputs without showing the resolved sample-to-file mapping and asking the user to confirm it.
-6. Prefer calling `../scripts/merge_remove_batch.r` with an explicit `--stage`.
+6. Prefer calling `../../scripts/merge_remove_batch.r` with an explicit `--stage`.
 7. When using this script for gene-level merging, pass `--object_label=gene`.
 8. Before the preview UMAP stage, first generate the PCA elbow plot and ask the user to confirm `npc`.
 9. After the preview UMAP is generated, ask the user whether batch correction is needed. Do not run Harmony by default.
@@ -177,7 +177,7 @@ Preferred execution pattern uses staged commands.
 PCA elbow plot:
 
 ```bash
-conda run -n <env_name> Rscript ../scripts/merge_remove_batch.r \
+conda run -n <env_name> Rscript ../../scripts/merge_remove_batch.r \
   --stage=elbow \
   --input_rds_files=/abs/path/to/sample1_singlets.rds,/abs/path/to/sample2_singlets.rds \
   --output_dir=/abs/path/to/merge_remove_batch \
@@ -189,7 +189,7 @@ conda run -n <env_name> Rscript ../scripts/merge_remove_batch.r \
 Preview UMAP before batch correction:
 
 ```bash
-conda run -n <env_name> Rscript ../scripts/merge_remove_batch.r \
+conda run -n <env_name> Rscript ../../scripts/merge_remove_batch.r \
   --stage=preview \
   --input_rds_files=/abs/path/to/sample1_singlets.rds,/abs/path/to/sample2_singlets.rds \
   --output_dir=/abs/path/to/merge_remove_batch \
@@ -203,7 +203,7 @@ conda run -n <env_name> Rscript ../scripts/merge_remove_batch.r \
 Harmony elbow plot:
 
 ```bash
-conda run -n <env_name> Rscript ../scripts/merge_remove_batch.r \
+conda run -n <env_name> Rscript ../../scripts/merge_remove_batch.r \
   --stage=harmony-elbow \
   --input_rds_files=/abs/path/to/sample1_singlets.rds,/abs/path/to/sample2_singlets.rds \
   --output_dir=/abs/path/to/merge_remove_batch \
@@ -217,7 +217,7 @@ conda run -n <env_name> Rscript ../scripts/merge_remove_batch.r \
 Finalize without batch correction:
 
 ```bash
-conda run -n <env_name> Rscript ../scripts/merge_remove_batch.r \
+conda run -n <env_name> Rscript ../../scripts/merge_remove_batch.r \
   --stage=finalize \
   --input_rds_files=/abs/path/to/sample1_singlets.rds,/abs/path/to/sample2_singlets.rds \
   --output_dir=/abs/path/to/merge_remove_batch \
@@ -232,7 +232,7 @@ conda run -n <env_name> Rscript ../scripts/merge_remove_batch.r \
 Finalize with Harmony:
 
 ```bash
-conda run -n <env_name> Rscript ../scripts/merge_remove_batch.r \
+conda run -n <env_name> Rscript ../../scripts/merge_remove_batch.r \
   --stage=finalize \
   --input_rds_files=/abs/path/to/sample1_singlets.rds,/abs/path/to/sample2_singlets.rds \
   --output_dir=/abs/path/to/merge_remove_batch \

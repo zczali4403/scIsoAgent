@@ -20,7 +20,7 @@ This skill is for per-sample matrix splitting only. It does not create the merge
 
 Execution source of truth:
 
-- `../scripts/split_gene_count_by_sample.r`
+- `../../scripts/split_gene_count_by_sample.r`
 
 ## Core Outputs
 
@@ -35,7 +35,7 @@ This skill currently produces:
 ## Mandatory Rules
 
 1. Prefer calling the project script directly:
-   - `../scripts/split_gene_count_by_sample.r`
+   - `../../scripts/split_gene_count_by_sample.r`
 2. Prefer detecting the merged geneSymbol matrix from the most recent `resource-setup` output when available.
 3. If automatic detection is missing, ambiguous, or clearly wrong, ask the user to provide the merged matrix path manually.
 4. Infer sample names from barcode prefixes before the first `_`.
@@ -63,7 +63,7 @@ At the start of a split request:
 Preferred execution pattern:
 
 ```bash
-Rscript ../scripts/split_gene_count_by_sample.r \
+Rscript ../../scripts/split_gene_count_by_sample.r \
   --gene_count_file=/abs/path/to/geneSymbol_gene_count.csv \
   --output_dir=/abs/path/to/output_dir \
   --strip_prefix=false

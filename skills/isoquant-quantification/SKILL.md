@@ -7,9 +7,9 @@ description: Runs project-specific IsoQuant single-cell transcript discovery and
 
 Use this skill when the selected Step 4 tool is `IsoQuant`.
 
-Source document:
+Primary skill file:
 
-- `/home4/zcz/zcz_proj1/IsoAgent/agent_proj/skills/tools/isoquant_quantification.md`
+- `./SKILL.md`
 
 ## Use This Skill When
 
