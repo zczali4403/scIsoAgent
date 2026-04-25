@@ -136,12 +136,11 @@ Typical workflow inside the container:
 cd /work
 git clone <your-repo-url>
 cd <repo-name>
-npm install -g @mariozechner/pi-coding-agent
 cd /work
 pi
 ```
 
-`pi-coding-agent` is required to launch scIsoAgent inside the container.
+The Docker image already includes `pi`, so no additional installation step is required inside the container.
 
 Start `pi` from `/work` so the agent can discover the repository content from the mounted working directory.
 
