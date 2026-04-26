@@ -40,10 +40,11 @@ This skill currently produces:
 3. If automatic detection is missing, ambiguous, or clearly wrong, ask the user to provide the merged matrix path manually.
 4. Infer sample names from barcode prefixes before the first `_`.
 5. If any barcode does not match the expected `sample_barcode` pattern, stop and report the offending columns clearly.
-6. Before execution, show the exact final command and wait for confirmation.
-7. Do not claim completion until the expected per-sample matrices and manifest file exist and are non-empty.
-8. Reuse the already confirmed workflow-level results root and derive the split output subdirectory automatically; do not ask the user to type a fresh output directory unless they explicitly want to override it.
-9. Use `06_split_gene_count` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
+6. Run this R-based skill in the `downstream` conda environment.
+7. Before execution, show the exact final command and wait for confirmation.
+8. Do not claim completion until the expected per-sample matrices and manifest file exist and are non-empty.
+9. Reuse the already confirmed workflow-level results root and derive the split output subdirectory automatically; do not ask the user to type a fresh output directory unless they explicitly want to override it.
+10. Use `06_split_gene_count` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
 
 ## Entry Procedure
 
@@ -63,7 +64,7 @@ At the start of a split request:
 Preferred execution pattern:
 
 ```bash
-Rscript ../../scripts/split_gene_count_by_sample.r \
+conda run -n downstream Rscript ../../scripts/split_gene_count_by_sample.r \
   --gene_count_file=/abs/path/to/geneSymbol_gene_count.csv \
   --output_dir=/abs/path/to/output_dir \
   --strip_prefix=false

@@ -52,7 +52,7 @@ This QC pipeline currently includes:
 
 1. Treat this skill as a staged QC workflow, not as a single one-shot command.
 2. Do not ask for all later-stage parameters at the beginning.
-3. First confirm which conda environment should be used.
+3. Run this R-based skill in the `downstream` conda environment.
 4. The input Seurat-object RDS path may be provided by the user directly, or auto-detected from the most recent `remove-droplets` result and then confirmed by the user.
 5. Do not silently assume an auto-detected RDS path without showing the resolved path and asking the user to confirm it.
 6. First confirm the input Seurat object after empty-droplet removal.
@@ -72,13 +72,12 @@ This QC pipeline currently includes:
 
 At the start of a QC request:
 
-1. Confirm the conda environment to use.
-2. Resolve the Seurat object RDS path produced after empty-droplet removal:
+1. Resolve the Seurat object RDS path produced after empty-droplet removal:
    - either ask the user to provide it directly
    - or auto-detect a likely `removed_empty_*.rds` output from the most recent `remove-droplets` result and ask the user to confirm that resolved path
-3. Derive the QC output directory from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
-4. Confirm the sample identifier or output prefix.
-5. Validate that the input Seurat object exists before proposing commands.
+2. Derive the QC output directory from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
+3. Confirm the sample identifier or output prefix.
+4. Validate that the input Seurat object exists before proposing commands.
 
 Only after those are clear should the pipeline enter the first QC stage.
 
@@ -206,7 +205,6 @@ Typical inputs for this skill may include:
 - empty-droplet-filtered Seurat object (`removed_empty_*.rds`) path
   - either manually provided by the user
   - or auto-detected from the most recent `remove-droplets` output and then user-confirmed
-- conda environment name
 - QC output directory
 - sample identifier
 
@@ -229,7 +227,7 @@ Preferred execution pattern uses staged commands.
 Pre-filter plotting:
 
 ```bash
-conda run -n <env_name> Rscript ../../scripts/QC_pipeline.r \
+conda run -n downstream Rscript ../../scripts/QC_pipeline.r \
   --stage=pre-filter \
   --input_rds=/abs/path/to/removed_empty_sample.rds \
   --output_dir=/abs/path/to/QC_pipeline \
@@ -239,7 +237,7 @@ conda run -n <env_name> Rscript ../../scripts/QC_pipeline.r \
 Filtering plus PCA:
 
 ```bash
-conda run -n <env_name> Rscript ../../scripts/QC_pipeline.r \
+conda run -n downstream Rscript ../../scripts/QC_pipeline.r \
   --stage=filter-pca \
   --input_rds=/abs/path/to/removed_empty_sample.rds \
   --output_dir=/abs/path/to/QC_pipeline \
@@ -254,7 +252,7 @@ conda run -n <env_name> Rscript ../../scripts/QC_pipeline.r \
 Clustering and UMAP:
 
 ```bash
-conda run -n <env_name> Rscript ../../scripts/QC_pipeline.r \
+conda run -n downstream Rscript ../../scripts/QC_pipeline.r \
   --stage=cluster-umap \
   --input_rds=/abs/path/to/removed_empty_sample.rds \
   --output_dir=/abs/path/to/QC_pipeline \
@@ -271,7 +269,7 @@ conda run -n <env_name> Rscript ../../scripts/QC_pipeline.r \
 Doublet detection:
 
 ```bash
-conda run -n <env_name> Rscript ../../scripts/QC_pipeline.r \
+conda run -n downstream Rscript ../../scripts/QC_pipeline.r \
   --stage=doublet \
   --input_rds=/abs/path/to/removed_empty_sample.rds \
   --output_dir=/abs/path/to/QC_pipeline \

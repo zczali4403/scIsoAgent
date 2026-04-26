@@ -44,8 +44,10 @@ This is a living workflow definition. The module list, order, and boundaries may
 6. If a module-specific skill exists, read that skill before proposing detailed commands or code.
 7. If a requested downstream module does not yet have a dedicated skill, say so explicitly and proceed with a minimal project-consistent plan instead of inventing hidden structure.
 8. Keep gene-level and isoform-level analyses clearly separated when the distinction matters for interpretation.
-9. Before executing any substantial command or script, show the exact final command and wait for confirmation.
-10. Do not claim a module is complete until its expected output artifacts exist and are non-empty.
+9. Use the `downstream` conda environment for downstream R-based modules unless a module explicitly declares a different environment for one subphase.
+10. In `isoform-classification`, use `sqanti3` for the terminal SQANTI3 phase and `downstream` for the persistent R analysis phase.
+11. Before executing any substantial command or script, show the exact final command and wait for confirmation.
+12. Do not claim a module is complete until its expected output artifacts exist and are non-empty.
 
 ## Entry Procedure
 
@@ -54,19 +56,19 @@ At the start of a new downstream analysis request:
 1. Confirm one top-level downstream results root under `results`.
 2. After that root is confirmed, derive per-skill and per-step output subdirectories automatically under it instead of repeatedly asking the user to provide new output directories.
 3. Show each resolved output path to the user for confirmation before execution.
-2. Confirm the upstream source and available inputs, such as:
+4. Confirm the upstream source and available inputs, such as:
    - gene-by-cell matrix
    - transcript-by-cell or isoform-by-cell matrix
    - cell metadata
    - transcript or isoform annotation
    - extended annotation if it already exists
    - dimensional reduction, cluster, or preliminary label files if they already exist
-3. Confirm the analysis level the user wants:
+5. Confirm the analysis level the user wants:
    - gene-focused
    - isoform-focused
    - or joint gene + isoform downstream analysis
-4. Confirm which downstream modules are in scope for this run.
-5. Validate that all declared input files exist before drafting module-level commands.
+6. Confirm which downstream modules are in scope for this run.
+7. Validate that all declared input files exist before drafting module-level commands.
 
 Only after those are clear should the workflow enter the first required downstream module.
 
@@ -87,6 +89,30 @@ Use this default order unless the user explicitly requests a different entry poi
 11. final run summary and discussion-style interpretation
 
 This ordering is a default, not a rigid law. Some analyses may start from an intermediate stage if validated prior outputs already exist.
+
+## Environment Routing
+
+Use these fixed environment assignments throughout the downstream workflow:
+
+- `resource-setup` -> `downstream`
+- `split-gene-count-by-sample` -> `downstream`
+- `remove-droplets` -> `downstream`
+- `qc-pipeline` -> `downstream`
+- `generate-iso-obj` -> `downstream`
+- `merge-remove-batch` -> `downstream`
+- `merge-iso-obj` -> `downstream`
+- `add-iso-to-gene` -> `downstream`
+- `draw-features` -> `downstream`
+- `annotation` -> `downstream`
+- `exploring-isoforms-of-interest` -> `downstream`
+- `profiling-isoform-diversity` -> `downstream`
+- `differential-transcript-usage` -> `downstream`
+- `summary` -> `downstream` when an R session or R-based helper is needed
+- `isoform-classification`:
+  - SQANTI3 terminal phase -> `sqanti3`
+  - downstream summary R phase -> `downstream`
+
+Do not ask the user to choose a downstream conda environment for these modules unless troubleshooting requires an explicit override.
 
 ## Module Map
 

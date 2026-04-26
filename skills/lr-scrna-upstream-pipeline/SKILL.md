@@ -24,14 +24,20 @@ Primary skill file:
 2. First confirm one top-level results root name under `results`.
 3. Ask questions progressively, only when each step is reached.
 4. At Step 4, explicitly ask which compatible tool to use.
-5. Run every long-running upstream step inside a persistent `tmux` session.
-6. Before executing any step command, show the exact final command, the planned `tmux` session name, and wait for confirmation.
-7. After launch, do not exit that `tmux` session until the active step command has finished.
-8. Execute confirmed step commands directly in the shell or in `tmux`; do not generate temporary `.sh` wrapper scripts unless the user explicitly asks for them.
-9. Confirm one top-level results root once at the start of the upstream workflow, then derive step-specific subdirectories under that root instead of repeatedly asking for new output directories.
-10. Show each resolved step output path to the user for confirmation before execution.
-11. If dependencies are missing or invalid, stop and report clearly.
-12. Do not silently rerun long jobs if outputs may already exist.
+5. Use fixed conda environments by tool:
+   - `BLAZE` -> `blaze`
+   - `minimap2` -> `minimap2`
+   - `samtools` -> `samtools`
+   - `FLAIR` -> `flair`
+   - `IsoQuant` -> `isoquant`
+6. Run every long-running upstream step inside a persistent `tmux` session.
+7. Before executing any step command, show the exact final command, the planned `tmux` session name, and wait for confirmation.
+8. After launch, do not exit that `tmux` session until the active step command has finished.
+9. Execute confirmed step commands directly in the shell or in `tmux`; do not generate temporary `.sh` wrapper scripts unless the user explicitly asks for them.
+10. Confirm one top-level results root once at the start of the upstream workflow, then derive step-specific subdirectories under that root instead of repeatedly asking for new output directories.
+11. Show each resolved step output path to the user for confirmation before execution.
+12. If dependencies are missing or invalid, stop and report clearly.
+13. Do not silently rerun long jobs if outputs may already exist.
 
 ## Branches
 
@@ -48,3 +54,15 @@ Primary skill file:
 - `../flair-quantification/SKILL.md`
 
 Read the relevant tool skill only when the workflow reaches that step.
+
+## Environment Routing
+
+Use these fixed environment assignments throughout the upstream workflow:
+
+- `blaze-demultiplex` -> `blaze`
+- `minimap2-align` -> `minimap2`
+- `samtools-bam-processing` -> `samtools`
+- `flair-quantification` -> `flair`
+- `isoquant-quantification` -> `isoquant`
+
+Do not ask the user to choose an upstream conda environment for these steps unless troubleshooting requires an explicit override.

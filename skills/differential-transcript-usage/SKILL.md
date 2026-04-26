@@ -55,7 +55,7 @@ source("../../scripts/differential_transcript_usage_helpers.r")
 
 At the start of a DTU request:
 
-1. Confirm which conda environment should be used.
+1. Use the `downstream` conda environment for the whole DTU workflow.
 2. Start one persistent `tmux` R session and keep it open for the whole workflow.
 3. Resolve the merged Seurat-object RDS path that contains the isoform assay.
 4. Confirm which quantification tool produced the isoform models:
@@ -283,7 +283,6 @@ Do not assume one fixed gene or one fixed pair of conditions.
 Typical inputs for this skill may include:
 
 - merged Seurat-object RDS with isoform assay
-- conda environment name
 - transcript FASTA path
 - transcript GTF path
 - resource-setup mapping table path

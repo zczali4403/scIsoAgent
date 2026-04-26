@@ -64,10 +64,11 @@ The merged geneSymbol matrix produced here is intended to feed the downstream sa
 14. To keep downstream sample splitting safe, normalize sample names by replacing underscores `_` with hyphens `-` before using them as barcode prefixes.
 15. If confirmed sample names collapse into duplicates after underscore-to-hyphen normalization, stop and ask the user to provide unique `sample_names` explicitly.
 16. When converting the merged gene-level count matrix, deduplicate on `gene_symbol` exactly as defined by the implementation.
-17. Before executing any substantial command or script, show the exact final command and wait for confirmation.
-18. Do not claim completion until the expected output files exist and are non-empty.
-19. Reuse the already confirmed workflow-level results root and derive the resource-setup output subdirectory automatically.
-20. Use `05_resource_setup` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
+17. Run this R-based skill in the `downstream` conda environment.
+18. Before executing any substantial command or script, show the exact final command and wait for confirmation.
+19. Do not claim completion until the expected output files exist and are non-empty.
+20. Reuse the already confirmed workflow-level results root and derive the resource-setup output subdirectory automatically.
+21. Use `05_resource_setup` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
 
 ## Entry Procedure
 
@@ -210,7 +211,7 @@ Project rule:
 Preferred execution pattern:
 
 ```bash
-Rscript ../../scripts/resource_file_creation.r \
+conda run -n downstream Rscript ../../scripts/resource_file_creation.r \
   --tool=isoquant \
   --output_gtf_file=/abs/path/to/output.gtf \
   --reference_gtf_file=/abs/path/to/reference.gtf \
@@ -225,7 +226,7 @@ Rscript ../../scripts/resource_file_creation.r \
 FLAIR route:
 
 ```bash
-Rscript ../../scripts/resource_file_creation.r \
+conda run -n downstream Rscript ../../scripts/resource_file_creation.r \
   --tool=flair \
   --flair_counts_tsv=/abs/path/to/flair_quantify.counts.tsv \
   --reference_gtf_file=/abs/path/to/reference.gtf \

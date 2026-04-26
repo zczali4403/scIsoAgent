@@ -65,7 +65,7 @@ Then call helper functions from that script instead of repeatedly rewriting the 
 
 At the start of an annotation request:
 
-1. Confirm which conda environment should be used.
+1. Use the `downstream` conda environment for the whole annotation workflow.
 2. Start one persistent `tmux` R session and keep it open for the whole annotation workflow.
 3. Resolve the merged Seurat RDS path to annotate.
 4. In that session, `source("../../scripts/annotation_helpers.r")`.
@@ -272,7 +272,6 @@ Prefer using:
 Typical inputs for this skill may include:
 
 - merged Seurat-object RDS
-- conda environment name
 - output directory
 - clustering metadata column
 - optional ScType database and tissue

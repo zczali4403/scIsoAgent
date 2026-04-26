@@ -45,7 +45,7 @@ This skill currently produces:
 2. Prefer calling the project script directly:
    - `../../scripts/remove_droplets.r`
 3. Collect the script parameters explicitly before execution.
-4. Before execution, first ask the user which conda environment should be used for this script.
+4. Run this R-based skill in the `downstream` conda environment.
 5. Do not assume the current shell environment is the correct R environment.
 6. Use the main gene count matrix as the direct input to `emptyDrops` in this project script.
 7. Always ask the user to confirm the `fdr_threshold` and `lower` cutoff before execution, while providing the project default values as the recommended starting point.
@@ -74,8 +74,7 @@ At the start of a droplet-removal request:
    - `output_path`
 4. Confirm how sample-specific outputs should be named:
    - by default, use one `output_seurat_file` per sample derived from the sample name
-5. Ask which conda environment should be used.
-6. Ask the user to confirm the threshold settings, and provide these default values as the recommended starting point:
+5. Ask the user to confirm the threshold settings, and provide these default values as the recommended starting point:
    - `fdr_threshold=0.001`
    - `lower=500`
 7. Optionally collect a project label for Seurat object creation:
@@ -90,7 +89,7 @@ If multiple samples will be processed, explicitly report the per-sample command 
 Preferred execution pattern:
 
 ```bash
-conda run -n <env_name> Rscript ../../scripts/remove_droplets.r \
+conda run -n downstream Rscript ../../scripts/remove_droplets.r \
   --gene_count_file=/abs/path/to/gene_count.csv \
   --output_path=/abs/path/to/output_dir \
   --output_seurat_file=sample_name \
@@ -101,7 +100,6 @@ conda run -n <env_name> Rscript ../../scripts/remove_droplets.r \
 
 Required parameters:
 
-- `env_name`
 - `gene_count_file`
 - `output_path`
 - `output_seurat_file`

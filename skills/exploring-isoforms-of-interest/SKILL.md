@@ -62,7 +62,7 @@ Then call helper functions from that script instead of repeatedly rewriting the 
 
 At the start of an isoform exploration request:
 
-1. Confirm which conda environment should be used.
+1. Use the `downstream` conda environment for the whole exploration workflow.
 2. Start one persistent `tmux` R session and keep it open for the whole workflow.
 3. Resolve the Seurat-object RDS path to explore.
 4. In that session, `source("../../scripts/exploring_isoforms_helpers.r")`.
@@ -223,7 +223,6 @@ Prefer using:
 Typical inputs for this skill may include:
 
 - Seurat-object RDS with isoform assay
-- conda environment name
 - grouping metadata column
 - output directory
 - optional gene-symbol mapping file from `resource-setup`

@@ -50,19 +50,20 @@ Then call helper functions from that script instead of repeatedly rewriting the 
 
 At the start of an isoform-classification request:
 
-1. Confirm which conda environment should be used.
-2. Resolve the transcriptome GTF to classify with SQANTI3.
-3. Resolve the reference annotation GTF.
-4. Resolve the reference genome FASTA.
-5. Confirm the merged Seurat-object RDS used for downstream R analysis.
-6. Confirm which metadata column should be used for grouping, for example:
+1. Use the `sqanti3` conda environment for the terminal SQANTI3 phase.
+2. Use the `downstream` conda environment for the persistent R analysis phase.
+3. Resolve the transcriptome GTF to classify with SQANTI3.
+4. Resolve the reference annotation GTF.
+5. Resolve the reference genome FASTA.
+6. Confirm the merged Seurat-object RDS used for downstream R analysis.
+7. Confirm which metadata column should be used for grouping, for example:
    - `celltype`
    - `sctype_db`
-7. Derive the output directory from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
-8. Use `14_isoform_classification` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
-9. Run the SQANTI3 preprocessing and classification commands first.
-10. Then start one persistent `tmux` R session and keep it open for all remaining analysis.
-11. In that session, `source("../../scripts/isoform_classification_helpers.r")`.
+8. Derive the output directory from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
+9. Use `14_isoform_classification` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
+10. Run the SQANTI3 preprocessing and classification commands first.
+11. Then start one persistent `tmux` R session in the `downstream` environment and keep it open for all remaining analysis.
+12. In that session, `source("../../scripts/isoform_classification_helpers.r")`.
 
 ## Workflow
 
@@ -73,8 +74,8 @@ Before entering the R session, first preprocess the GTF and run SQANTI3 from the
 The source pattern is:
 
 ```bash
-awk '$7 == "+" || $7 == "-"' isoform_annotated.gtf > remove_unknownstrand.gtf
-SQANTI3-5.2.1/sqanti3_qc.py remove_unknownstrand.gtf <reference_gtf> <genome_fasta>
+conda run -n sqanti3 bash -lc "awk '$7 == \"+\" || $7 == \"-\"' isoform_annotated.gtf > remove_unknownstrand.gtf"
+conda run -n sqanti3 SQANTI3-5.2.1/sqanti3_qc.py remove_unknownstrand.gtf <reference_gtf> <genome_fasta>
 ```
 
 Requirements:
@@ -85,6 +86,7 @@ Requirements:
   - the reference genome FASTA
 - remove entries with unknown strand before running SQANTI3
 - use the resulting `classification.txt` file for downstream R analysis
+- start the subsequent persistent R session in the `downstream` environment
 
 ### 2. Load SQANTI Output And Seurat Object
 

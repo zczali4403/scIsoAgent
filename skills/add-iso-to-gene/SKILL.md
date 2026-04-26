@@ -45,7 +45,7 @@ This skill currently includes:
 
 ## Mandatory Rules
 
-1. First confirm which conda environment should be used.
+1. Run this R-based skill in the `downstream` conda environment.
 2. First resolve the merged gene Seurat RDS path.
 3. First resolve the merged isoform Seurat RDS path.
 4. Prefer calling `../../scripts/add_iso_to_gene.r` directly rather than composing inline R code.
@@ -60,17 +60,16 @@ This skill currently includes:
 
 At the start of an add-isoform-to-gene request:
 
-1. Ask which conda environment should be used.
-2. Resolve the merged gene object path:
+1. Resolve the merged gene object path:
    - `gene_rds`
-3. Resolve the merged isoform object path:
+2. Resolve the merged isoform object path:
    - `isoform_rds`
-4. Confirm the combined output path:
+3. Confirm the combined output path:
    - `output_rds`
-5. Optionally confirm custom names for:
+4. Optionally confirm custom names for:
    - `isoform_assay_name`
    - `isoform_reduction_name`
-6. Validate that all declared inputs exist before drafting commands.
+5. Validate that all declared inputs exist before drafting commands.
 
 Only after those are clear should the script be run.
 
@@ -119,14 +118,13 @@ Typical inputs for this skill may include:
 - `output_rds`
 - optional `isoform_assay_name`
 - optional `isoform_reduction_name`
-- conda environment name
 
 ## Script Interface
 
 Preferred execution pattern:
 
 ```bash
-conda run -n <env_name> Rscript ../../scripts/add_iso_to_gene.r \
+conda run -n downstream Rscript ../../scripts/add_iso_to_gene.r \
   --gene_rds=/abs/path/to/merged_gene.rds \
   --isoform_rds=/abs/path/to/merged_isoform.rds \
   --output_rds=/abs/path/to/gene_with_isoform.rds \
@@ -136,7 +134,6 @@ conda run -n <env_name> Rscript ../../scripts/add_iso_to_gene.r \
 
 Required parameters:
 
-- `env_name`
 - `gene_rds`
 - `isoform_rds`
 - `output_rds`

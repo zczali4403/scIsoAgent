@@ -20,28 +20,29 @@ Primary skill file:
 
 ## Mandatory Rules
 
-1. Do not use this skill for PacBio.
-2. Ask FLAIR-specific questions only when the workflow reaches the FLAIR step.
-3. First ask how samples should be organized:
+1. Use the `flair` conda environment for all FLAIR commands in this skill.
+2. Do not use this skill for PacBio.
+3. Ask FLAIR-specific questions only when the workflow reaches the FLAIR step.
+4. First ask how samples should be organized:
    - one sample per run
    - or multi-sample comparative run
-4. Reuse the existing aligned BAM from the workflow rather than defaulting to realignment.
-5. Confirm splice-junction support source explicitly.
-6. If the workflow uses `flair combine`, require the command to include `-c` / `--convert_gtf`.
-7. In this project, do not treat `-c` as optional once `flair combine` is selected, because the combined transcriptome should also be converted to GTF.
-8. Run every FLAIR command block inside a persistent `tmux` session.
-9. Confirm all command blocks before execution, including `intronProspector`, `flair transcriptome`, optional `flair combine`, `flair quantify`, and matrix recovery, and show the planned `tmux` session name.
-10. After launch, do not exit that `tmux` session until the active FLAIR command block has finished.
-11. Execute confirmed FLAIR commands directly in the shell or in `tmux`; do not generate temporary `.sh` wrappers unless the user explicitly asks for them.
-12. Resolve the FLAIR output subdirectory automatically from the already confirmed workflow-level results root and ask the user to confirm the resolved path rather than asking for a new output directory.
-13. Use `04_flair` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
-13. When showing a `flair combine` command for confirmation, explicitly check that `-c` or `--convert_gtf` is present.
-14. After `flair quantify`, run the project script:
+5. Reuse the existing aligned BAM from the workflow rather than defaulting to realignment.
+6. Confirm splice-junction support source explicitly.
+7. If the workflow uses `flair combine`, require the command to include `-c` / `--convert_gtf`.
+8. In this project, do not treat `-c` as optional once `flair combine` is selected, because the combined transcriptome should also be converted to GTF.
+9. Run every FLAIR command block inside a persistent `tmux` session.
+10. Confirm all command blocks before execution, including `intronProspector`, `flair transcriptome`, optional `flair combine`, `flair quantify`, and matrix recovery, and show the planned `tmux` session name.
+11. After launch, do not exit that `tmux` session until the active FLAIR command block has finished.
+12. Execute confirmed FLAIR commands directly in the shell or in `tmux`; do not generate temporary `.sh` wrappers unless the user explicitly asks for them.
+13. Resolve the FLAIR output subdirectory automatically from the already confirmed workflow-level results root and ask the user to confirm the resolved path rather than asking for a new output directory.
+14. Use `04_flair` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
+15. When showing a `flair combine` command for confirmation, explicitly check that `-c` or `--convert_gtf` is present.
+16. After `flair quantify`, run the project script:
    - `../../scripts/recover_sc_matrix.py`
-15. Before matrix recovery, verify read names follow:
+17. Before matrix recovery, verify read names follow:
    - `barcode_umi#read_uuid_strand`
-16. In multi-sample runs, run `../../scripts/recover_sc_matrix.py` only on the per-sample `isoform.read.map.txt` files produced by `flair quantify`.
-17. Do not use the multi-sample `combine` result as the input for `recover_sc_matrix.py`.
+18. In multi-sample runs, run `../../scripts/recover_sc_matrix.py` only on the per-sample `isoform.read.map.txt` files produced by `flair quantify`.
+19. Do not use the multi-sample `combine` result as the input for `recover_sc_matrix.py`.
 
 ## Output Handling
 

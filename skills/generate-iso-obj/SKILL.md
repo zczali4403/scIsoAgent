@@ -44,7 +44,7 @@ This skill currently includes:
 
 ## Mandatory Rules
 
-1. First confirm which conda environment should be used.
+1. Run this R-based skill in the `downstream` conda environment.
 2. First resolve the per-sample transcript barcode-feature-matrix inputs.
 3. First resolve the matched per-sample gene-level Seurat RDS inputs that came after empty-droplet removal and QC.
 4. The sample order across `barcodes_paths`, `features_paths`, `matrix_paths`, and `gene_rds_paths` must match exactly.
@@ -58,17 +58,16 @@ This skill currently includes:
 
 At the start of an isoform-object generation request:
 
-1. Ask which conda environment should be used.
-2. Resolve the transcript-level per-sample inputs:
+1. Resolve the transcript-level per-sample inputs:
    - `barcodes_paths`
    - `features_paths`
    - `matrix_paths`
-3. Resolve the matched gene-level QC Seurat inputs:
+2. Resolve the matched gene-level QC Seurat inputs:
    - `gene_rds_paths`
-4. Derive the output directory from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
-5. Use `10_generate_iso_obj` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
-6. If `sample_names` are not explicitly provided, infer them from `barcodes_paths`, then show the inferred sample names and ask the user to confirm them.
-7. Validate that all declared inputs exist and that the sample list lengths match before proposing commands.
+3. Derive the output directory from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
+4. Use `10_generate_iso_obj` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
+5. If `sample_names` are not explicitly provided, infer them from `barcodes_paths`, then show the inferred sample names and ask the user to confirm them.
+6. Validate that all declared inputs exist and that the sample list lengths match before proposing commands.
 
 Only after those are clear should the script be run.
 
@@ -122,14 +121,13 @@ Typical inputs for this skill may include:
 - `output_dir`
 - optional `sample_names`
 - optional `min_features`
-- conda environment name
 
 ## Script Interface
 
 Preferred execution pattern:
 
 ```bash
-conda run -n <env_name> Rscript ../../scripts/generate_iso_obj.r \
+conda run -n downstream Rscript ../../scripts/generate_iso_obj.r \
   --barcodes_paths=/abs/path/to/sample1.barcodes.tsv,/abs/path/to/sample2.barcodes.tsv \
   --features_paths=/abs/path/to/sample1.features.tsv,/abs/path/to/sample2.features.tsv \
   --matrix_paths=/abs/path/to/sample1.matrix.mtx,/abs/path/to/sample2.matrix.mtx \
@@ -141,7 +139,6 @@ conda run -n <env_name> Rscript ../../scripts/generate_iso_obj.r \
 
 Required parameters:
 
-- `env_name`
 - `barcodes_paths`
 - `features_paths`
 - `matrix_paths`

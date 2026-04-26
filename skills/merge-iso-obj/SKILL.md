@@ -47,7 +47,7 @@ This skill currently includes:
 ## Mandatory Rules
 
 1. Treat this skill as a staged workflow, not as a one-shot merge command.
-2. First confirm which conda environment should be used.
+2. Run this R-based skill in the `downstream` conda environment.
 3. First resolve the per-sample isoform Seurat-object RDS inputs.
 4. The per-sample RDS paths may be provided by the user directly, or auto-detected from prior `generate-iso-obj` outputs and then confirmed by the user.
 5. Do not silently assume auto-detected inputs without showing the resolved sample-to-file mapping and asking the user to confirm it.
@@ -65,15 +65,14 @@ This skill currently includes:
 
 At the start of an isoform merge request:
 
-1. Ask which conda environment should be used.
-2. Resolve the per-sample isoform Seurat-object RDS files:
+1. Resolve the per-sample isoform Seurat-object RDS files:
    - either ask the user to provide them directly
    - or auto-detect likely outputs from `generate-iso-obj` and ask the user to confirm the resolved paths
-3. Derive the merge output directory from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
-4. Confirm the output prefix for the merged isoform object.
-5. Use `11_merge_iso_obj` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
-6. Optionally infer sample names from the input file names, then ask the user to confirm them if they will be used as the sample labels.
-7. Validate that all declared input files exist before drafting commands.
+2. Derive the merge output directory from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
+3. Confirm the output prefix for the merged isoform object.
+4. Use `11_merge_iso_obj` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
+5. Optionally infer sample names from the input file names, then ask the user to confirm them if they will be used as the sample labels.
+6. Validate that all declared input files exist before drafting commands.
 
 Only after those are clear should the pipeline enter the first merge stage.
 
@@ -166,7 +165,6 @@ Recommended script stage:
 Typical inputs for this skill may include:
 
 - one isoform-level Seurat-object RDS per sample
-- conda environment name
 - output directory
 - output prefix
 - optional explicit sample names
@@ -178,7 +176,7 @@ Preferred execution pattern uses staged commands.
 PCA elbow plot:
 
 ```bash
-conda run -n <env_name> Rscript ../../scripts/merge_remove_batch.r \
+conda run -n downstream Rscript ../../scripts/merge_remove_batch.r \
   --stage=elbow \
   --input_rds_files=/abs/path/to/sample1_isoform_subset.rds,/abs/path/to/sample2_isoform_subset.rds \
   --output_dir=/abs/path/to/merge_iso_obj \
@@ -190,7 +188,7 @@ conda run -n <env_name> Rscript ../../scripts/merge_remove_batch.r \
 Preview UMAP before batch correction:
 
 ```bash
-conda run -n <env_name> Rscript ../../scripts/merge_remove_batch.r \
+conda run -n downstream Rscript ../../scripts/merge_remove_batch.r \
   --stage=preview \
   --input_rds_files=/abs/path/to/sample1_isoform_subset.rds,/abs/path/to/sample2_isoform_subset.rds \
   --output_dir=/abs/path/to/merge_iso_obj \
@@ -204,7 +202,7 @@ conda run -n <env_name> Rscript ../../scripts/merge_remove_batch.r \
 Harmony elbow plot:
 
 ```bash
-conda run -n <env_name> Rscript ../../scripts/merge_remove_batch.r \
+conda run -n downstream Rscript ../../scripts/merge_remove_batch.r \
   --stage=harmony-elbow \
   --input_rds_files=/abs/path/to/sample1_isoform_subset.rds,/abs/path/to/sample2_isoform_subset.rds \
   --output_dir=/abs/path/to/merge_iso_obj \
@@ -218,7 +216,7 @@ conda run -n <env_name> Rscript ../../scripts/merge_remove_batch.r \
 Finalize without batch correction:
 
 ```bash
-conda run -n <env_name> Rscript ../../scripts/merge_remove_batch.r \
+conda run -n downstream Rscript ../../scripts/merge_remove_batch.r \
   --stage=finalize \
   --input_rds_files=/abs/path/to/sample1_isoform_subset.rds,/abs/path/to/sample2_isoform_subset.rds \
   --output_dir=/abs/path/to/merge_iso_obj \
@@ -233,7 +231,7 @@ conda run -n <env_name> Rscript ../../scripts/merge_remove_batch.r \
 Finalize with Harmony:
 
 ```bash
-conda run -n <env_name> Rscript ../../scripts/merge_remove_batch.r \
+conda run -n downstream Rscript ../../scripts/merge_remove_batch.r \
   --stage=finalize \
   --input_rds_files=/abs/path/to/sample1_isoform_subset.rds,/abs/path/to/sample2_isoform_subset.rds \
   --output_dir=/abs/path/to/merge_iso_obj \

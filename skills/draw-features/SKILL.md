@@ -39,7 +39,7 @@ This skill currently supports:
 
 ## Mandatory Rules
 
-1. First confirm which conda environment should be used.
+1. Run this R-based skill in the `downstream` conda environment.
 2. First resolve the input Seurat RDS path.
 3. If the user wants to draw multiple plots from the same object, you must keep one R session open so the RDS is loaded only once.
 4. In a repeated plotting session, do not restart the script between successive plots unless the user wants to switch to a different RDS.
@@ -61,13 +61,12 @@ This skill currently supports:
 
 At the start of a feature-drawing request:
 
-1. Ask which conda environment should be used.
-2. Resolve the input Seurat RDS path.
-3. Decide whether this is:
+1. Resolve the input Seurat RDS path.
+2. Decide whether this is:
    - a one-off plot request
    - or a multi-plot session on the same object
-4. If it is a multi-plot session, use one persistent R session instead of repeatedly calling `Rscript`.
-5. If it is a one-off plot request, confirm:
+3. If it is a multi-plot session, use one persistent R session instead of repeatedly calling `Rscript`.
+4. If it is a one-off plot request, confirm:
    - `features`
    - optional `assay`
    - `reduction`
@@ -98,7 +97,7 @@ Why:
 Preferred command pattern:
 
 ```bash
-conda run -n <env_name> R
+conda run -n downstream R
 ```
 
 In this mode:
@@ -125,7 +124,7 @@ Use this mode when the user only wants one plot batch.
 Preferred command pattern:
 
 ```bash
-conda run -n <env_name> Rscript ../../scripts/draw_features.r \
+conda run -n downstream Rscript ../../scripts/draw_features.r \
   --input_rds=/abs/path/to/seurat_object.rds \
   --features=Sox9,Neurog3,Fev,Rbp4 \
   --output_file=/abs/path/to/feature_plot.pdf \
@@ -142,7 +141,6 @@ Typical inputs for this skill may include:
 - optional `assay`
 - `reduction`
 - either `output_file` or `output_dir`
-- conda environment name
 
 ## Expected Deliverables
 

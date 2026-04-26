@@ -44,7 +44,7 @@ source("../../scripts/profiling_isoform_diversity_helpers.r")
 
 At the start of an isoform-diversity request:
 
-1. Confirm which conda environment should be used.
+1. Use the `downstream` conda environment for the whole diversity workflow.
 2. Start one persistent `tmux` R session and keep it open for the whole workflow.
 3. Resolve the Seurat-object RDS path to analyze.
 4. In that session, first `source("../../scripts/find_diversity.R")`, then `source("../../scripts/profiling_isoform_diversity_helpers.r")`.
@@ -184,7 +184,6 @@ Use the provided `color_palette_21` for transcript colors.
 Typical inputs for this skill may include:
 
 - Seurat-object RDS with isoform assay
-- conda environment name
 - metadata column for celltype selection
 - target cell type
 - output directory
