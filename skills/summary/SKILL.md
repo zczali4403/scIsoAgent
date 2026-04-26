@@ -77,6 +77,7 @@ When both figures and tables exist for the same step, use both:
 12. If a requested stage has no readable outputs, say so explicitly instead of inventing a placeholder summary.
 13. Reuse the confirmed workflow-level results root and summary scope instead of re-asking for already established context.
 14. By default, treat the Markdown report as the main output artifact for this skill.
+15. Use `16_summary` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
 
 ## Entry Procedure
 
@@ -88,9 +89,10 @@ At the start of a summary request:
    - biological interpretation only
    - or both technical summary plus biological interpretation
 3. Ask whether the user also wants discussion-style writing support.
-4. Scan the selected results root and identify which stage directories are present.
-5. Within each detected stage directory, identify readable summary artifacts such as CSV, TSV, TXT, PDF, and image files.
-6. Report the detected stage list and the main files that will be used as evidence before writing the final summary.
+4. Derive the summary output directory from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
+5. Scan the selected results root and identify which stage directories are present.
+6. Within each detected stage directory, identify readable summary artifacts such as CSV, TSV, TXT, PDF, and image files.
+7. Report the detected stage list and the main files that will be used as evidence before writing the final summary.
 
 Only after the available evidence has been identified should this skill produce the final synthesis.
 
