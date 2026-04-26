@@ -59,12 +59,15 @@ The merged geneSymbol matrix produced here is intended to feed the downstream sa
 9. Preserve transcript-level identifiers in the isoform dictionary even when gene symbols are added.
 10. Prefer discovering the per-sample single-cell matrix files directly from the chosen run directory under `results` instead of asking the user to type every barcode, feature, and matrix path manually.
 11. Only ask the user for explicit per-sample barcode, feature, and matrix paths if automatic discovery from the selected results directory fails or is ambiguous.
-12. For matrix merging, read each sample separately, infer sample names from the discovered files or parent sample directories, add the sample name as a barcode prefix, then merge the matrices before gene-symbol conversion.
-13. When converting the merged gene-level count matrix, deduplicate on `gene_symbol` exactly as defined by the implementation.
-14. Before executing any substantial command or script, show the exact final command and wait for confirmation.
-15. Do not claim completion until the expected output files exist and are non-empty.
-16. Reuse the already confirmed workflow-level results root and derive the resource-setup output subdirectory automatically.
-17. Use `05_resource_setup` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
+12. The agent must infer candidate sample names before execution, present them to the user for confirmation, and then pass them explicitly to the script through `--sample_names`.
+13. For matrix merging, read each sample separately, use the confirmed `sample_names` as barcode prefixes, then merge the matrices before gene-symbol conversion.
+14. To keep downstream sample splitting safe, normalize sample names by replacing underscores `_` with hyphens `-` before using them as barcode prefixes.
+15. If confirmed sample names collapse into duplicates after underscore-to-hyphen normalization, stop and ask the user to provide unique `sample_names` explicitly.
+16. When converting the merged gene-level count matrix, deduplicate on `gene_symbol` exactly as defined by the implementation.
+17. Before executing any substantial command or script, show the exact final command and wait for confirmation.
+18. Do not claim completion until the expected output files exist and are non-empty.
+19. Reuse the already confirmed workflow-level results root and derive the resource-setup output subdirectory automatically.
+20. Use `05_resource_setup` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
 
 ## Entry Procedure
 
@@ -77,11 +80,12 @@ At the start of a resource setup request:
    - `reference_gtf_file`
    - `dict_output_file`
    - `matrix_output_file`
+   - `sample_names`
 4. Confirm the tool-specific dictionary input:
    - if `tool=isoquant`, collect `output_gtf_file`
    - if `tool=flair`, collect `flair_counts_tsv`
 5. Discover the per-sample matrix inputs from the selected run directory whenever possible.
-6. Infer sample names automatically from the discovered files or sample directories by default. Only ask the user to provide overrides if the inferred names are ambiguous, duplicated, or clearly wrong.
+6. Infer sample names automatically from the discovered files or sample directories at the agent level, normalize underscores `_` to hyphens `-`, and show the final proposed `sample_names` to the user before execution.
 7. Confirm that the discovered per-sample inputs are complete and aligned by sample.
 8. Confirm that output paths are writable and belong under the intended project results area.
 9. Validate that all declared or discovered input files exist before building commands.
@@ -94,12 +98,14 @@ Use this default order:
 
 1. create the isoform-gene-symbol dictionary using the appropriate upstream tool route
 2. discover each sample's matrix inputs from the selected results directory
-3. read each sample's matrix inputs separately
-4. infer each sample name automatically when possible
-5. prefix each sample's barcodes with the sample name
-6. merge all sample matrices by `gene_id`
-7. convert the merged matrix from `ENSGID` to `geneSymbol`
-8. verify output structure and row naming
+3. infer candidate sample names at the agent level
+4. normalize underscores in sample names to hyphens
+5. confirm the final `sample_names` with the user
+6. read each sample's matrix inputs separately
+7. prefix each sample's barcodes with the confirmed sample name
+8. merge all sample matrices by `gene_id`
+9. convert the merged matrix from `ENSGID` to `geneSymbol`
+10. verify output structure and row naming
 
 ## Step 1: Create Isoform-Gene-Symbol Dictionary
 
@@ -148,10 +154,10 @@ Preferred discovery behavior:
 
 Expected inputs after discovery:
 
+- confirmed `sample_names`
 - per-sample barcode files
 - per-sample feature files
 - per-sample matrix files
-- optional explicit sample-name overrides only if needed
 
 Expected behavior:
 
@@ -163,8 +169,10 @@ Expected behavior:
   - `*.sc_barcodes.tsv`
   - `*.sc_genes.tsv`
   - `*.sc_gene_by_cell.mtx`
+- infer candidate sample names from file names or sample directories at the agent level
+- normalize underscores in sample names to hyphens before using them as barcode prefixes
+- show the final proposed `sample_names` to the user for confirmation before execution
 - read each sample's barcode, feature, and matrix files separately
-- infer sample names from discovered file names or sample directory names by default
 - add `sample_name_` as a prefix to every barcode from that sample
 - merge all sample matrices by `gene_id`
 
@@ -207,6 +215,7 @@ Rscript ../../scripts/resource_file_creation.r \
   --output_gtf_file=/abs/path/to/output.gtf \
   --reference_gtf_file=/abs/path/to/reference.gtf \
   --dict_output_file=/abs/path/to/isoform_gene_dict.csv \
+  --sample_names=sample1,sample2 \
   --barcodes_paths=/abs/path/to/sample1.barcodes.tsv,/abs/path/to/sample2.barcodes.tsv \
   --features_paths=/abs/path/to/sample1.features.tsv,/abs/path/to/sample2.features.tsv \
   --matrix_paths=/abs/path/to/sample1.matrix.mtx,/abs/path/to/sample2.matrix.mtx \
@@ -221,21 +230,16 @@ Rscript ../../scripts/resource_file_creation.r \
   --flair_counts_tsv=/abs/path/to/flair_quantify.counts.tsv \
   --reference_gtf_file=/abs/path/to/reference.gtf \
   --dict_output_file=/abs/path/to/isoform_gene_dict.csv \
+  --sample_names=sample1,sample2 \
   --barcodes_paths=/abs/path/to/sample1.barcodes.tsv,/abs/path/to/sample2.barcodes.tsv \
   --features_paths=/abs/path/to/sample1.features.tsv,/abs/path/to/sample2.features.tsv \
   --matrix_paths=/abs/path/to/sample1.matrix.mtx,/abs/path/to/sample2.matrix.mtx \
   --matrix_output_file=/abs/path/to/geneSymbol_gene_count.csv
 ```
 
-Optional override when automatic sample-name inference is not suitable:
-
-```bash
-  --sample_names=sample1,sample2
-```
-
 Skill-level rule:
 
-- even though the script accepts explicit path lists, the skill should usually discover those paths from the chosen `results` run directory first and only then assemble the final command
+- the agent should usually discover the matrix paths from the chosen `results` run directory first, infer and confirm `sample_names`, and only then assemble the final command
 
 The current script implements:
 

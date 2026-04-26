@@ -42,6 +42,7 @@ require_common_args <- function(parsed) {
     "tool",
     "reference_gtf_file",
     "dict_output_file",
+    "sample_names",
     "barcodes_paths",
     "features_paths",
     "matrix_paths",
@@ -59,27 +60,35 @@ require_common_args <- function(parsed) {
   }
 }
 
-infer_sample_names <- function(barcodes_paths) {
-  sample_names <- basename(barcodes_paths)
-  sample_names <- sub("\\.barcodes\\.tsv(\\.gz)?$", "", sample_names)
-  sample_names <- sub("\\.tsv(\\.gz)?$", "", sample_names)
-  sample_names <- sub("\\.txt(\\.gz)?$", "", sample_names)
-  sample_names <- gsub("[^A-Za-z0-9._-]", "_", sample_names)
+normalize_sample_names <- function(sample_names) {
+  normalized_sample_names <- gsub("_", "-", sample_names, fixed = TRUE)
 
-  if (any(sample_names == "")) {
+  if (any(normalized_sample_names == "")) {
     stop("Failed to infer sample names from --barcodes_paths")
   }
 
-  if (anyDuplicated(sample_names)) {
-    stop(
+  if (!identical(sample_names, normalized_sample_names)) {
+    message(
       paste(
-        "Inferred sample names are not unique.",
-        "Please provide --sample_names explicitly."
+        "Normalized sample_names by replacing underscores with hyphens:",
+        paste(
+          paste0(sample_names, " -> ", normalized_sample_names),
+          collapse = ", "
+        )
       )
     )
   }
 
-  sample_names
+  if (anyDuplicated(normalized_sample_names)) {
+    stop(
+      paste(
+        "Normalized sample names are not unique after replacing underscores with hyphens.",
+        "Please provide unique --sample_names explicitly."
+      )
+    )
+  }
+
+  normalized_sample_names
 }
 
 validate_tool_args <- function(parsed) {
@@ -326,11 +335,8 @@ main <- function() {
   barcodes_paths <- split_csv_arg(args$barcodes_paths)
   features_paths <- split_csv_arg(args$features_paths)
   matrix_paths <- split_csv_arg(args$matrix_paths)
-  sample_names <- if ("sample_names" %in% names(args)) {
-    split_csv_arg(args$sample_names)
-  } else {
-    infer_sample_names(barcodes_paths)
-  }
+  sample_names <- split_csv_arg(args$sample_names)
+  sample_names <- normalize_sample_names(sample_names)
 
   validate_sample_lists(sample_names, barcodes_paths, features_paths, matrix_paths)
 

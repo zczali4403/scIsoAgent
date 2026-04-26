@@ -178,9 +178,9 @@ If the user starts with upstream and then continues into downstream:
 - downstream entry:
   - `../lr-scrna-downstream-pipeline/SKILL.md`
 - input data directory:
-  - `../../data`
+  - `../../../data`
 - output root:
-  - `../../results`
+  - `../../../results`
 
 ## What To Deliver
 

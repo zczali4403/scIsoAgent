@@ -134,9 +134,11 @@ Typical workflow inside the container:
 
 ```bash
 cd /work
-git clone <your-repo-url>
-cd <repo-name>
-cd /work
+git clone https://github.com/zczali4403/scIsoAgent.git
+cd scIsoAgent
+mkdir .pi
+mv scripts .pi/
+mv skills .pi/
 pi
 ```
 
