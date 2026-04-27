@@ -152,19 +152,34 @@ I want to profile isoform diversity.
 I want to run differential transcript usage analysis.
 
 
-## 6. Continue From Existing Results
+## 6. Sequence-Based Isoform Functional Inference
 
-### 6.1 Continue From Existing Upstream Outputs
+Use these when you want to bring sequence modeling into isoform functional analysis and automatically infer potential functional differences from transcript sequences.
+
+### 6.1 Transcript Localization
+
+I want to predict transcript subcellular localization for isoforms from one gene and compare localization differences across isoforms.
+
+
+### 6.2 TIS/TTS Analysis
+
+I want to analyze translation start sites and transcription termination sites for isoforms from one gene and visualize their structural differences.
+
+
+
+## 7. Continue From Existing Results
+
+### 7.1 Continue From Existing Upstream Outputs
 
 I already completed upstream quantification. Please help me continue into downstream analysis.
 
 
-### 6.2 Continue From A Merged Seurat Object
+### 7.2 Continue From A Merged Seurat Object
 
 I already have a merged Seurat object. Please help me decide which downstream analysis to do next.
 
 
-## 7. Useful Variants
+## 8. Useful Variants
 
 These are still short, but a little more specific.
 
@@ -185,7 +200,7 @@ Example:
 I want to continue from my existing results directory instead of starting from scratch.
 
 
-## 8. Minimal Template
+## 9. Minimal Template
 
 If you want a reusable short template, use this:
 
