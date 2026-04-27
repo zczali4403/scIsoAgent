@@ -71,13 +71,19 @@ split_isoform_feature_ids <- function(pseudobulk_df, feature_col = "feature_id")
     )
 }
 
+normalize_celltype_label <- function(x) {
+  # remove repeated helper prefixes like iso., iso.isoform., isoform.
+  gsub("^(iso\\.|isoform\\.)+", "", x)
+}
+
 build_long_isoform_expression <- function(pseudobulk_data, group_prefix = "iso.") {
   pseudobulk_data %>%
     pivot_longer(
       cols = starts_with(group_prefix),
       names_to = "cell_type",
       values_to = "expression"
-    )
+    ) %>%
+    mutate(cell_type = normalize_celltype_label(cell_type))
 }
 
 summarize_celltype_gene_isoform_counts <- function(long_data) {
@@ -146,6 +152,7 @@ summarize_sqanti_categories_by_celltype <- function(merged_data, group_prefix = 
       names_to = "cell_type",
       values_to = "expression"
     ) %>%
+    mutate(cell_type = normalize_celltype_label(cell_type)) %>%
     filter(expression > 0) %>%
     distinct()
 

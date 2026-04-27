@@ -18,17 +18,43 @@ save_plot_pdf <- function(plot_obj, file_path, width = 9, height = 6) {
 }
 
 read_deeplocrna_predictions <- function(prediction_file) {
-  pred_df <- data.table::fread(prediction_file, data.table = FALSE)
+  lines <- readLines(prediction_file, warn = FALSE)
+  lines <- lines[nzchar(trimws(lines))]
+
+  if (length(lines) < 2) {
+    stop("DeepLocRNA prediction file appears malformed: expected a header plus at least one data row")
+  }
+
+  # DeepLocRNA output does not include an explicit first-column header for transcript ids.
+  # Prepending one preserves the Nucleus column instead of accidentally renaming it away.
+  lines[[1]] <- paste("transcript_id", lines[[1]])
+
+  pred_df <- utils::read.table(
+    text = lines,
+    header = TRUE,
+    sep = "",
+    quote = '"',
+    check.names = FALSE,
+    stringsAsFactors = FALSE,
+    comment.char = ""
+  )
 
   if (ncol(pred_df) < 3) {
     stop("DeepLocRNA prediction file appears malformed: expected transcript ID, score columns, and Prediction")
   }
 
-  first_col <- colnames(pred_df)[1]
-  colnames(pred_df)[1] <- "transcript_id"
   pred_df$transcript_id <- gsub("^>", "", as.character(pred_df$transcript_id))
 
-  required_cols <- c("Prediction")
+  required_cols <- c(
+    "transcript_id",
+    "Nucleus",
+    "Exosome",
+    "Cytosol",
+    "Ribosome",
+    "Membrane",
+    "Endoplasmic reticulum",
+    "Prediction"
+  )
   missing_cols <- required_cols[!required_cols %in% colnames(pred_df)]
   if (length(missing_cols) > 0) {
     stop(
@@ -46,7 +72,6 @@ read_deeplocrna_predictions <- function(prediction_file) {
 
   pred_df[score_cols] <- lapply(pred_df[score_cols], as.numeric)
   attr(pred_df, "score_cols") <- score_cols
-  attr(pred_df, "original_first_col") <- first_col
   pred_df
 }
 
@@ -61,11 +86,39 @@ summarize_prediction_counts <- function(pred_df) {
 
 plot_prediction_class_counts <- function(summary_df, output_file = NULL) {
   plot_df <- summary_df %>%
-    mutate(Prediction = reorder(Prediction, transcript_count))
+    mutate(
+      Prediction = reorder(Prediction, transcript_count),
+      label_y = transcript_count + max(transcript_count, na.rm = TRUE) * 0.03
+    )
 
-  p <- ggplot(plot_df, aes(x = Prediction, y = transcript_count)) +
-    geom_col(fill = "#4C78A8", color = "black", width = 0.8) +
-    coord_flip() +
+  pred_palette <- c(
+    "#4C78A8", "#F58518", "#54A24B", "#E45756", "#72B7B2",
+    "#B279A2", "#FF9DA6", "#9D755D", "#BAB0AC", "#2F4B7C",
+    "#D45087", "#FFA600"
+  )
+  palette_vals <- stats::setNames(
+    pred_palette[seq_len(nrow(plot_df))],
+    as.character(plot_df$Prediction)
+  )
+
+  p <- ggplot(plot_df, aes(x = Prediction, y = transcript_count, fill = Prediction)) +
+    geom_col(
+      color = "white",
+      linewidth = 0.35,
+      width = 0.78,
+      show.legend = FALSE
+    ) +
+    geom_text(
+      aes(y = label_y, label = transcript_count),
+      hjust = 0,
+      size = 3.4,
+      color = "#243447"
+    ) +
+    scale_fill_manual(values = palette_vals) +
+    coord_flip(clip = "off") +
+    scale_y_continuous(
+      expand = expansion(mult = c(0, 0.12))
+    ) +
     labs(
       title = "Transcript Counts by DeepLocRNA Prediction",
       x = "Prediction class",
@@ -73,12 +126,18 @@ plot_prediction_class_counts <- function(summary_df, output_file = NULL) {
     ) +
     theme_minimal(base_size = 12) +
     theme(
-      plot.title = element_text(hjust = 0.5, face = "bold"),
-      axis.text.y = element_text(size = 10)
+      plot.title = element_text(hjust = 0.5, face = "bold", size = 14, color = "#1F2933"),
+      axis.title = element_text(face = "bold", color = "#243447"),
+      axis.text = element_text(color = "#243447"),
+      panel.grid.major.y = element_blank(),
+      panel.grid.minor = element_blank(),
+      panel.grid.major.x = element_line(color = "#D9E2EC", linewidth = 0.35),
+      plot.margin = margin(12, 24, 12, 12)
     )
 
   if (!is.null(output_file) && output_file != "") {
-    save_plot_pdf(p, output_file, width = 9, height = 6)
+    plot_height <- max(6, 0.45 * nrow(plot_df) + 2.2)
+    save_plot_pdf(p, output_file, width = 10.5, height = plot_height)
   }
 
   p
@@ -136,6 +195,66 @@ write_transcript_ids_file <- function(transcript_df, output_file) {
   invisible(output_file)
 }
 
+prepare_subset_fasta_command <- function(transcript_ids_file,
+                                         input_fasta,
+                                         output_fasta) {
+  paste0(
+    "awk '\n",
+    "BEGIN { while ((getline < ", shQuote(transcript_ids_file), ") > 0) ids[$1] = 1 }\n",
+    "/^>/ {\n",
+    "  header = substr($0, 2)\n",
+    "  split(header, parts, /[[:space:]]+/)\n",
+    "  keep = (parts[1] in ids)\n",
+    "}\n",
+    "keep { print }\n",
+    "' ", shQuote(input_fasta), " > ", shQuote(output_fasta)
+  )
+}
+
+extract_subset_fasta_by_transcript_ids <- function(transcript_ids_file,
+                                                   input_fasta,
+                                                   output_fasta) {
+  if (!file.exists(transcript_ids_file)) {
+    stop(paste("Transcript ID file not found:", transcript_ids_file))
+  }
+  if (!file.exists(input_fasta)) {
+    stop(paste("Input FASTA not found:", input_fasta))
+  }
+
+  ids <- readLines(transcript_ids_file, warn = FALSE)
+  ids <- unique(trimws(ids[nzchar(trimws(ids))]))
+  if (length(ids) == 0) {
+    stop("No transcript IDs found in transcript_ids_file")
+  }
+
+  ensure_dir(dirname(output_fasta))
+
+  keep <- FALSE
+  n_kept <- 0L
+  con_in <- file(input_fasta, open = "r")
+  con_out <- file(output_fasta, open = "w")
+  on.exit({
+    try(close(con_in), silent = TRUE)
+    try(close(con_out), silent = TRUE)
+  }, add = TRUE)
+
+  repeat {
+    line <- readLines(con_in, n = 1, warn = FALSE)
+    if (length(line) == 0) break
+
+    if (startsWith(line, ">")) {
+      header <- sub("^>", "", line)
+      tx_id <- strsplit(header, "[[:space:]]+")[[1]][1]
+      keep <- tx_id %in% ids
+      if (keep) n_kept <- n_kept + 1L
+    }
+
+    if (keep) writeLines(line, con_out)
+  }
+
+  invisible(list(output_fasta = output_fasta, kept_transcripts = n_kept))
+}
+
 prepare_gene_localization_scores <- function(gene_query,
                                              pred_df,
                                              mapping_df,
@@ -180,46 +299,147 @@ plot_gene_localization_heatmap <- function(localization_obj,
   score_mat <- localization_obj$score_matrix
 
   annotation_row <- NULL
+  annotation_colors <- NULL
   if ("Prediction" %in% colnames(localization_obj$transcript_table)) {
     annotation_row <- data.frame(
       Prediction = localization_obj$transcript_table$Prediction,
       row.names = localization_obj$transcript_table$transcript_id,
       stringsAsFactors = FALSE
     )
+
+    pred_levels <- unique(annotation_row$Prediction)
+    pred_palette <- grDevices::colorRampPalette(
+      c("#4C78A8", "#F58518", "#54A24B", "#B279A2", "#E45756", "#72B7B2")
+    )(length(pred_levels))
+    annotation_colors <- list(
+      Prediction = stats::setNames(pred_palette, pred_levels)
+    )
   }
 
-  palette_fun <- colorRampPalette(c("#F7FBFF", "#6BAED6", "#08306B"))
-  heat_colors <- palette_fun(100)
+  threshold_map <- c(
+    "Nucleus" = 0.7551,
+    "Exosome" = 0.9796,
+    "Cytosol" = 0.2245,
+    "Ribosome" = 0.2857,
+    "Membrane" = 0.3061,
+    "Endoplasmic reticulum" = 0.1837
+  )
+
+  keep_cols <- intersect(names(threshold_map), colnames(score_mat))
+  if (length(keep_cols) == 0) {
+    stop("None of the threshold-defined DeepLocRNA compartments were found in the score matrix")
+  }
+
+  score_mat <- score_mat[, keep_cols, drop = FALSE]
+  col_thresholds <- threshold_map[keep_cols]
+  col_labels <- paste0(
+    keep_cols,
+    "
+(thr=",
+    sprintf("%.3f", col_thresholds),
+    ")"
+  )
+  colnames(score_mat) <- col_labels
+
+  relative_margin_mat <- matrix(
+    NA_real_,
+    nrow = nrow(score_mat),
+    ncol = ncol(score_mat),
+    dimnames = dimnames(score_mat)
+  )
+  display_numbers <- matrix(
+    "",
+    nrow = nrow(score_mat),
+    ncol = ncol(score_mat),
+    dimnames = dimnames(score_mat)
+  )
+
+  for (i in seq_along(col_thresholds)) {
+    thr <- col_thresholds[[i]]
+    if (!is.na(thr) && thr > 0) {
+      margin_vals <- score_mat[, i] / thr - 1
+      relative_margin_mat[, i] <- margin_vals
+      display_numbers[, i] <- ifelse(margin_vals > 0, "PASS", "")
+    }
+  }
+
+  finite_vals <- relative_margin_mat[is.finite(relative_margin_mat)]
+    min_margin <- if (length(finite_vals) > 0) {
+        min(finite_vals, na.rm = TRUE)
+    }
+    else {
+        -0.25
+    }
+    max_margin <- if (length(finite_vals) > 0) {
+        max(finite_vals, na.rm = TRUE)
+    }
+    else {
+        0.25
+    }
+    min_margin <- min(min_margin, -0.02)
+    max_margin <- max(max_margin, 0.02)
+
+  neg_palette <- grDevices::colorRampPalette(
+    c("#24557A", "#7DB7D8", "#EAF4FF")
+  )(80)
+  pos_palette <- grDevices::colorRampPalette(
+    c("#F6D38B", "#E58F65", "#B23A48")
+  )(80)
+  margin_palette <- c(neg_palette, pos_palette)
+  neg_breaks <- seq(min_margin, 0, length.out = length(neg_palette) + 
+        1)
+    pos_breaks <- seq(0, max_margin, length.out = length(pos_palette) + 
+        1)
+  breaks_vec <- c(neg_breaks, pos_breaks[-1])
+
+  plot_width <- max(11.5, 1.85 * ncol(score_mat) + 3.8)
+  plot_height <- max(6.5, 0.72 * nrow(score_mat) + 3.2)
+  heat_cellwidth <- max(34, min(58, 250 / max(1, ncol(score_mat))))
+  heat_cellheight <- max(20, min(34, 300 / max(1, nrow(score_mat))))
+  legend_breaks <- c(min_margin, 0, max_margin)
+  legend_labels <- c("Below", "At threshold", "Above")
+    draw_heatmap <- function() {
+    pheatmap::pheatmap(
+      relative_margin_mat,
+      cluster_rows = cluster_rows,
+      cluster_cols = cluster_cols,
+      color = margin_palette,
+      breaks = breaks_vec,
+      border_color = "#FFFFFF",
+      main = paste0(
+        "Transcript Localization Relative To Threshold: ",
+        gene_query,
+        "
+Negative = below threshold, positive = above threshold"
+      ),
+      annotation_row = annotation_row,
+      annotation_colors = annotation_colors,
+      display_numbers = display_numbers,
+      number_color = "#202124",
+      fontsize_number = 8.5,
+      fontsize_row = 9.5,
+      fontsize_col = 10.5,
+      angle_col = "45",
+      cellwidth = heat_cellwidth,
+      cellheight = heat_cellheight,
+      treeheight_row = if (cluster_rows) 42 else 0,
+      treeheight_col = if (cluster_cols) 36 else 0,
+      legend = TRUE,
+      legend_breaks = legend_breaks,
+      legend_labels = legend_labels,
+      fontsize = 10.5,
+      na_col = "#F3F6FA"
+    )
+  }
 
   if (!is.null(output_file) && output_file != "") {
     ensure_dir(dirname(output_file))
-    pdf(output_file, width = 10, height = max(4, 0.35 * nrow(score_mat) + 2), bg = "white")
-    pheatmap::pheatmap(
-      score_mat,
-      cluster_rows = cluster_rows,
-      cluster_cols = cluster_cols,
-      color = heat_colors,
-      border_color = "grey85",
-      main = paste0("Transcript Localization Scores: ", gene_query),
-      annotation_row = annotation_row,
-      fontsize_row = 9,
-      fontsize_col = 10,
-      angle_col = 45
-    )
+    pdf(output_file, width = plot_width, height = plot_height, bg = "white")
+    draw_heatmap()
     dev.off()
     return(invisible(NULL))
   }
 
-  pheatmap::pheatmap(
-    score_mat,
-    cluster_rows = cluster_rows,
-    cluster_cols = cluster_cols,
-    color = heat_colors,
-    border_color = "grey85",
-    main = paste0("Transcript Localization Scores: ", gene_query),
-    annotation_row = annotation_row,
-    fontsize_row = 9,
-    fontsize_col = 10,
-    angle_col = 45
-  )
+  draw_heatmap()
 }
+

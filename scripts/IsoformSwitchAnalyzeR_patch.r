@@ -3,6 +3,33 @@ determineTranscriptClass <- IsoformSwitchAnalyzeR:::determineTranscriptClass
 startCapitalLetter <- IsoformSwitchAnalyzeR:::startCapitalLetter
 evalSig <- IsoformSwitchAnalyzeR:::evalSig
 
+# Compatibility patch for older IsoformSwitchAnalyzeR code paths that call
+# dplyr::full_join(..., all = TRUE) on newer dplyr versions.
+.patch_dplyr_full_join_all <- function() {
+    ns <- asNamespace("dplyr")
+    if (!bindingIsLocked("full_join", ns)) return(invisible(FALSE))
+
+    original_full_join <- get("full_join", envir = ns)
+    patched_full_join <- function(x, y, by = NULL, copy = FALSE,
+                                  suffix = c(".x", ".y"), ..., keep = NULL) {
+        dots <- list(...)
+        if ("all" %in% names(dots)) {
+            dots[["all"]] <- NULL
+        }
+        do.call(
+            original_full_join,
+            c(list(x = x, y = y, by = by, copy = copy, suffix = suffix, keep = keep), dots)
+        )
+    }
+
+    unlockBinding("full_join", ns)
+    assign("full_join", patched_full_join, envir = ns)
+    lockBinding("full_join", ns)
+    invisible(TRUE)
+}
+
+try(.patch_dplyr_full_join_all(), silent = TRUE)
+
 expressionAnalysisPlot <- function(
     switchAnalyzeRlist,
     gene = NULL,
@@ -757,7 +784,7 @@ expressionAnalysisPlot <- function(
 
             if( optimizeForCombinedPlot ) {
                 g1 <- g1 +
-                    scale_fill_manual(values = c('darkgrey', '#333333')) +
+                    scale_fill_manual(values = c('#83d1db', '#b6261e')) +
                     guides(fill="none")
             }
 
@@ -1000,7 +1027,7 @@ expressionAnalysisPlot <- function(
             }
 
             g2 <- g2 +
-                scale_fill_manual(values = c('darkgrey', '#333333')) +
+                scale_fill_manual(values = c('#83d1db', '#b6261e')) +
                 labs(x = 'Isoform', y = 'Isoform Expression') +
                 localTheme + # modify to tilt conditions
                 theme(strip.background = element_rect(
@@ -1133,7 +1160,7 @@ expressionAnalysisPlot <- function(
             }
 
             g3 <- g3 +
-                scale_fill_manual(values = c('darkgrey', '#333333')) +
+                scale_fill_manual(values = c('#83d1db', '#b6261e')) +
                 localTheme + # modify to tilt conditions
                 theme(strip.background = element_rect(
                     fill = "white",
@@ -2796,6 +2823,32 @@ switchPlotTranscript <- function(
     ### Build plot
     if(TRUE) {
 
+        # Transcript-specific coloring for upper structure panel
+        txFound <- unique(as.character(myTranscriptPlotData$transcript))
+        nTx <- length(txFound)
+        if (nTx <= 12) {
+            txColors <- RColorBrewer::brewer.pal(12, "Set3")[seq_len(nTx)]
+        } else {
+            txColors <- grDevices::colorRampPalette(RColorBrewer::brewer.pal(12, "Set3"))(nTx)
+        }
+        txKeys <- paste0("tx::", txFound)
+
+        myTranscriptPlotData$FillKey <- ifelse(
+            myTranscriptPlotData$Domain == ' transcript',
+            paste0("tx::", as.character(myTranscriptPlotData$transcript)),
+            as.character(myTranscriptPlotData$Domain)
+        )
+
+        domainKeys <- c('transcript', domainsFound)
+        domainKeysNoTx <- setdiff(domainKeys, 'transcript')
+        domainColorsNoTx <- correspondingColors[match(domainKeysNoTx, domainKeys)]
+
+        fillValues <- c(
+            stats::setNames(txColors, txKeys),
+            stats::setNames(domainColorsNoTx, domainKeysNoTx)
+        )
+        fillBreaks <- c(txKeys, domainKeysNoTx)
+
         myPlot <- ggplot()
 
         ### Introns
@@ -2833,17 +2886,17 @@ switchPlotTranscript <- function(
                         ymin = xmin,
                         xmax = ymax,
                         ymax = xmax,
-                        fill = Domain
+                        fill = FillKey
                     )
                 )
 
             ### Transcript color and theme
             myPlot <- myPlot +
                 scale_fill_manual(
-                    breaks = c('transcript',domainsFound),
-                    values = correspondingColors,
-                    na.value = '#161616'
-                ) + # Correct domian color code so transcripts are black and not shown
+                    breaks = fillBreaks,
+                    values = fillValues,
+                    na.value = '#595959'
+                ) +
                 scale_y_continuous(breaks = idData$idNr, labels = idData$transcript) # change index numbers back to names
 
 
@@ -3413,7 +3466,7 @@ switchPlot <- function(
             geom = 'text',
             x = 2,
             y = 1,
-            size = safe_text_size * 0.6,
+            size = safe_text_size * 0.4,
             fontface = 'bold',
             label = paste(
                 'The isoform switch in ',

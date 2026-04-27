@@ -181,9 +181,44 @@ add_orf_and_gene_symbols <- function(aSwitchList_filt,
   }
 
   isoform_features <- aSwitchList_ORF_filt[["isoformFeatures"]]
-  isoform_features[["gene_name"]] <- resource_table$gene_symbol[
-    match(isoform_features[["gene_id"]], resource_table$gene_id)
-  ]
+
+  # Prefer transcript-level mapping to avoid ID-system mismatch
+  # (e.g., switch list gene_id may be symbols while resource gene_id is ENSG).
+  mapped_gene_symbol <- rep(NA_character_, nrow(isoform_features))
+
+  if ("transcript_id" %in% colnames(resource_table) && "isoform_id" %in% colnames(isoform_features)) {
+    rt <- resource_table %>%
+      dplyr::transmute(
+        transcript_id = as.character(transcript_id),
+        gene_id = as.character(gene_id),
+        gene_symbol = as.character(gene_symbol)
+      ) %>%
+      dplyr::filter(!is.na(transcript_id), transcript_id != "") %>%
+      dplyr::distinct(transcript_id, .keep_all = TRUE)
+
+    idx <- match(as.character(isoform_features[["isoform_id"]]), rt$transcript_id)
+    mapped_gene_symbol <- rt$gene_symbol[idx]
+
+    # Fallback: strip transcript version suffix if needed
+    miss <- is.na(mapped_gene_symbol) | mapped_gene_symbol == ""
+    if (any(miss)) {
+      idx2 <- match(
+        sub("\\.[0-9]+$", "", as.character(isoform_features[["isoform_id"]])[miss]),
+        sub("\\.[0-9]+$", "", rt$transcript_id)
+      )
+      mapped_gene_symbol[miss] <- rt$gene_symbol[idx2]
+    }
+  }
+
+  # Secondary fallback by gene_id matching when still missing
+  miss2 <- is.na(mapped_gene_symbol) | mapped_gene_symbol == ""
+  if (any(miss2) && "gene_id" %in% colnames(isoform_features)) {
+    mapped_gene_symbol[miss2] <- resource_table$gene_symbol[
+      match(as.character(isoform_features[["gene_id"]])[miss2], as.character(resource_table$gene_id))
+    ]
+  }
+
+  isoform_features[["gene_name"]] <- mapped_gene_symbol
   aSwitchList_ORF_filt[["isoformFeatures"]] <- isoform_features
 
   aSwitchList_ORF_filt

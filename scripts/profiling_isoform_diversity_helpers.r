@@ -175,10 +175,47 @@ run_isoform_diversity <- function(seurat_obj,
   }
 
   feature_ids <- rownames(expr)
-  split_ids <- strsplit(feature_ids, "-(?=[^-]+$)", perl = TRUE)
-  gene_ids <- as.character(vapply(split_ids, function(x) {
-    if (length(x) >= 2) x[[2]] else x[[1]]
-  }, character(1)))
+
+  # Prefer transcript->gene mapping from resource-setup dictionary.
+  resolved_dict <- resolve_gene_symbol_dict(
+    gene_symbol_dict_csv = gene_symbol_dict_csv,
+    output_rds = output_rds
+  )
+  gene_ids <- NULL
+  if (!is.null(resolved_dict) && file.exists(resolved_dict)) {
+    dict_full <- data.table::fread(resolved_dict, data.table = FALSE)
+    if (all(c("transcript_id", "gene_id") %in% colnames(dict_full))) {
+      dict_full <- dict_full %>%
+        dplyr::select(transcript_id, gene_id) %>%
+        dplyr::mutate(
+          transcript_id = as.character(transcript_id),
+          gene_id = as.character(gene_id)
+        ) %>%
+        dplyr::filter(!is.na(transcript_id), transcript_id != "", !is.na(gene_id), gene_id != "") %>%
+        dplyr::distinct(transcript_id, .keep_all = TRUE)
+
+      idx <- match(feature_ids, dict_full$transcript_id)
+      gene_ids <- dict_full$gene_id[idx]
+
+      # Fallback by stripping version suffix if needed (e.g., ENST... .1)
+      miss <- is.na(gene_ids)
+      if (any(miss)) {
+        idx2 <- match(sub("\\.[0-9]+$", "", feature_ids[miss]), sub("\\.[0-9]+$", "", dict_full$transcript_id))
+        gene_ids[miss] <- dict_full$gene_id[idx2]
+      }
+    }
+  }
+
+  # Final fallback: parse transcript-gene pattern from feature ids
+  if (is.null(gene_ids)) {
+    split_ids <- strsplit(feature_ids, "-(?=[^-]+$)", perl = TRUE)
+    gene_ids <- as.character(vapply(split_ids, function(x) {
+      if (length(x) >= 2) x[[2]] else x[[1]]
+    }, character(1)))
+  } else {
+    # Keep unmapped features as-is to avoid missing rowData
+    gene_ids[is.na(gene_ids) | gene_ids == ""] <- feature_ids[is.na(gene_ids) | gene_ids == ""]
+  }
 
   sce <- SingleCellExperiment::SingleCellExperiment(
     assays = setNames(list(expr), assay)

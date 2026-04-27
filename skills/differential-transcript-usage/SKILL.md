@@ -63,7 +63,11 @@ At the start of a DTU request:
    - `isoquant`
    - or another route
 5. Confirm the transcript FASTA path:
-   - for `flair`, ask the user to confirm the FLAIR combined FASTA path
+   - for `flair`, ask the user to confirm the existing FLAIR transcript FASTA path
+   - for `isoquant`, ask the user to confirm:
+     - the IsoQuant transcript annotation GTF path
+     - the reference genome FASTA path
+     - the output transcript FASTA path to generate with `gffread`
    - for other tools, ask the user to provide a transcript FASTA that contains one sequence per transcript
 6. Confirm the transcript annotation GTF path from the upstream quantification output.
 7. Derive the output directory for DTU analysis from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
@@ -80,7 +84,12 @@ At the start of a DTU request:
 
 This step is done in the shell before the R workflow starts.
 
-For `flair`, prepare a DTU-ready FASTA by removing the last underscore-delimited suffix from transcript headers.
+First determine which upstream quantification tool produced the transcript models.
+
+If the upstream route was `flair`:
+
+- confirm the existing FLAIR transcript FASTA path
+- prepare a DTU-ready FASTA by removing the last underscore-delimited suffix from transcript headers
 
 The source text uses this pattern:
 
@@ -108,7 +117,33 @@ Rules:
 - always show the exact FASTA-preparation command before execution
 - ask the user to confirm the input FASTA path and output FASTA path
 - preferably generate the shell command with `prepare_flair_dtu_fasta_command()`
-- if the tool is not `flair`, do not assume this header rewrite is appropriate; ask the user to provide a ready-to-use transcript FASTA
+
+If the upstream route was `isoquant`:
+
+- do not ask the user for a ready-made transcript FASTA first
+- generate a transcript FASTA from the IsoQuant transcript GTF and the reference genome FASTA
+
+Use the same `gffread` pattern as in `transcript-localization`:
+
+```bash
+conda run -n downstream gffread annotation.gtf \
+  -g genome.fa \
+  -w transcripts.fa \
+  --w-nocds
+```
+
+Rules:
+
+- ask the user to confirm `annotation.gtf`
+- ask the user to confirm `genome.fa`
+- ask the user to confirm `transcripts.fa`
+- do not assume the output path
+- show the exact final command before execution
+
+If the tool is neither `flair` nor `isoquant`:
+
+- do not assume the FLAIR header rewrite is appropriate
+- ask the user to provide a ready-to-use transcript FASTA
 
 ### 2. Load Seurat Object
 

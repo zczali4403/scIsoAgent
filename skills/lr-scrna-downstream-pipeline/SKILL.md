@@ -31,7 +31,8 @@ This downstream pipeline currently includes the following planned modules:
 9. isoform diversity profiling
 10. differential transcript usage
 11. transcript localization prediction and gene-specific transcript localization exploration
-12. final run summary and discussion-style interpretation
+12. translation start/stop site prediction and gene-specific TIS/TTS visualization
+13. final run summary and discussion-style interpretation
 
 This is a living workflow definition. The module list, order, and boundaries may be revised as the project matures.
 
@@ -88,7 +89,8 @@ Use this default order unless the user explicitly requests a different entry poi
 9. isoform diversity profiling
 10. differential transcript usage
 11. transcript localization prediction and gene-specific transcript localization exploration
-12. final run summary and discussion-style interpretation
+12. translation start/stop site prediction and gene-specific TIS/TTS visualization
+13. final run summary and discussion-style interpretation
 
 This ordering is a default, not a rigid law. Some analyses may start from an intermediate stage if validated prior outputs already exist.
 
@@ -109,6 +111,9 @@ Use these fixed environment assignments throughout the downstream workflow:
 - `exploring-isoforms-of-interest` -> `downstream`
 - `transcript-localization`:
   - non-R preparation and DeepLocRNA prediction -> `DeepLocRNA`
+  - downstream summary R phase -> `downstream`
+- `tis-tts-analysis`:
+  - non-R preparation and TranslationAI prediction -> `TranslationAI`
   - downstream summary R phase -> `downstream`
 - `profiling-isoform-diversity` -> `downstream`
 - `differential-transcript-usage` -> `downstream`
@@ -306,7 +311,23 @@ Current dispatch rule for this stage:
 - if the task is transcript localization prediction or DeepLocRNA-based gene-specific transcript localization exploration, read:
   - `../transcript-localization/SKILL.md`
 
-### 12. Final Summary
+### 12. TIS/TTS Analysis
+
+Use this module when the user wants to predict translation initiation and termination sites with TranslationAI and then inspect one gene's transcripts together.
+
+Typical goals:
+
+- prepare or resolve a transcript FASTA from `flair` or `isoquant`
+- run TranslationAI prediction on all transcripts
+- inspect one gene at a time using the `resource-setup` transcript-to-gene mapping table
+- visualize predicted TIS and TTS coordinates for all matched transcripts in one plot
+
+Current dispatch rule for this stage:
+
+- if the task is TranslationAI-based translation start/stop site prediction or gene-specific TIS/TTS visualization, read:
+  - `../tis-tts-analysis/SKILL.md`
+
+### 13. Final Summary
 
 Use this module when the user wants a final synthesis after analysis outputs have been generated.
 
@@ -356,6 +377,8 @@ Current downstream module skills already available:
   - `../exploring-isoforms-of-interest/SKILL.md`
 - transcript localization prediction and exploration:
   - `../transcript-localization/SKILL.md`
+- translation start/stop site prediction and TIS/TTS visualization:
+  - `../tis-tts-analysis/SKILL.md`
 - isoform classification:
   - `../isoform-classification/SKILL.md`
 - isoform diversity profiling:

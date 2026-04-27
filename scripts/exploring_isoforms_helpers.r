@@ -21,10 +21,10 @@ save_plot_pdf <- function(plot_obj, file_path, width = 8, height = 6) {
   dev.off()
 }
 
-read_gene_symbol_mapping <- function(mapping_file) {
+read_transcript_gene_mapping <- function(mapping_file) {
   mapping_df <- fread(mapping_file)
 
-  required_cols <- c("gene_id", "gene_symbol")
+  required_cols <- c("transcript_id", "gene_id", "gene_symbol")
   missing_cols <- required_cols[!required_cols %in% colnames(mapping_df)]
   if (length(missing_cols) > 0) {
     stop(
@@ -36,6 +36,12 @@ read_gene_symbol_mapping <- function(mapping_file) {
   }
 
   mapping_df %>%
+    dplyr::select(transcript_id, gene_id, gene_symbol) %>%
+    dplyr::distinct(transcript_id, .keep_all = TRUE)
+}
+
+read_gene_symbol_mapping <- function(mapping_file) {
+  read_transcript_gene_mapping(mapping_file) %>%
     dplyr::select(gene_id, gene_symbol) %>%
     dplyr::distinct(gene_id, .keep_all = TRUE)
 }
@@ -66,13 +72,34 @@ aggregate_isoform_expression <- function(seurat_obj,
 }
 
 split_isoform_gene_ids <- function(pseudobulk_df,
+                                   transcript_gene_mapping,
                                    feature_col = "feature_id") {
-  pseudobulk_df %>%
-    tidyr::separate(
-      !!sym(feature_col),
-      into = c("transcript_id", "gene_id"),
-      sep = "-(?=[^-]+$)"
+  if (missing(transcript_gene_mapping) || is.null(transcript_gene_mapping)) {
+    stop("transcript_gene_mapping is required. Use read_transcript_gene_mapping() with the resource-setup dictionary.")
+  }
+
+  if (!feature_col %in% colnames(pseudobulk_df)) {
+    stop(sprintf("feature column '%s' not found in pseudobulk_df", feature_col))
+  }
+
+  if (!all(c("transcript_id", "gene_id") %in% colnames(transcript_gene_mapping))) {
+    stop("transcript_gene_mapping must include transcript_id and gene_id columns")
+  }
+
+  out <- pseudobulk_df %>%
+    dplyr::rename(transcript_id = !!sym(feature_col)) %>%
+    dplyr::left_join(
+      transcript_gene_mapping %>% dplyr::select(transcript_id, gene_id, gene_symbol),
+      by = "transcript_id"
     )
+
+  missing_n <- sum(is.na(out$gene_id))
+  if (missing_n > 0) {
+    warning(sprintf("%d transcript features have no transcript→gene mapping and will be removed", missing_n))
+    out <- out %>% dplyr::filter(!is.na(gene_id))
+  }
+
+  out
 }
 
 compute_isoform_count_per_gene <- function(pseudobulk_df) {
@@ -262,7 +289,7 @@ plot_selected_isoforms_featureplot <- function(seurat_obj,
   combined_plot <- cowplot::plot_grid(plotlist = plots, ncol = ncol_use)
 
   if (!is.null(output_file) && output_file != "") {
-    save_plot_pdf(combined_plot, output_file, width = 16, height = 16)
+    save_plot_pdf(combined_plot, output_file, width = 16, height = 10)
   }
 
   combined_plot
@@ -286,7 +313,8 @@ plot_selected_isoforms_stat <- function(seurat_obj,
       theme(
         plot.title = element_blank(),
         plot.subtitle = element_blank(),
-        strip.text = element_text(size = 8)
+        strip.text = element_text(size = 8),
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)
       )
     p
   })

@@ -185,18 +185,15 @@ Then:
 
 Preferred extraction-and-rerun pattern:
 
-```bash
-conda run -n DeepLocRNA bash -lc 'awk "
-BEGIN {
-  while ((getline < \"transcript_ids.txt\") > 0) ids[$1] = 1
-}
-/^>/ {
-  header = substr($0, 2)
-  keep = (header in ids)
-}
-keep { print }
-" transcripts.fa > transcripts_sub.fa'
+1) Build transcript ID list from mapping in the persistent R session.
+2) Extract subset FASTA using helper functions from `transcript_localization_helpers.r`:
+   - prefer R-native extraction with `extract_subset_fasta_by_transcript_ids()`
+   - if shell execution is preferred, generate the exact AWK command with `prepare_subset_fasta_command()` and run it in `tmux`
+3) Rerun DeepLocRNA on the subset FASTA with `--plot True`.
 
+Example rerun command:
+
+```bash
 conda run -n DeepLocRNA python /opt/DeepLocRNA-main/DeepLocRNA/fine_tuning_deeprbploc_allRNA_prediction.py \
   --fasta transcripts_sub.fa \
   --rna_types mRNA \
@@ -209,6 +206,8 @@ Prefer using:
 
 - `resolve_gene_transcripts()`
 - `write_transcript_ids_file()`
+- `prepare_subset_fasta_command()`
+- `extract_subset_fasta_by_transcript_ids()`
 - `prepare_gene_localization_scores()`
 - `plot_gene_localization_heatmap()`
 
@@ -230,11 +229,12 @@ After one gene heatmap is produced:
 6. Do not assume paths for the transcript FASTA, prediction output, or mapping table; confirm them.
 7. At the beginning of the R phase, first `source("../../scripts/transcript_localization_helpers.r")`.
 8. Prefer helper functions from `transcript_localization_helpers.r` instead of rewriting the same plotting and filtering code inline.
-9. Do not reload the DeepLocRNA output or the mapping table for every gene unless the user changes inputs.
-10. For each selected gene, derive a transcript-ID list from the mapping table, extract a subset FASTA from the original transcript FASTA, and rerun DeepLocRNA on that subset before summarizing gene-specific scores.
-11. Do not assume one fixed gene; ask the user.
-12. Before any substantial command or code block is executed, show the exact intended command or code and wait for confirmation.
-13. Do not claim completion until the expected prediction output and requested plots exist and are non-empty.
+9. For transcript subset FASTA creation, prefer helper-based extraction (`extract_subset_fasta_by_transcript_ids()`), or generate shell AWK via `prepare_subset_fasta_command()` and run it in `tmux`.
+10. Do not reload the DeepLocRNA output or the mapping table for every gene unless the user changes inputs.
+11. For each selected gene, derive a transcript-ID list from the mapping table, extract a subset FASTA from the original transcript FASTA, and rerun DeepLocRNA on that subset before summarizing gene-specific scores.
+12. Do not assume one fixed gene; ask the user.
+13. Before any substantial command or code block is executed, show the exact intended command or code and wait for confirmation.
+14. Do not claim completion until the expected prediction output and requested plots exist and are non-empty.
 
 ## Expected Inputs
 
