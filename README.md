@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/scisoagent_logo.jpg" alt="scIsoAgent logo" width="1400">
+</p>
+
 # scIsoAgent User Guide
 
 `scIsoAgent` is a portable workflow assistant for long-read single-cell RNA-seq analysis.
