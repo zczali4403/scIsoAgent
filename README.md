@@ -2,6 +2,8 @@
   <img src="assets/scisoagent_logo.jpg" alt="scIsoAgent logo" width="1400">
 </p>
 
+scIsoAgent is an AI agent for long-read single-cell RNA-seq analysis. It is designed to help users run complete long-read single-cell workflows in an interactive and stepwise way, from upstream read processing and isoform quantification to downstream cell-level and isoform-level interpretation. In addition to conventional long-read scRNA-seq analysis, scIsoAgent also supports sequence-based isoform functional inference, including transcript localization prediction, TIS/TTS analysis, and Orthrus-based embedding-driven prediction of multiple transcript properties. The goal is to provide one unified workflow interface for raw-data processing, downstream biological interpretation, and sequence-informed isoform characterization.
+
 # scIsoAgent User Guide
 
 `scIsoAgent` is a portable workflow assistant for long-read single-cell RNA-seq analysis.
