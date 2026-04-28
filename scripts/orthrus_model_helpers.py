@@ -34,6 +34,18 @@ TASK_DISPLAY_NAMES = {
 }
 
 
+DEFAULT_PROBE_DIR = Path("/work/scIsoAgent/orthrus_trained_probes")
+DEFAULT_LABEL_MAP_DIR = Path("/work/scIsoAgent/orthrus_label_maps")
+DEFAULT_TASK_SPECS = [
+    {"task_name": "mrl-sugimoto", "probe_filename": "mrl-sugimoto_probe.joblib", "task": "regression", "label_map_filename": ""},
+    {"task_name": "rnahl-human", "probe_filename": "rnahl-human_probe.joblib", "task": "regression", "label_map_filename": ""},
+    {"task_name": "translation-efficiency-human", "probe_filename": "translation-efficiency-human_probe.joblib", "task": "regression", "label_map_filename": ""},
+    {"task_name": "prot-loc", "probe_filename": "prot-loc_probe.joblib", "task": "multilabel", "label_map_filename": "prot-loc_label_map.json"},
+    {"task_name": "rna-lifecycle-ietswaart", "probe_filename": "rna-lifecycle-ietswaart_probe.joblib", "task": "multilabel", "label_map_filename": "rna-lifecycle-ietswaart_label_map.json"},
+    {"task_name": "rna-loc-fazal", "probe_filename": "rna-loc-fazal_probe.joblib", "task": "multilabel", "label_map_filename": "rna-loc-fazal_label_map.json"},
+]
+
+
 def ensure_parent(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -161,11 +173,20 @@ except ImportError:
     pass
 
 
-def infer_embeddings(records: list[tuple[str, str]], model_name: str, model_version: str, device: str) -> np.ndarray:
+def infer_embeddings(
+    records: list[tuple[str, str]],
+    model_name: str,
+    model_version: str,
+    device: str,
+    mrna_bench_data_path: Path | None = None,
+) -> np.ndarray:
     try:
         import mrna_bench as mb
     except ImportError as exc:
         raise ImportError("mrna_bench is required for Orthrus embedding inference.") from exc
+
+    if mrna_bench_data_path is not None:
+        mb.update_data_path(str(mrna_bench_data_path))
 
     mb_model = mb.load_model(
         model_name=model_name,
@@ -197,11 +218,18 @@ def run_embedding_inference(
     model_name: str,
     model_version: str,
     device: str,
+    mrna_bench_data_path: Path | None,
 ) -> Path:
     records = read_fasta(fasta)
     transcript_ids = [record_id for record_id, _ in records]
     lengths = np.array([len(seq) for _, seq in records], dtype=np.int64)
-    embeddings = infer_embeddings(records, model_name=model_name, model_version=model_version, device=device)
+    embeddings = infer_embeddings(
+        records,
+        model_name=model_name,
+        model_version=model_version,
+        device=device,
+        mrna_bench_data_path=mrna_bench_data_path,
+    )
     ensure_parent(output)
     np.savez_compressed(
         output,
@@ -362,6 +390,31 @@ def predict_with_probe(
         meta_out.write_text(json.dumps(metadata, indent=2, ensure_ascii=False))
 
     return output_csv
+
+
+def build_default_task_manifest(
+    output: Path,
+    probe_dir: Path = DEFAULT_PROBE_DIR,
+    label_map_dir: Path = DEFAULT_LABEL_MAP_DIR,
+) -> Path:
+    rows = []
+    for spec in DEFAULT_TASK_SPECS:
+        label_map_path = ""
+        if spec["label_map_filename"]:
+            label_map_path = str(label_map_dir / spec["label_map_filename"])
+        rows.append(
+            {
+                "task_name": spec["task_name"],
+                "probe_path": str(probe_dir / spec["probe_filename"]),
+                "task": spec["task"],
+                "label_map_json": label_map_path,
+                "threshold": 0.5,
+                "save_metadata": False,
+            }
+        )
+    ensure_parent(output)
+    pd.DataFrame(rows).to_csv(output, index=False)
+    return output
 
 
 def load_task_manifest(path: Path) -> pd.DataFrame:
@@ -674,11 +727,17 @@ def build_parser() -> argparse.ArgumentParser:
     p_embed.add_argument("--csv-output", type=Path, default=None)
     p_embed.add_argument("--mb-model-name", default="Orthrus")
     p_embed.add_argument("--mb-model-version", default="orthrus-base-4-track")
+    p_embed.add_argument("--mrna-bench-data-path", type=Path, default=None)
     p_embed.add_argument(
         "--device",
         default="cuda" if torch.cuda.is_available() else "cpu",
         help="Torch device, for example cuda, cuda:0, or cpu.",
     )
+
+    p_manifest = subparsers.add_parser("build-default-manifest", help="Build a task manifest from the packaged Orthrus probe and label-map directories.")
+    p_manifest.add_argument("--output", type=Path, required=True)
+    p_manifest.add_argument("--probe-dir", type=Path, default=DEFAULT_PROBE_DIR)
+    p_manifest.add_argument("--label-map-dir", type=Path, default=DEFAULT_LABEL_MAP_DIR)
 
     p_predict = subparsers.add_parser("predict-tasks", help="Run all tasks from a manifest on one embedding NPZ.")
     p_predict.add_argument("--embedding-npz", type=Path, required=True)
@@ -723,10 +782,20 @@ def main() -> None:
             model_name=args.mb_model_name,
             model_version=args.mb_model_version,
             device=args.device,
+            mrna_bench_data_path=args.mrna_bench_data_path,
         )
         print(f"Saved embeddings: {output}")
         if args.csv_output is not None:
             print(f"Saved embedding CSV: {args.csv_output}")
+        return
+
+    if args.command == "build-default-manifest":
+        output = build_default_task_manifest(
+            output=args.output,
+            probe_dir=args.probe_dir,
+            label_map_dir=args.label_map_dir,
+        )
+        print(f"Saved task manifest: {output}")
         return
 
     if args.command == "predict-tasks":

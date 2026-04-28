@@ -72,13 +72,14 @@ At the start of an Orthrus-model request:
    - the output transcript FASTA path
 6. Confirm the `resource-setup` dictionary path:
    - `isoform_gene_symbol_dict.csv`
-7. Confirm either:
-   - one task-manifest CSV/TSV that lists all pretrained Orthrus task heads
-   - or the six individual pretrained head paths plus any required label-map JSON files
-8. Start or reuse one persistent `tmux` shell session in the `orthrus` environment.
-9. Run any FASTA-preparation step first if needed.
-10. Ask the user which gene should be analyzed first.
-11. Keep the same `tmux` session alive while the user iteratively requests additional genes.
+7. Use these fixed repository-in-container paths for Orthrus task resources:
+   - pretrained probes: `/work/scIsoAgent/orthrus_trained_probes`
+   - label maps: `/work/scIsoAgent/orthrus_label_maps`
+8. Confirm the `mrna_bench_data` directory path used by Orthrus embedding inference.
+9. Start or reuse one persistent `tmux` shell session in the `orthrus` environment.
+10. Run any FASTA-preparation step first if needed.
+11. Ask the user which gene should be analyzed first.
+12. Keep the same `tmux` session alive while the user iteratively requests additional genes.
 
 ## Workflow
 
@@ -143,17 +144,34 @@ Rules:
 
 Once the gene-specific FASTA exists, generate one embedding per transcript.
 
+Before computing embeddings, first confirm or let the user specify the `mrna_bench_data` directory path, then set it in the terminal session.
+
+Preferred data-path setup pattern:
+
+```bash
+conda run -n orthrus python - <<'PY'
+import mrna_bench as mb
+
+mb.update_data_path("/path/to/mrna_bench_data")
+print("data path set")
+PY
+```
+
 Preferred command pattern:
 
 ```bash
 conda run -n orthrus python ../../scripts/orthrus_model_helpers.py infer-embeddings \
   --fasta gene_transcripts.fa \
+  --mrna-bench-data-path /path/to/mrna_bench_data \
   --output gene_embeddings.npz \
   --csv-output gene_embeddings.csv
 ```
 
 Rules:
 
+- ask the user to confirm the `mrna_bench_data` directory path
+- show the exact data-path setup command before execution
+- run the data-path setup command inside `tmux`
 - ask the user to confirm the input gene-specific FASTA path
 - ask the user to confirm the output embedding NPZ path
 - ask the user whether they also want the optional embedding CSV path
@@ -164,8 +182,16 @@ Rules:
 
 After embeddings exist:
 
+- first generate a task manifest automatically from the fixed probe and label-map directories
 - run all six pretrained Orthrus task heads on the gene embedding matrix
 - write one prediction CSV per task under one confirmed per-gene output directory
+
+Preferred manifest-generation pattern:
+
+```bash
+conda run -n orthrus python ../../scripts/orthrus_model_helpers.py build-default-manifest \
+  --output orthrus_task_manifest.csv
+```
 
 Preferred command pattern:
 
@@ -188,7 +214,11 @@ Expected tasks include:
 Rules:
 
 - ask the user to confirm the embedding NPZ path
-- ask the user to confirm the task-manifest path, or explicitly confirm the six individual probe paths before creating the manifest
+- do not ask the user to provide a task-manifest path, pretrained probe paths, or label-map paths during normal execution
+- use the fixed directories `/work/scIsoAgent/orthrus_trained_probes` and `/work/scIsoAgent/orthrus_label_maps`
+- show the exact manifest-generation command before execution
+- run the manifest-generation command inside `tmux`
+- ask the user to confirm only the generated manifest output path
 - ask the user to confirm the prediction output directory
 - show the exact final command before execution
 - run this command inside `tmux`
@@ -234,11 +264,12 @@ After one gene summary is produced:
 2. Use the `orthrus` conda environment for every step in this skill.
 3. If the upstream route was `flair`, do not regenerate a transcript FASTA if the user already has a correct one.
 4. If the upstream route was `isoquant`, use `gffread` to generate the transcript FASTA before any Orthrus step.
-5. Do not assume paths for the transcript FASTA, mapping table, task manifest, output directories, or PDF figure; confirm them.
-6. For each selected gene, first extract a gene-specific FASTA, then generate embeddings, then run all six tasks, then aggregate and plot.
-7. Before any substantial command is executed, show the exact intended command and wait for confirmation.
-8. Do not claim completion until the expected FASTA, embedding, prediction, and PDF artifacts exist and are non-empty.
-9. Keep the same `tmux` session alive until the user explicitly says they are done with Orthrus analysis.
+5. Do not assume paths for the transcript FASTA, mapping table, output directories, or PDF figure; confirm them.
+6. Use the fixed probe directory `/work/scIsoAgent/orthrus_trained_probes` and fixed label-map directory `/work/scIsoAgent/orthrus_label_maps` unless the user is explicitly troubleshooting or overriding the packaged resources.
+7. For each selected gene, first extract a gene-specific FASTA, then generate embeddings, then generate the default task manifest, then run all six tasks, then aggregate and plot.
+8. Before any substantial command is executed, show the exact intended command and wait for confirmation.
+9. Do not claim completion until the expected FASTA, embedding, prediction, and PDF artifacts exist and are non-empty.
+10. Keep the same `tmux` session alive until the user explicitly says they are done with Orthrus analysis.
 
 ## Expected Inputs
 
@@ -249,8 +280,6 @@ Typical inputs for this skill may include:
 - or IsoQuant transcript GTF path plus reference genome FASTA path
 - `isoform_gene_symbol_dict.csv`
 - one or more user-selected genes
-- one task-manifest CSV/TSV or six individual pretrained probe paths
-- optional label-map JSON files for classification or multilabel tasks
 - output directory
 
 ## Expected Deliverables

@@ -1,0 +1,20 @@
+{
+  "prot-loc": {
+    "None": 0,
+    "Nuclear bodies|Endoplasmic reticulum": 1
+  },
+  "rna-lifecycle-ietswaart": {
+    "Chromatin": 0,
+    "Cytoplasm": 1,
+    "Cytoplasm|Polysome": 2,
+    "None": 3
+  },
+  "rna-loc-fazal": {
+    "ERM|OMM": 0,
+    "Nucleolus|ERM": 1,
+    "Nucleolus|ERM|OMM": 2,
+    "Nucleolus|Lamina": 3,
+    "Nucleolus|Lamina|ERM|OMM": 4,
+    "Nucleus|Nucleolus|Lamina": 5
+  }
+}
