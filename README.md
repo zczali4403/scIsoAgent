@@ -78,6 +78,9 @@ Downstream analysis currently includes:
 - isoform classification
 - isoform diversity analysis
 - differential transcript usage
+- transcript localization prediction and gene-specific localization exploration
+- translation start/stop site prediction and gene-specific TIS/TTS visualization
+- Orthrus-based sequence embedding and isoform functional prediction
 - final cross-step summary and optional discussion-style interpretation
 
 ## How To Use It 🚀
@@ -178,6 +181,10 @@ Typical default subdirectory names:
 - `14_isoform_classification`
 - `14_isoform_diversity`
 - `14_dtu`
+- `15_transcript_localization`
+- `15_tis_tts_analysis`
+- `15_orthrus_model`
+- `16_summary`
 
 ## What You Should Prepare 📝
 

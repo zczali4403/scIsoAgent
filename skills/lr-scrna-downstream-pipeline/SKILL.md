@@ -32,7 +32,8 @@ This downstream pipeline currently includes the following planned modules:
 10. differential transcript usage
 11. transcript localization prediction and gene-specific transcript localization exploration
 12. translation start/stop site prediction and gene-specific TIS/TTS visualization
-13. final run summary and discussion-style interpretation
+13. Orthrus-based sequence embedding and isoform functional prediction
+14. final run summary and discussion-style interpretation
 
 This is a living workflow definition. The module list, order, and boundaries may be revised as the project matures.
 
@@ -90,7 +91,8 @@ Use this default order unless the user explicitly requests a different entry poi
 10. differential transcript usage
 11. transcript localization prediction and gene-specific transcript localization exploration
 12. translation start/stop site prediction and gene-specific TIS/TTS visualization
-13. final run summary and discussion-style interpretation
+13. Orthrus-based sequence embedding and isoform functional prediction
+14. final run summary and discussion-style interpretation
 
 This ordering is a default, not a rigid law. Some analyses may start from an intermediate stage if validated prior outputs already exist.
 
@@ -115,6 +117,7 @@ Use these fixed environment assignments throughout the downstream workflow:
 - `tis-tts-analysis`:
   - non-R preparation and TranslationAI prediction -> `TranslationAI`
   - downstream summary R phase -> `downstream`
+- `orthrus-model` -> `orthrus`
 - `profiling-isoform-diversity` -> `downstream`
 - `differential-transcript-usage` -> `downstream`
 - `summary` -> `downstream` when an R session or R-based helper is needed
@@ -327,7 +330,24 @@ Current dispatch rule for this stage:
 - if the task is TranslationAI-based translation start/stop site prediction or gene-specific TIS/TTS visualization, read:
   - `../tis-tts-analysis/SKILL.md`
 
-### 13. Final Summary
+### 13. Orthrus Model
+
+Use this module when the user wants sequence-based isoform functional inference with Orthrus embeddings and pretrained task heads.
+
+Typical goals:
+
+- prepare or resolve a transcript FASTA from `flair` or `isoquant`
+- extract one gene's transcripts from the full transcript FASTA
+- generate Orthrus embeddings for the selected transcripts
+- predict mean ribosome load, RNA half-life, translation efficiency, protein localization, RNA lifecycle, and RNA localization
+- export one aggregated summary table and one PDF report
+
+Current dispatch rule for this stage:
+
+- if the task is Orthrus-based sequence embedding, pretrained task-head prediction, or gene-specific sequence-based isoform functional inference, read:
+  - `../orthrus-model/SKILL.md`
+
+### 14. Final Summary
 
 Use this module when the user wants a final synthesis after analysis outputs have been generated.
 
@@ -379,6 +399,8 @@ Current downstream module skills already available:
   - `../transcript-localization/SKILL.md`
 - translation start/stop site prediction and TIS/TTS visualization:
   - `../tis-tts-analysis/SKILL.md`
+- Orthrus-based sequence embedding and isoform functional prediction:
+  - `../orthrus-model/SKILL.md`
 - isoform classification:
   - `../isoform-classification/SKILL.md`
 - isoform diversity profiling:

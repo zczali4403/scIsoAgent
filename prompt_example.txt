@@ -166,6 +166,23 @@ I want to predict transcript subcellular localization for isoforms from one gene
 I want to analyze translation start sites and transcription termination sites for isoforms from one gene and visualize their structural differences.
 
 
+### 6.3 Orthrus-Based Functional Prediction
+
+I want to use Orthrus to generate sequence embeddings for isoforms from one gene and predict their potential functions.
+
+Example:
+
+I want to predict mean ribosome load, RNA half-life, translation efficiency, protein localization, RNA lifecycle, and RNA localization for isoforms from one gene.
+
+Example:
+
+I want to compare Orthrus-based functional predictions across all isoforms from one gene and export the aggregated plot as a PDF.
+
+
+### 6.4 General Functional Interpretation
+
+I want to use sequence-based downstream analysis to help interpret the potential functions of my isoforms.
+
 
 ## 7. Continue From Existing Results
 

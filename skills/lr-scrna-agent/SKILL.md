@@ -78,7 +78,8 @@ Downstream analysis currently includes:
 10. differential transcript usage
 11. transcript localization prediction and gene-specific transcript localization exploration
 12. translation start/stop site prediction and gene-specific TIS/TTS visualization
-13. final summary of completed outputs
+13. Orthrus-based sequence embedding and isoform functional prediction
+14. final summary of completed outputs
 
 ## Mandatory Operating Rules
 
@@ -157,6 +158,7 @@ Route to the downstream entry skill if the user is asking for:
 - isoforms of interest exploration
 - transcript localization prediction or DeepLocRNA-based gene-specific transcript localization exploration
 - TranslationAI-based translation start/stop site prediction or gene-specific TIS/TTS visualization
+- Orthrus-based sequence embedding or gene-specific isoform functional prediction
 - isoform classification
 - isoform diversity profiling
 - differential transcript usage
