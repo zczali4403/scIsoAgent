@@ -99,7 +99,6 @@ In normal use:
 - make sure the required Docker image is available locally
 - confirm the proposed command before execution
 
-Note: the overall usefulness and reasoning quality of scIsoAgent depend in part on the model the user is running it with. In practice, more capable and more up-to-date models may produce better guidance, better planning, and better interpretation.
 
 Examples:
 
@@ -107,6 +106,11 @@ Examples:
 - "Start downstream analysis from this merged Seurat object"
 - "Run only IsoQuant on these aligned BAM files"
 - "Plot these genes on the merged object"
+
+## Notes
+
+- The overall usefulness and reasoning quality of scIsoAgent depend in part on the model the user is running it with. In practice, more capable and more up-to-date models may produce better guidance, better planning, and better interpretation.
+- The Orthrus-based sequence embedding and functional prediction task requires GPU support for practical execution. If you plan to use the Orthrus module, make sure the Docker runtime and host machine provide a usable GPU.
 
 ## Docker Environment
 
@@ -199,8 +203,6 @@ Typical default subdirectory names:
 ## What You Should Prepare 📝
 
 Depending on the task, you may need some or all of the following:
-
-Note: input files do not need to live under a repository-owned `data/` directory. Users can organize inputs wherever they want and pass the real paths at runtime.
 
 - raw FASTQ files
 - aligned BAM files
