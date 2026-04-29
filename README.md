@@ -99,6 +99,8 @@ In normal use:
 - make sure the required Docker image is available locally
 - confirm the proposed command before execution
 
+Note: the overall usefulness and reasoning quality of scIsoAgent depend in part on the model the user is running it with. In practice, more capable and more up-to-date models may produce better guidance, better planning, and better interpretation.
+
 Examples:
 
 - "Run the upstream ONT workflow from these FASTQ files"
@@ -158,6 +160,8 @@ Start `pi` from `/work` so the agent can discover the repository content from th
 After that, work inside the repository directory and keep `skills/` and `scripts/` as sibling directories.
 
 Use this image as the default execution environment for both upstream and downstream analysis. The required analysis software has been packaged into this image.
+
+Note: the Orthrus-based sequence embedding and functional prediction task requires GPU support for practical execution.
 
 ## How Outputs Are Organized 📁
 
