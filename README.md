@@ -15,6 +15,12 @@ It supports:
 
 This repository is a portable workflow bundle for long-read single-cell RNA-seq analysis.
 
+## Agent Framework
+
+<p align="center">
+  <img src="assets/framework.png" alt="scIsoAgent framework" width="1200">
+</p>
+
 ## What This Bundle Contains 📦
 
 The repository mainly includes:
@@ -88,6 +94,12 @@ Downstream analysis currently includes:
 - translation start/stop site prediction and gene-specific TIS/TTS visualization
 - Orthrus-based sequence embedding and isoform functional prediction
 - final cross-step summary and optional discussion-style interpretation
+
+## Workflow Overview
+
+<p align="center">
+  <img src="assets/workflow.png" alt="scIsoAgent workflow" width="1300">
+</p>
 
 ## How To Use It 🚀
 
