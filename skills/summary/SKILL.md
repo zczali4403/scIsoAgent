@@ -1,6 +1,6 @@
 ---
 name: summary
-description: Summarizes completed long-read single-cell RNA-seq analysis runs by reading step outputs such as plots, CSV/TSV tables, and key Seurat-derived artifacts, then producing a stepwise result summary plus optional discussion-style biological interpretation.
+description: Summarizes completed long-read single-cell RNA-seq analysis runs with emphasis on post-annotation isoform analysis and sequence-model outputs, then produces an evidence-grounded result summary plus optional discussion-style interpretation based mainly on those downstream findings.
 ---
 
 # Analysis Summary
@@ -8,6 +8,12 @@ description: Summarizes completed long-read single-cell RNA-seq analysis runs by
 Use this skill when the user wants a final summary after one or more upstream or downstream workflow steps have already finished.
 
 This skill is for reading existing outputs and synthesizing them into a concise report. It is not for rerunning analysis, changing thresholds, or inventing results that are not supported by the saved artifacts.
+
+By default, this skill should emphasize results generated after annotation, especially:
+
+- isoform-focused downstream analysis
+- sequence-based isoform functional inference
+- cross-step interpretation connecting annotation-aware isoform findings to sequence-model outputs
 
 Preferred report route for this skill:
 
@@ -27,7 +33,14 @@ Preferred report route for this skill:
 
 ## Scope
 
-This summary skill may synthesize outputs from any completed stage, including:
+This summary skill may read outputs from any completed stage, but the default synthesis priority is:
+
+1. annotation and post-annotation downstream outputs
+2. isoform-focused analysis outputs
+3. sequence-model outputs
+4. earlier technical stages only as supporting context
+
+Readable stages may include:
 
 1. upstream processing outputs
 2. resource setup
@@ -42,6 +55,9 @@ This summary skill may synthesize outputs from any completed stage, including:
 11. isoform classification
 12. isoform diversity profiling
 13. differential transcript usage
+14. transcript localization
+15. TIS/TTS analysis
+16. Orthrus-based sequence functional prediction
 
 ## Evidence Sources
 
@@ -103,6 +119,8 @@ When both figures and tables exist for the same step, use both:
 25. If online literature search is unavailable, state that limitation explicitly and restrict the report to artifact-grounded interpretation plus any user-provided literature.
 26. When the user requests a detailed summary, prioritize interpretive depth over brevity.
 27. If discussion-style interpretation is requested in deep mode, the discussion section should be detailed and substantial; by default, target at least 500 Chinese characters or an equivalently substantial English paragraph block unless the user asks for shorter text.
+28. By default, discussion-style writing should be based mainly on annotation-afterward results, especially isoform-focused analysis and sequence-model outputs, rather than on the full workflow.
+29. Earlier upstream or QC-related outputs may be mentioned briefly as workflow context, but they should not dominate the discussion unless the user explicitly asks for a full-run discussion.
 
 ## Entry Procedure
 
@@ -123,12 +141,17 @@ At the start of a summary request:
 6. Confirm interpretation boundary:
    - strict evidence-only interpretation
    - or evidence-grounded hypothesis generation
-7. If the user wants `deep` interpretation or discussion-style writing, state whether targeted online literature search will be used.
-8. Derive the summary output directory from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
-9. Scan the selected results root and identify which stage directories are present.
-10. Within each detected stage directory, identify readable summary artifacts such as CSV, TSV, TXT, PDF, and image files.
-11. For `deep` interpretation when network tools are available, identify 2-4 main biological themes from the detected outputs, then perform targeted literature search around those themes before writing the final biological interpretation.
-12. Report the detected stage list and the main files that will be used as evidence before writing the final summary.
+7. Confirm summary emphasis:
+   - annotation and later results only
+   - annotation plus selected earlier context
+   - or full workflow recap
+8. If the user does not specify otherwise, default to `annotation and later results only`.
+9. If the user wants `deep` interpretation or discussion-style writing, state whether targeted online literature search will be used.
+10. Derive the summary output directory from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
+11. Scan the selected results root and identify which stage directories are present.
+12. Within each detected stage directory, identify readable summary artifacts such as CSV, TSV, TXT, PDF, and image files.
+13. For `deep` interpretation when network tools are available, identify 2-4 main biological themes from the detected post-annotation outputs, then perform targeted literature search around those themes before writing the final biological interpretation.
+14. Report the detected stage list and the main files that will be used as evidence before writing the final summary.
 
 Only after the available evidence has been identified should this skill produce the final synthesis.
 
@@ -137,12 +160,14 @@ Only after the available evidence has been identified should this skill produce 
 Use this default order:
 
 1. detect completed stage directories under the selected results root
-2. collect readable evidence files for each stage
-3. summarize each stage separately
-4. extract cross-stage themes and major findings
-5. if requested, draft discussion-style interpretation grounded in the detected outputs
-6. if `deep` interpretation is requested and network tools are available, perform targeted literature search on the main biological themes
-7. assemble the final report in a structure suitable for Markdown delivery
+2. prioritize annotation and post-annotation stage directories
+3. collect readable evidence files for prioritized stages
+4. summarize prioritized stages separately
+5. add only brief supporting context from earlier stages when needed
+6. extract cross-stage themes and major findings, emphasizing isoform and sequence-model outputs
+7. if requested, draft discussion-style interpretation grounded mainly in the prioritized outputs
+8. if `deep` interpretation is requested and network tools are available, perform targeted literature search on the main biological themes
+9. assemble the final report in a structure suitable for Markdown delivery
 
 ## Stage Summary Rules
 
@@ -194,23 +219,110 @@ If isoform modules are present, summarize items such as:
 
 Prefer quoting categories, counts, rankings, and group comparisons from saved summary tables where available.
 
-### 5. Cross-Stage Synthesis
+### 5. Sequence-Model Summary
+
+If sequence-model modules are present, summarize items such as:
+
+- transcript localization patterns across isoforms
+- TIS/TTS differences across isoforms from the same gene
+- Orthrus-based predicted differences in transcript properties
+- convergence or disagreement between structural isoform findings and sequence-model outputs
+
+Prefer linking these findings back to annotated cell types, condition comparisons, or isoform classes when the evidence supports it.
+
+### 6. Cross-Stage Synthesis
 
 After stepwise summaries, produce a cross-stage synthesis covering:
 
 - the main technical outcome of the workflow
-- the main biological signals supported by the outputs
-- any repeated theme appearing across annotation, isoform classification, diversity, or DTU
+- the main biological signals supported by the post-annotation outputs
+- any repeated theme appearing across annotation, isoform classification, diversity, DTU, transcript localization, TIS/TTS, or Orthrus prediction
 - any important caveat caused by missing steps, weak outputs, or incomplete summaries
+
+## How To Read Post-Annotation Results
+
+When summarizing results after annotation, interpret them in the following order.
+
+### 1. Annotation As Biological Context
+
+Treat annotation as the biological background layer for later isoform interpretation.
+
+Focus on:
+
+- which cell types or states were identified
+- how confident or well-supported the labels appear from saved plots or marker summaries
+- which cell populations are most relevant for later isoform findings
+
+Do not stop at restating labels. Use annotation to define the biological context in which later isoform and sequence-model findings should be interpreted.
+
+### 2. Isoform-Focused Results As The Core Signal
+
+Treat post-annotation isoform analysis as the main evidence layer for biological interpretation.
+
+Focus on:
+
+- whether specific genes show multiple isoforms with distinct patterns
+- whether certain isoforms are enriched in particular cell types, clusters, or conditions
+- whether structural categories, coding status, diversity metrics, or DTU results converge on the same genes or cell populations
+
+When multiple isoform-focused modules point to the same gene, cell type, or condition contrast, treat that convergence as stronger support than any single isolated result.
+
+### 3. Sequence-Model Results As Functional Support
+
+Treat transcript localization, TIS/TTS, and Orthrus predictions as functional interpretation layers that may help explain isoform differences.
+
+Use them to ask:
+
+- do different isoforms from the same gene show different predicted localization patterns?
+- do they show differences in predicted start/stop usage or transcript structural endpoints?
+- do Orthrus predictions suggest differences in stability, translation-related properties, lifecycle, or localization?
+
+These outputs should usually be interpreted as functional plausibility support rather than definitive proof.
+
+### 4. Integrate The Three Layers
+
+For the strongest summary and discussion, connect:
+
+1. annotated biological context
+2. isoform-level structural or usage differences
+3. sequence-model-based functional interpretation
+
+Preferred logic pattern:
+
+- `Context`: which annotated cell type, state, or comparison is involved
+- `Isoform evidence`: what structural, abundance, diversity, or DTU difference is observed
+- `Functional interpretation`: what localization, TIS/TTS, or Orthrus result may help explain that difference
+
+### 5. What To Prioritize In Discussion
+
+By default, prioritize cases where:
+
+- one gene has multiple isoforms with clearly different downstream signatures
+- isoform-focused modules and sequence-model modules point in the same direction
+- the same biological theme appears across more than one output type
+
+Do not prioritize:
+
+- isolated technical outputs with no biological connection to later findings
+- single weak hints unsupported by other post-annotation evidence
+- sequence-model predictions that contradict all other evidence unless explicitly framed as uncertainty or a hypothesis
 
 ## Discussion-Style Writing
 
 If the user asks for discussion help, produce a separate section that may include:
 
-- the biological significance of the observed celltype or isoform patterns
-- possible mechanistic explanations suggested by the outputs
-- links between structural isoform differences and cell-state or condition differences
+- the biological significance of the observed annotated celltype or isoform patterns
+- possible mechanistic explanations suggested by post-annotation isoform and sequence-model outputs
+- links between structural isoform differences, predicted sequence-level properties, and cell-state or condition differences
 - caveats, limitations, and follow-up validation ideas
+
+By default, this section should be built mainly from:
+
+- annotation-aware isoform findings
+- isoform classification, diversity, and DTU outputs
+- transcript localization, TIS/TTS, and Orthrus outputs
+
+Do not default to a full-workflow discussion unless the user explicitly asks for it.
 
 This section must:
 
@@ -240,10 +352,10 @@ When the user wants a report-oriented output, prefer the following structure:
 1. title and run identifier
 2. analyzed results root and detected stages
 3. evidence inventory
-4. stepwise technical summary
-5. key biological findings
+4. annotation and post-annotation technical summary
+5. key isoform and sequence-model findings
 6. literature-supported biological interpretation
-7. discussion-style interpretation
+7. discussion-style interpretation focused on annotation-afterward results
 8. references
 9. caveats and missing outputs
 10. candidate follow-up or validation directions
