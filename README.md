@@ -179,6 +179,86 @@ Use this image as the default execution environment for both upstream and downst
 
 Note: the Orthrus-based sequence embedding and functional prediction task requires GPU support for practical execution.
 
+## If `pi` Login Fails Inside Docker
+
+In some server environments, starting `pi` inside the Docker container and logging into an external coding-agent account such as ChatGPT Codex may fail because of network restrictions or browser-login issues inside the container.
+
+If that happens, use the following workaround:
+
+1. Start the Docker container as usual.
+2. Exit the container and return to the host server shell.
+3. Install `Node.js` on the host server.
+4. Install `pi-coding-agent` on the host server.
+5. Start `pi` on the host server and complete `/login`.
+6. Copy the generated authentication file into the running Docker container.
+7. Restart `pi` inside the container. It should then already be authenticated.
+
+### 1. Install Node.js On The Host Server
+
+Run:
+
+```bash
+# Download and install nvm:
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
+
+# In lieu of restarting the shell:
+\. "$HOME/.nvm/nvm.sh"
+
+# Download and install Node.js:
+nvm install 24
+
+# Verify the Node.js version:
+node -v
+
+# Verify npm version:
+npm -v
+```
+
+Expected versions:
+
+- `node -v` should print `v24.15.0`
+- `npm -v` should print `11.12.1`
+
+### 2. Install `pi-coding-agent` On The Host Server
+
+Run:
+
+```bash
+npm install -g @earendil-works/pi-coding-agent
+```
+
+### 3. Log In On The Host Server
+
+Start `pi` on the host server and run:
+
+```text
+/login
+```
+
+After login succeeds, an auth file should be created at:
+
+```text
+~/.pi/agent/auth.json
+```
+
+### 4. Copy The Auth File Into The Docker Container
+
+If your running container is named `scisoagent`, copy the host auth file into the container:
+
+```bash
+docker cp ~/.pi/agent/auth.json scisoagent:/root/.pi/agent/auth.json
+```
+
+### 5. Start `pi` Inside Docker Again
+
+After the auth file has been copied into:
+
+```text
+/root/.pi/agent/auth.json
+```
+
+start `pi` inside the container again. In normal cases, it should already be logged in automatically.
+
 ## How Outputs Are Organized 📁
 
 scIsoAgent uses one top-level `results` directory for a workflow run. This is a runtime output directory and may be created when a run starts.
