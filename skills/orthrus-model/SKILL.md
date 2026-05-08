@@ -45,7 +45,7 @@ This skill depends on:
 - transcript FASTA preparation in the shell
 - one persistent `tmux` shell session
 - the local helper script:
-  - `../../scripts/orthrus_model_helpers.py`
+  - `/work/.pi/scripts/orthrus_model_helpers.py`
 
 Prefer using the helper script instead of repeatedly rewriting FASTA extraction, embedding, prediction, and aggregation code inline.
 
@@ -124,7 +124,7 @@ After the full transcript FASTA exists:
 Preferred command pattern:
 
 ```bash
-conda run -n orthrus python ../../scripts/orthrus_model_helpers.py extract-gene-fasta \
+conda run -n orthrus python /work/.pi/scripts/orthrus_model_helpers.py extract-gene-fasta \
   --mapping-csv isoform_gene_symbol_dict.csv \
   --input-fasta transcripts.fa \
   --gene-query GENE_NAME \
@@ -160,7 +160,7 @@ PY
 Preferred command pattern:
 
 ```bash
-conda run -n orthrus python ../../scripts/orthrus_model_helpers.py infer-embeddings \
+conda run -n orthrus python /work/.pi/scripts/orthrus_model_helpers.py infer-embeddings \
   --fasta gene_transcripts.fa \
   --mrna-bench-data-path /path/to/mrna_bench_data \
   --output gene_embeddings.npz \
@@ -189,14 +189,14 @@ After embeddings exist:
 Preferred manifest-generation pattern:
 
 ```bash
-conda run -n orthrus python ../../scripts/orthrus_model_helpers.py build-default-manifest \
+conda run -n orthrus python /work/.pi/scripts/orthrus_model_helpers.py build-default-manifest \
   --output orthrus_task_manifest.csv
 ```
 
 Preferred command pattern:
 
 ```bash
-conda run -n orthrus python ../../scripts/orthrus_model_helpers.py predict-tasks \
+conda run -n orthrus python /work/.pi/scripts/orthrus_model_helpers.py predict-tasks \
   --embedding-npz gene_embeddings.npz \
   --task-manifest orthrus_task_manifest.csv \
   --output-dir task_predictions/
@@ -234,7 +234,7 @@ After all six prediction CSVs exist:
 Preferred command pattern:
 
 ```bash
-conda run -n orthrus python ../../scripts/orthrus_model_helpers.py aggregate-results \
+conda run -n orthrus python /work/.pi/scripts/orthrus_model_helpers.py aggregate-results \
   --result-dir task_predictions/ \
   --output-table aggregated_predictions.csv \
   --output-category-map aggregated_category_code_map.json \

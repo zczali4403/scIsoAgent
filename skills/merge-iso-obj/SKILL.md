@@ -20,7 +20,7 @@ This skill is for isoform-level sample merging and optional batch correction onl
 
 Execution source of truth:
 
-- `../../scripts/merge_remove_batch.r`
+- `/work/.pi/scripts/merge_remove_batch.r`
 
 Prefer calling that script directly.
 
@@ -51,7 +51,7 @@ This skill currently includes:
 3. First resolve the per-sample isoform Seurat-object RDS inputs.
 4. The per-sample RDS paths may be provided by the user directly, or auto-detected from prior `generate-iso-obj` outputs and then confirmed by the user.
 5. Do not silently assume auto-detected inputs without showing the resolved sample-to-file mapping and asking the user to confirm it.
-6. Prefer calling `../../scripts/merge_remove_batch.r` with an explicit `--stage`.
+6. Prefer calling `/work/.pi/scripts/merge_remove_batch.r` with an explicit `--stage`.
 7. When using this script for isoform-level merging, pass `--object_label=isoform`.
 8. Before the preview UMAP stage, first generate the PCA elbow plot and ask the user to confirm `npc`.
 9. After the preview UMAP is generated, ask the user whether batch correction is needed. Do not run Harmony by default.
@@ -176,7 +176,7 @@ Preferred execution pattern uses staged commands.
 PCA elbow plot:
 
 ```bash
-conda run -n downstream Rscript ../../scripts/merge_remove_batch.r \
+conda run -n downstream Rscript /work/.pi/scripts/merge_remove_batch.r \
   --stage=elbow \
   --input_rds_files=/abs/path/to/sample1_isoform_subset.rds,/abs/path/to/sample2_isoform_subset.rds \
   --output_dir=/abs/path/to/merge_iso_obj \
@@ -188,7 +188,7 @@ conda run -n downstream Rscript ../../scripts/merge_remove_batch.r \
 Preview UMAP before batch correction:
 
 ```bash
-conda run -n downstream Rscript ../../scripts/merge_remove_batch.r \
+conda run -n downstream Rscript /work/.pi/scripts/merge_remove_batch.r \
   --stage=preview \
   --input_rds_files=/abs/path/to/sample1_isoform_subset.rds,/abs/path/to/sample2_isoform_subset.rds \
   --output_dir=/abs/path/to/merge_iso_obj \
@@ -202,7 +202,7 @@ conda run -n downstream Rscript ../../scripts/merge_remove_batch.r \
 Harmony elbow plot:
 
 ```bash
-conda run -n downstream Rscript ../../scripts/merge_remove_batch.r \
+conda run -n downstream Rscript /work/.pi/scripts/merge_remove_batch.r \
   --stage=harmony-elbow \
   --input_rds_files=/abs/path/to/sample1_isoform_subset.rds,/abs/path/to/sample2_isoform_subset.rds \
   --output_dir=/abs/path/to/merge_iso_obj \
@@ -216,7 +216,7 @@ conda run -n downstream Rscript ../../scripts/merge_remove_batch.r \
 Finalize without batch correction:
 
 ```bash
-conda run -n downstream Rscript ../../scripts/merge_remove_batch.r \
+conda run -n downstream Rscript /work/.pi/scripts/merge_remove_batch.r \
   --stage=finalize \
   --input_rds_files=/abs/path/to/sample1_isoform_subset.rds,/abs/path/to/sample2_isoform_subset.rds \
   --output_dir=/abs/path/to/merge_iso_obj \
@@ -231,7 +231,7 @@ conda run -n downstream Rscript ../../scripts/merge_remove_batch.r \
 Finalize with Harmony:
 
 ```bash
-conda run -n downstream Rscript ../../scripts/merge_remove_batch.r \
+conda run -n downstream Rscript /work/.pi/scripts/merge_remove_batch.r \
   --stage=finalize \
   --input_rds_files=/abs/path/to/sample1_isoform_subset.rds,/abs/path/to/sample2_isoform_subset.rds \
   --output_dir=/abs/path/to/merge_iso_obj \

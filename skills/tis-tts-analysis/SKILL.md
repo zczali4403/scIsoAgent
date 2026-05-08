@@ -44,12 +44,12 @@ This skill depends on:
 
 Primary local helper script:
 
-- `../../scripts/tis_tts_analysis_helpers.r`
+- `/work/.pi/scripts/tis_tts_analysis_helpers.r`
 
 At the start of the R analysis session, prefer:
 
 ```r
-source("../../scripts/tis_tts_analysis_helpers.r")
+source("/work/.pi/scripts/tis_tts_analysis_helpers.r")
 ```
 
 Then call helper functions from that script instead of repeatedly rewriting the same TIS/TTS parsing and plotting code in the terminal.
@@ -80,7 +80,7 @@ At the start of a TIS/TTS analysis request:
 8. Run any FASTA-preparation step first if needed.
 9. Then run TranslationAI prediction.
 10. After prediction finishes, start one persistent `tmux` R session in the `downstream` environment.
-11. In that session, `source("../../scripts/tis_tts_analysis_helpers.r")`.
+11. In that session, `source("/work/.pi/scripts/tis_tts_analysis_helpers.r")`.
 12. Keep the same R session alive while the user iteratively requests additional genes.
 
 ## Workflow
@@ -138,7 +138,7 @@ Rules:
 After the TranslationAI ORF output exists:
 
 - start one persistent `tmux` R session in the `downstream` environment
-- `source("../../scripts/tis_tts_analysis_helpers.r")`
+- `source("/work/.pi/scripts/tis_tts_analysis_helpers.r")`
 - read the TranslationAI ORF output once
 - read the `isoform_gene_symbol_dict.csv` mapping table once
 
@@ -186,7 +186,7 @@ After one gene plot is produced:
 4. If the upstream route was `flair`, do not regenerate a transcript FASTA if the user already has a correct one.
 5. If the upstream route was `isoquant`, use `gffread` to generate the transcript FASTA before running TranslationAI.
 6. Do not assume paths for the transcript FASTA, prediction output, or mapping table; confirm them.
-7. At the beginning of the R phase, first `source("../../scripts/tis_tts_analysis_helpers.r")`.
+7. At the beginning of the R phase, first `source("/work/.pi/scripts/tis_tts_analysis_helpers.r")`.
 8. Prefer helper functions from `tis_tts_analysis_helpers.r` instead of rewriting the same parsing and plotting code inline.
 9. Do not reload the TranslationAI output or the mapping table for every gene unless the user changes inputs.
 10. Do not assume one fixed gene; ask the user.

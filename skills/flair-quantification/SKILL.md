@@ -38,10 +38,10 @@ Primary skill file:
 14. Use `04_flair` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
 15. When showing a `flair combine` command for confirmation, explicitly check that `-c` or `--convert_gtf` is present.
 16. After `flair quantify`, run the project script:
-   - `../../scripts/recover_sc_matrix.py`
+   - `/work/.pi/scripts/recover_sc_matrix.py`
 17. Before matrix recovery, verify read names follow:
    - `barcode_umi#read_uuid_strand`
-18. In multi-sample runs, run `../../scripts/recover_sc_matrix.py` only on the per-sample `isoform.read.map.txt` files produced by `flair quantify`.
+18. In multi-sample runs, run `/work/.pi/scripts/recover_sc_matrix.py` only on the per-sample `isoform.read.map.txt` files produced by `flair quantify`.
 19. Do not use the multi-sample `combine` result as the input for `recover_sc_matrix.py`.
 
 ## Output Handling

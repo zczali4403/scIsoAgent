@@ -48,12 +48,12 @@ Likely libraries needed in the session include:
 
 Primary local helper script:
 
-- `../../scripts/exploring_isoforms_helpers.r`
+- `/work/.pi/scripts/exploring_isoforms_helpers.r`
 
 At the start of the exploration session, prefer:
 
 ```r
-source("../../scripts/exploring_isoforms_helpers.r")
+source("/work/.pi/scripts/exploring_isoforms_helpers.r")
 ```
 
 Then call helper functions from that script instead of repeatedly rewriting the same exploration code in the terminal.
@@ -65,7 +65,7 @@ At the start of an isoform exploration request:
 1. Use the `downstream` conda environment for the whole exploration workflow.
 2. Start one persistent `tmux` R session and keep it open for the whole workflow.
 3. Resolve the Seurat-object RDS path to explore.
-4. In that session, `source("../../scripts/exploring_isoforms_helpers.r")`.
+4. In that session, `source("/work/.pi/scripts/exploring_isoforms_helpers.r")`.
 5. Read the Seurat object once in that session.
 6. Confirm which metadata column should be used for grouping, for example:
    - `celltype`
@@ -85,7 +85,7 @@ At the start of an isoform exploration request:
 
 Within the persistent R session:
 
-- `source("../../scripts/exploring_isoforms_helpers.r")`
+- `source("/work/.pi/scripts/exploring_isoforms_helpers.r")`
 - read the Seurat RDS
 - ensure the grouping metadata column is available
 - if needed, copy current identities into a metadata column such as `celltype`
@@ -205,7 +205,7 @@ Prefer using:
 ## Mandatory Rules
 
 1. Keep the whole workflow in one persistent `tmux` R session until the user says to exit.
-2. At the beginning of the session, first `source("../../scripts/exploring_isoforms_helpers.r")`.
+2. At the beginning of the session, first `source("/work/.pi/scripts/exploring_isoforms_helpers.r")`.
 3. Prefer calling helper functions from `exploring_isoforms_helpers.r` instead of rewriting the same blocks manually in the terminal.
 4. Do not reload the Seurat object for every subtask.
 5. Do not assume the grouping column; confirm it.
