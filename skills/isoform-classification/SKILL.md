@@ -75,7 +75,7 @@ The source pattern is:
 
 ```bash
 conda run -n sqanti3 bash -lc "awk '$7 == \"+\" || $7 == \"-\"' isoform_annotated.gtf > remove_unknownstrand.gtf"
-conda run -n sqanti3 SQANTI3-5.2.1/sqanti3_qc.py remove_unknownstrand.gtf <reference_gtf> <genome_fasta>
+conda run -n sqanti3 /opt/SQANTI3/sqanti3_qc.py remove_unknownstrand.gtf <reference_gtf> <genome_fasta>
 ```
 
 Requirements:
