@@ -7,6 +7,8 @@ description: Runs SQANTI3 isoform classification from the terminal and then summ
 
 Use this skill when the user wants downstream isoform classification after a Seurat object with an isoform assay is already available and a transcriptome GTF can be passed to SQANTI3.
 
+For downstream summarization, prefer using the isoform↔gene mapping table generated in the earlier resource-setup step (for example `/work/output/05_resource_setup/isoform_gene_symbol_dict.csv`) when available.
+
 This skill covers SQANTI3-based structural classification plus downstream celltype-level summary analysis. It does not cover QC, cell type annotation itself, trajectory analysis, or DTU.
 
 ## Mandatory Session Rule
@@ -59,11 +61,12 @@ At the start of an isoform-classification request:
 7. Confirm which metadata column should be used for grouping, for example:
    - `celltype`
    - `sctype_db`
-8. Derive the output directory from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
-9. Use `14_isoform_classification` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
-10. Run the SQANTI3 preprocessing and classification commands first.
-11. Then start one persistent `tmux` R session in the `downstream` environment and keep it open for all remaining analysis.
-12. In that session, `source("/work/.pi/scripts/isoform_classification_helpers.r")`.
+8. Ask for the isoform↔gene mapping CSV path (prefer the resource-setup output, e.g. `/work/output/05_resource_setup/isoform_gene_symbol_dict.csv`) and confirm whether to use it for downstream annotation harmonization.
+9. Derive the output directory from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
+10. Use `14_isoform_classification` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
+11. Run the SQANTI3 preprocessing and classification commands first.
+12. Then start one persistent `tmux` R session in the `downstream` environment and keep it open for all remaining analysis.
+13. In that session, `source("/work/.pi/scripts/isoform_classification_helpers.r")`.
 
 ## Workflow
 
@@ -75,11 +78,7 @@ The source pattern is:
 
 ```bash
 conda run -n sqanti3 bash -lc "awk '$7 == \"+\" || $7 == \"-\"' isoform_annotated.gtf > remove_unknownstrand.gtf"
-conda run -n sqanti3 env LD_LIBRARY_PATH=/opt/conda/lib /opt/SQANTI3/sqanti3_qc.py \
-  --isoforms remove_unknownstrand.gtf \
-  --refGTF <reference_gtf> \
-  --refFasta <genome_fasta> \
-  -d <output_dir>
+conda run -n sqanti3 /opt/SQANTI3/sqanti3_qc.py remove_unknownstrand.gtf <reference_gtf> <genome_fasta>
 ```
 
 Requirements:
@@ -98,8 +97,10 @@ Inside the persistent `tmux` R session:
 
 - read the SQANTI `classification.txt`
 - read the Seurat-object RDS
+- read the optional isoform↔gene mapping CSV from resource-setup when provided
 - aggregate isoform expression across cell types from the isoform assay
 - split transcript and gene identifiers from the isoform feature names
+- if gene identifiers are missing or inconsistent after splitting, use the mapping CSV (and then SQANTI fields if needed) to fill/harmonize gene annotation before summaries
 
 Prefer using:
 
@@ -177,9 +178,10 @@ Prefer using:
 2. At the beginning of the R session, first `source("/work/.pi/scripts/isoform_classification_helpers.r")`.
 3. Prefer calling helper functions from `isoform_classification_helpers.r` instead of rewriting the same blocks manually in the terminal.
 4. Do not assume the Seurat grouping column; confirm it.
-5. Do not assume the thresholds for celltype-specific isoforms; ask the user.
-6. Before any substantial command or code block is executed, show the exact intended command or code and wait for confirmation.
-7. Do not claim classification is complete until the SQANTI output and the expected summary plots exist and are non-empty.
+5. Do not assume the isoform↔gene mapping CSV path; ask the user (prefer the resource-setup output path when available).
+6. Do not assume the thresholds for celltype-specific isoforms; ask the user.
+7. Before any substantial command or code block is executed, show the exact intended command or code and wait for confirmation.
+8. Do not claim classification is complete until the SQANTI output and the expected summary plots exist and are non-empty.
 
 ## Expected Inputs
 
@@ -190,6 +192,7 @@ Typical inputs for this skill may include:
 - reference genome FASTA
 - SQANTI `classification.txt`
 - merged Seurat-object RDS with isoform assay
+- isoform↔gene mapping CSV from resource-setup (recommended), e.g. `isoform_gene_symbol_dict.csv`
 - grouping metadata column
 - output directory
 
