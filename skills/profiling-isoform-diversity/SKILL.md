@@ -46,16 +46,17 @@ At the start of an isoform-diversity request:
 
 1. Use the `downstream` conda environment for the whole diversity workflow.
 2. Start one persistent `tmux` R session and keep it open for the whole workflow.
-3. Resolve the Seurat-object RDS path to analyze.
-4. In that session, first `source("/work/.pi/scripts/find_diversity.R")`, then `source("/work/.pi/scripts/profiling_isoform_diversity_helpers.r")`.
-5. Read the Seurat object once in that session.
-6. Confirm which metadata column should be used for celltype selection, for example:
+3. If the session is entered with `conda activate`, first run `source "$(conda info --base)/etc/profile.d/conda.sh"` inside `tmux`, then `conda activate downstream`, then start `R`.
+4. Resolve the Seurat-object RDS path to analyze.
+5. In that session, first `source("/work/.pi/scripts/find_diversity.R")`, then `source("/work/.pi/scripts/profiling_isoform_diversity_helpers.r")`.
+6. Read the Seurat object once in that session.
+7. Confirm which metadata column should be used for celltype selection, for example:
    - `celltype`
    - `sctype_db`
-7. Ask the user which cell type should be analyzed first.
-8. Derive the output directory from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
-9. Use `14_isoform_diversity` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
-10. Resolve gene-symbol mapping configuration for entropy row labels:
+8. Ask the user which cell type should be analyzed first.
+9. Derive the output directory from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
+10. Use `14_isoform_diversity` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
+11. Resolve gene-symbol mapping configuration for entropy row labels:
    - do not hardcode a fixed absolute dictionary path in commands
    - prefer user-provided dictionary path if given
    - otherwise auto-discover under `<output_root>/resource_setup/*isoform_gene_symbol_dict.csv`

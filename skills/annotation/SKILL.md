@@ -67,15 +67,16 @@ At the start of an annotation request:
 
 1. Use the `downstream` conda environment for the whole annotation workflow.
 2. Start one persistent `tmux` R session and keep it open for the whole annotation workflow.
-3. Resolve the merged Seurat RDS path to annotate.
-4. In that session, `source("/work/.pi/scripts/annotation_helpers.r")`.
-5. Read the Seurat object once in that session.
-6. Derive the output directory for annotation artifacts from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
-7. Use `13_annotation` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
-8. Confirm which clustering metadata column should be used for annotation, for example:
+3. If the session is entered with `conda activate`, first run `source "$(conda info --base)/etc/profile.d/conda.sh"` inside `tmux`, then `conda activate downstream`, then start `R`.
+4. Resolve the merged Seurat RDS path to annotate.
+5. In that session, `source("/work/.pi/scripts/annotation_helpers.r")`.
+6. Read the Seurat object once in that session.
+7. Derive the output directory for annotation artifacts from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
+8. Use `13_annotation` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
+9. Confirm which clustering metadata column should be used for annotation, for example:
    - `RNA_snn_res.0.9`
-9. First draw the cluster UMAP and review it with the user.
-10. Then compute cluster-level marker genes and marker isoforms before asking the user whether they want automatic annotation or manual annotation.
+10. First draw the cluster UMAP and review it with the user.
+11. Then compute cluster-level marker genes and marker isoforms before asking the user whether they want automatic annotation or manual annotation.
 
 ## Workflow
 

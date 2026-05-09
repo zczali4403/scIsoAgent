@@ -64,16 +64,17 @@ At the start of an isoform exploration request:
 
 1. Use the `downstream` conda environment for the whole exploration workflow.
 2. Start one persistent `tmux` R session and keep it open for the whole workflow.
-3. Resolve the Seurat-object RDS path to explore.
-4. In that session, `source("/work/.pi/scripts/exploring_isoforms_helpers.r")`.
-5. Read the Seurat object once in that session.
-6. Confirm which metadata column should be used for grouping, for example:
+3. If the session is entered with `conda activate`, first run `source "$(conda info --base)/etc/profile.d/conda.sh"` inside `tmux`, then `conda activate downstream`, then start `R`.
+4. Resolve the Seurat-object RDS path to explore.
+5. In that session, `source("/work/.pi/scripts/exploring_isoforms_helpers.r")`.
+6. Read the Seurat object once in that session.
+7. Confirm which metadata column should be used for grouping, for example:
    - `celltype`
    - `sctype_db`
-7. Derive the output directory for exploration artifacts from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
-8. Use `14_explore_isoforms` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
-9. Resolve the transcript-to-gene mapping file created by `resource-setup` before any gene-level isoform counting or ranking.
-10. Ask which part of the exploration workflow the user wants first:
+8. Derive the output directory for exploration artifacts from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
+9. Use `14_explore_isoforms` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
+10. Resolve the transcript-to-gene mapping file created by `resource-setup` before any gene-level isoform counting or ranking.
+11. Ask which part of the exploration workflow the user wants first:
    - global isoform-count overview
    - top genes by isoform complexity
    - one gene's isoform exploration

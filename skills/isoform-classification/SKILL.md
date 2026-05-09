@@ -66,7 +66,8 @@ At the start of an isoform-classification request:
 10. Use `14_isoform_classification` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
 11. Run the SQANTI3 preprocessing and classification commands first.
 12. Then start one persistent `tmux` R session in the `downstream` environment and keep it open for all remaining analysis.
-13. In that session, `source("/work/.pi/scripts/isoform_classification_helpers.r")`.
+13. If the session is entered with `conda activate`, first run `source "$(conda info --base)/etc/profile.d/conda.sh"` inside `tmux`, then `conda activate downstream`, then start `R`.
+14. In that session, `source("/work/.pi/scripts/isoform_classification_helpers.r")`.
 
 ## Workflow
 
@@ -78,7 +79,11 @@ The source pattern is:
 
 ```bash
 conda run -n sqanti3 bash -lc "awk '$7 == \"+\" || $7 == \"-\"' isoform_annotated.gtf > remove_unknownstrand.gtf"
-conda run -n sqanti3 /opt/SQANTI3/sqanti3_qc.py remove_unknownstrand.gtf <reference_gtf> <genome_fasta>
+conda run -n sqanti3 env LD_LIBRARY_PATH=/opt/conda/lib /opt/SQANTI3/sqanti3_qc.py \
+  --isoforms remove_unknownstrand.gtf \
+  --refGTF <reference_gtf> \
+  --refFasta <genome_fasta> \
+  -d <output_dir>
 ```
 
 Requirements:

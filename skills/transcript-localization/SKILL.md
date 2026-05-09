@@ -84,8 +84,9 @@ At the start of a transcript-localization request:
 8. Run any FASTA-preparation step first if needed.
 9. Then run DeepLocRNA prediction.
 10. After prediction finishes, start one persistent `tmux` R session in the `downstream` environment.
-11. In that session, `source("/work/.pi/scripts/transcript_localization_helpers.r")`.
-12. Keep the same R session alive while the user iteratively requests additional genes.
+11. If the session is entered with `conda activate`, first run `source "$(conda info --base)/etc/profile.d/conda.sh"` inside `tmux`, then `conda activate downstream`, then start `R`.
+12. In that session, `source("/work/.pi/scripts/transcript_localization_helpers.r")`.
+13. Keep the same R session alive while the user iteratively requests additional genes.
 
 ## Workflow
 

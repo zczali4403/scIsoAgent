@@ -77,9 +77,10 @@ At the start of an Orthrus-model request:
    - label maps: `/work/scIsoAgent/orthrus_label_maps`
 8. Confirm the `mrna_bench_data` directory path used by Orthrus embedding inference.
 9. Start or reuse one persistent `tmux` shell session in the `orthrus` environment.
-10. Run any FASTA-preparation step first if needed.
-11. Ask the user which gene should be analyzed first.
-12. Keep the same `tmux` session alive while the user iteratively requests additional genes.
+10. If the session is entered with `conda activate`, first run `source "$(conda info --base)/etc/profile.d/conda.sh"` inside `tmux`, then `conda activate orthrus`.
+11. Run any FASTA-preparation step first if needed.
+12. Ask the user which gene should be analyzed first.
+13. Keep the same `tmux` session alive while the user iteratively requests additional genes.
 
 ## Workflow
 

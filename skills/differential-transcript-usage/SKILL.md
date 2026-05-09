@@ -57,26 +57,27 @@ At the start of a DTU request:
 
 1. Use the `downstream` conda environment for the whole DTU workflow.
 2. Start one persistent `tmux` R session and keep it open for the whole workflow.
-3. Resolve the merged Seurat-object RDS path that contains the isoform assay.
-4. Confirm which quantification tool produced the isoform models:
+3. If the session is entered with `conda activate`, first run `source "$(conda info --base)/etc/profile.d/conda.sh"` inside `tmux`, then `conda activate downstream`, then start `R`.
+4. Resolve the merged Seurat-object RDS path that contains the isoform assay.
+5. Confirm which quantification tool produced the isoform models:
    - `flair`
    - `isoquant`
    - or another route
-5. Confirm the transcript FASTA path:
+6. Confirm the transcript FASTA path:
    - for `flair`, ask the user to confirm the existing FLAIR transcript FASTA path
    - for `isoquant`, ask the user to confirm:
      - the IsoQuant transcript annotation GTF path
      - the reference genome FASTA path
      - the output transcript FASTA path to generate with `gffread`
    - for other tools, ask the user to provide a transcript FASTA that contains one sequence per transcript
-6. Confirm the transcript annotation GTF path from the upstream quantification output.
-7. Derive the output directory for DTU analysis from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
-8. Use `14_dtu` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
-9. Confirm which metadata fields encode:
+7. Confirm the transcript annotation GTF path from the upstream quantification output.
+8. Derive the output directory for DTU analysis from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
+9. Use `14_dtu` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
+10. Confirm which metadata fields encode:
    - sample identity, typically `sample_id`
    - biological condition
    - cell type, typically `celltype`
-10. Confirm the exact `resource-setup` output mapping-table path that contains `gene_id` and `gene_symbol`.
+11. Confirm the exact `resource-setup` output mapping-table path that contains `gene_id` and `gene_symbol`.
 
 ## Workflow
 
