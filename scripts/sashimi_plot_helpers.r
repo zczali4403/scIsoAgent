@@ -179,7 +179,10 @@ prepare_subset_bam_manifest <- function(barcode_manifest,
   barcode_manifest %>%
     left_join(sample_bam_map, by = "sample_id") %>%
     mutate(
-      subset_bam = file.path(subset_bam_dir, paste0(sample_id, "__", group_id, ".bam"))
+      subset_bam = file.path(subset_bam_dir, paste0(sample_id, "__", group_id, ".bam")),
+      sample_name = paste0(sample_id, "__", group_id),
+      bam_path = subset_bam,
+      group_name = group_id
     )
 }
 

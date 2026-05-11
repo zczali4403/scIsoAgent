@@ -40,7 +40,7 @@ then activate the needed environment for that phase.
 
 This skill may use helper scripts written under:
 
-- `/work/.pi/scripts`
+- `/work/scIsoAgent/.pi/scripts`
 
 If repeated helper logic is needed, place helper scripts there instead of keeping large ad hoc code blocks only in the terminal.
 
@@ -50,7 +50,7 @@ Primary plotting entrypoint:
 
 Primary local helper script:
 
-- `/work/.pi/scripts/sashimi_plot_helpers.r`
+- `/work/scIsoAgent/.pi/scripts/sashimi_plot_helpers.r`
 
 ## Use This Skill When
 
@@ -72,7 +72,7 @@ At the start of a sashimi-plot request:
 6. In the `downstream` phase, prefer:
 
 ```r
-source("/work/.pi/scripts/sashimi_plot_helpers.r")
+source("/work/scIsoAgent/.pi/scripts/sashimi_plot_helpers.r")
 ```
 
 7. Read the Seurat object once and inspect available metadata columns.
@@ -96,14 +96,14 @@ source("/work/.pi/scripts/sashimi_plot_helpers.r")
 14. Ask the user to confirm which BAM tag stores the barcode:
    - default `CB`
    - or another tag explicitly provided by the user
-15. Switch to the `ggsashimi` environment in `tmux` for BAM subsetting and plotting.
-16. Build:
+15. Ask the user to confirm the transcriptome GTF path produced after transcript identification and quantification.
+16. Ask the user which gene to plot first.
+17. While still in the `downstream` phase, resolve the gene's genomic region from the GTF and confirm it before plotting.
+18. Switch to the `ggsashimi` environment in `tmux` for BAM subsetting and plotting.
+19. Build:
    - one or more subset BAM files
    - `input_bams.tsv`
    - `palette.txt`
-17. Ask the user to confirm the transcriptome GTF path produced after transcript identification and quantification.
-18. Ask the user which gene to plot first.
-19. Resolve the gene's genomic region from the GTF and confirm it before plotting.
 20. Show the exact final `ggsashimi` command and wait for confirmation.
 21. After one gene plot is finished, ask whether the user wants to draw another gene and keep the same `tmux` workflow alive if yes.
 
@@ -113,7 +113,7 @@ source("/work/.pi/scripts/sashimi_plot_helpers.r")
 
 In the `downstream` environment:
 
-- `source("/work/.pi/scripts/sashimi_plot_helpers.r")`
+- `source("/work/scIsoAgent/.pi/scripts/sashimi_plot_helpers.r")`
 - read the annotated Seurat-object RDS, preferably with `read_sashimi_seurat_object()`
 - list metadata columns with `list_metadata_columns()`
 - summarize likely values for grouping columns with `summarize_metadata_column()`
@@ -220,7 +220,7 @@ Prefer using:
 
 Ask the user which gene to plot.
 
-Then:
+In the `downstream` environment:
 
 - search the confirmed transcriptome GTF for that gene
 - resolve the genomic interval needed for `-c`
