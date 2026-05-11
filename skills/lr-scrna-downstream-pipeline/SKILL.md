@@ -27,13 +27,14 @@ This downstream pipeline currently includes the following planned modules:
 5. isoform expression matrix integration
 6. cell type identification
 7. isoforms of interest exploration
-8. isoform classification
-9. isoform diversity profiling
-10. differential transcript usage
-11. transcript localization prediction and gene-specific transcript localization exploration
-12. translation start/stop site prediction and gene-specific TIS/TTS visualization
-13. Orthrus-based sequence embedding and isoform functional prediction
-14. final run summary and discussion-style interpretation
+8. sashimi plotting
+9. isoform classification
+10. isoform diversity profiling
+11. differential transcript usage
+12. transcript localization prediction and gene-specific transcript localization exploration
+13. translation start/stop site prediction and gene-specific TIS/TTS visualization
+14. Orthrus-based sequence embedding and isoform functional prediction
+15. final run summary and discussion-style interpretation
 
 This is a living workflow definition. The module list, order, and boundaries may be revised as the project matures.
 
@@ -86,13 +87,14 @@ Use this default order unless the user explicitly requests a different entry poi
 5. isoform expression matrix integration
 6. cell type identification
 7. isoforms of interest exploration
-8. isoform classification
-9. isoform diversity profiling
-10. differential transcript usage
-11. transcript localization prediction and gene-specific transcript localization exploration
-12. translation start/stop site prediction and gene-specific TIS/TTS visualization
-13. Orthrus-based sequence embedding and isoform functional prediction
-14. final run summary and discussion-style interpretation
+8. sashimi plotting
+9. isoform classification
+10. isoform diversity profiling
+11. differential transcript usage
+12. transcript localization prediction and gene-specific transcript localization exploration
+13. translation start/stop site prediction and gene-specific TIS/TTS visualization
+14. Orthrus-based sequence embedding and isoform functional prediction
+15. final run summary and discussion-style interpretation
 
 This ordering is a default, not a rigid law. Some analyses may start from an intermediate stage if validated prior outputs already exist.
 
@@ -109,6 +111,9 @@ Use these fixed environment assignments throughout the downstream workflow:
 - `merge-iso-obj` -> `downstream`
 - `add-iso-to-gene` -> `downstream`
 - `draw-features` -> `downstream`
+- `sashimi-plot`:
+  - Seurat metadata inspection and barcode extraction -> `downstream`
+  - BAM subsetting and plotting -> `ggsashimi`
 - `annotation` -> `downstream`
 - `exploring-isoforms-of-interest` -> `downstream`
 - `transcript-localization`:
@@ -255,7 +260,23 @@ Current dispatch rule for this stage:
 - if the task is focused exploratory analysis of selected genes or isoforms, including isoform-count summaries, top isoform-rich genes, selected-gene isoform inspection, or IsoVis export preparation, read:
   - `../exploring-isoforms-of-interest/SKILL.md`
 
-### 8. Isoform Classification
+### 8. Sashimi Plotting
+
+Use this module when the user wants gene-specific sashimi plots comparing splice-junction usage across selected groups after downstream annotation.
+
+Typical goals:
+
+- compare splice-junction usage across cell types
+- compare splice-junction usage across conditions
+- compare splice-junction usage across conditions within one selected cell type
+- visualize one gene at a time using per-sample BAM files plus a transcriptome GTF
+
+Current dispatch rule for this stage:
+
+- if the task is drawing gene-specific sashimi plots across cell types, conditions, or condition-restricted cell types using per-sample BAM files plus a transcriptome GTF, read:
+  - `../sashimi-plot/SKILL.md`
+
+### 9. Isoform Classification
 
 Use this module to classify isoforms into biologically or structurally meaningful categories.
 
@@ -272,7 +293,7 @@ Current dispatch rule for this stage:
 - if the task is SQANTI-based isoform structural classification plus downstream summary of structural categories, subcategories, coding status, or celltype-specific isoforms, read:
   - `../isoform-classification/SKILL.md`
 
-### 9. Profiling Isoform Diversity
+### 10. Profiling Isoform Diversity
 
 Use this module to quantify and compare isoform complexity across cells, clusters, or conditions.
 
@@ -287,7 +308,7 @@ Current dispatch rule for this stage:
 - if the task is entropy-based isoform diversity analysis in a selected cell type, including entropy heatmaps, high- and low-entropy gene summaries, or per-cell isoform proportion pie charts, read:
   - `../profiling-isoform-diversity/SKILL.md`
 
-### 10. Differential Transcript Usage
+### 11. Differential Transcript Usage
 
 Use this module for transcript- or isoform-level comparative analysis across conditions, groups, or trajectories.
 
@@ -298,7 +319,7 @@ Current dispatch rule for this stage:
 - if the task is IsoformSwitchAnalyzeR- or DEXSeq-based differential transcript usage analysis, including DTU FASTA preparation, pseudobulk aggregation, GTF subsetting, DTU testing, or switch plotting, read:
   - `../differential-transcript-usage/SKILL.md`
 
-### 11. Transcript Localization
+### 12. Transcript Localization
 
 Use this module when the user wants to predict transcript localization with DeepLocRNA and then inspect one gene's transcripts across localization compartments.
 
@@ -314,7 +335,7 @@ Current dispatch rule for this stage:
 - if the task is transcript localization prediction or DeepLocRNA-based gene-specific transcript localization exploration, read:
   - `../transcript-localization/SKILL.md`
 
-### 12. TIS/TTS Analysis
+### 13. TIS/TTS Analysis
 
 Use this module when the user wants to predict translation initiation and termination sites with TranslationAI and then inspect one gene's transcripts together.
 
@@ -330,7 +351,7 @@ Current dispatch rule for this stage:
 - if the task is TranslationAI-based translation start/stop site prediction or gene-specific TIS/TTS visualization, read:
   - `../tis-tts-analysis/SKILL.md`
 
-### 13. Orthrus Model
+### 14. Orthrus Model
 
 Use this module when the user wants sequence-based isoform functional inference with Orthrus embeddings and pretrained task heads.
 

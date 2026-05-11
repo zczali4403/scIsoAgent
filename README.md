@@ -86,6 +86,7 @@ Downstream analysis currently includes:
 - adding isoform assay into gene-level Seurat objects
 - annotation
 - feature plotting
+- sashimi plotting
 - isoform exploration
 - isoform classification
 - isoform diversity analysis
@@ -118,6 +119,7 @@ Examples:
 - "Start downstream analysis from this merged Seurat object"
 - "Run only IsoQuant on these aligned BAM files"
 - "Plot these genes on the merged object"
+- "Draw a sashimi plot for this gene across selected cell types"
 
 ## Notes
 
@@ -283,6 +285,7 @@ Typical default subdirectory names:
 - `12_add_iso_to_gene`
 - `13_annotation`
 - `14_draw_features`
+- `14_sashimi_plot`
 - `14_explore_isoforms`
 - `14_isoform_classification`
 - `14_isoform_diversity`

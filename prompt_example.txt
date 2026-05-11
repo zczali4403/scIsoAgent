@@ -130,6 +130,15 @@ I want to draw some genes on my Seurat object.
 I want to draw some isoforms on my Seurat object.
 
 
+### 4.4 Draw Sashimi Plot
+
+I want to draw a sashimi plot for one gene across selected cell types.
+
+Example:
+
+I want to compare sashimi plots between conditions within cardiomyocytes.
+
+
 ## 5. Isoform-Focused Downstream Analysis
 
 ### 5.1 Explore Isoforms Of Interest
