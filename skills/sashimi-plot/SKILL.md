@@ -138,6 +138,7 @@ Expected comparison patterns include:
 Rules:
 
 - barcode extraction must be done per sample
+- barcodes extracted from the Seurat RDS will often carry a sample-name prefix, so remove that prefix before BAM subsetting so the resulting barcode strings can match the BAM `CB` tag
 - if Seurat cell names contain sample prefixes, remove the prefixes before matching to BAM tags
 - do not assume the barcode tag is always `CB`; confirm it
 
