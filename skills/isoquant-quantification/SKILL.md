@@ -77,6 +77,72 @@ If the user selects multi-sample mode, follow this project-specific pattern:
    - `--no_model_construction`
 4. ask the user which single-cell `--mode` should be used for those per-sample quantification runs
 
+Example template for Stage 1 joint transcript discovery in PacBio multi-sample mode with raw HiFi / CCS BAM:
+
+```bash
+isoquant \
+  --output <results_root>/04_isoquant/00_joint_discovery \
+  --threads <threads> \
+  --reference <reference_genome_fasta> \
+  --genedb <reference_annotation_gtf> \
+  --unmapped_bam \
+    <sample1_raw_hifi_bam> \
+    <sample2_raw_hifi_bam> \
+    <...additional_raw_hifi_bams> \
+  --data_type pacbio_ccs \
+  --mode bulk
+```
+
+Example template for Stage 1 joint transcript discovery in PacBio multi-sample mode with prewritten barcode / UMI tags in BAM:
+
+```bash
+isoquant \
+  --output <results_root>/04_isoquant/00_joint_discovery \
+  --threads <threads> \
+  --reference <reference_genome_fasta> \
+  --genedb <reference_annotation_gtf> \
+  --bam \
+    <sample1_aligned_sorted_barcoded_bam> \
+    <sample2_aligned_sorted_barcoded_bam> \
+    <...additional_aligned_sorted_barcoded_bams> \
+  --data_type pacbio_ccs \
+  --mode bulk
+```
+
+Example template for Stage 2 per-sample single-cell quantification in PacBio multi-sample mode with raw HiFi / CCS BAM:
+
+```bash
+isoquant \
+  --output <results_root>/04_isoquant/<sample1>_sc_quant \
+  --threads <threads> \
+  --reference <reference_genome_fasta> \
+  --genedb <joint_transcript_models.gtf> \
+  --unmapped_bam <sample1_raw_hifi_bam> \
+  --data_type pacbio_ccs \
+  --mode tenX_v3_split \
+  --barcode_whitelist <barcode_whitelist.txt> \
+  --no_model_construction \
+  --counts_format mtx
+```
+
+Example template for Stage 2 per-sample single-cell quantification in PacBio multi-sample mode with prewritten barcode / UMI tags in BAM:
+
+```bash
+isoquant \
+  --output <results_root>/04_isoquant/<sample_name>_sc_quant \
+  --threads <threads> \
+  --reference <reference_genome_fasta> \
+  --genedb <joint_transcript_models.gtf> \
+  --bam <sample_aligned_sorted_barcoded_bam> \
+  --data_type pacbio_ccs \
+  --mode tenX_v3 \
+  --barcoded_bam \
+  --barcode_tag CR \
+  --umi_tag UR \
+  --no_model_construction \
+  --counts_format mtx
+```
+
 Do not describe the multi-sample route as a single final joint single-cell quantification run.
 
 Do not guess resume, force, or overwrite behavior.
