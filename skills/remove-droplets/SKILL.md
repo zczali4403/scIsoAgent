@@ -22,7 +22,7 @@ When multiple per-sample matrices are present, run this step once per sample rat
 
 Execution source of truth:
 
-- `/work/.pi/scripts/remove_droplets.r`
+- `/work/scIsoAgent/.pi/scripts/remove_droplets.r`
 
 Prefer calling that script directly.
 
@@ -43,7 +43,7 @@ This skill currently produces:
 
 1. First confirm all required input files before drafting commands.
 2. Prefer calling the project script directly:
-   - `/work/.pi/scripts/remove_droplets.r`
+   - `/work/scIsoAgent/.pi/scripts/remove_droplets.r`
 3. Collect the script parameters explicitly before execution.
 4. Run this R-based skill in the `downstream` conda environment.
 5. Do not assume the current shell environment is the correct R environment.
@@ -89,7 +89,7 @@ If multiple samples will be processed, explicitly report the per-sample command 
 Preferred execution pattern:
 
 ```bash
-conda run -n downstream Rscript /work/.pi/scripts/remove_droplets.r \
+conda run -n downstream Rscript /work/scIsoAgent/.pi/scripts/remove_droplets.r \
   --gene_count_file=/abs/path/to/gene_count.csv \
   --output_path=/abs/path/to/output_dir \
   --output_seurat_file=sample_name \

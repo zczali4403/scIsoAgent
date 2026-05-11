@@ -47,12 +47,12 @@ This skill depends on:
 
 Primary local helper script:
 
-- `/work/.pi/scripts/transcript_localization_helpers.r`
+- `/work/scIsoAgent/.pi/scripts/transcript_localization_helpers.r`
 
 At the start of the R analysis session, prefer:
 
 ```r
-source("/work/.pi/scripts/transcript_localization_helpers.r")
+source("/work/scIsoAgent/.pi/scripts/transcript_localization_helpers.r")
 ```
 
 Then call helper functions from that script instead of repeatedly rewriting the same transcript-localization summary code in the terminal.
@@ -85,7 +85,7 @@ At the start of a transcript-localization request:
 9. Then run DeepLocRNA prediction.
 10. After prediction finishes, start one persistent `tmux` R session in the `downstream` environment.
 11. If the session is entered with `conda activate`, first run `source "$(conda info --base)/etc/profile.d/conda.sh"` inside `tmux`, then `conda activate downstream`, then start `R`.
-12. In that session, `source("/work/.pi/scripts/transcript_localization_helpers.r")`.
+12. In that session, `source("/work/scIsoAgent/.pi/scripts/transcript_localization_helpers.r")`.
 13. Keep the same R session alive while the user iteratively requests additional genes.
 
 ## Workflow
@@ -143,7 +143,7 @@ Rules:
 After the DeepLocRNA output exists:
 
 - start one persistent `tmux` R session in the `downstream` environment
-- `source("/work/.pi/scripts/transcript_localization_helpers.r")`
+- `source("/work/scIsoAgent/.pi/scripts/transcript_localization_helpers.r")`
 - read the DeepLocRNA prediction table once
 - read the `isoform_gene_symbol_dict.csv` mapping table once
 
@@ -228,7 +228,7 @@ After one gene heatmap is produced:
 4. If the upstream route was `flair`, do not regenerate a transcript FASTA if the user already has a correct one.
 5. If the upstream route was `isoquant`, use `gffread` to generate the transcript FASTA before running DeepLocRNA.
 6. Do not assume paths for the transcript FASTA, prediction output, or mapping table; confirm them.
-7. At the beginning of the R phase, first `source("/work/.pi/scripts/transcript_localization_helpers.r")`.
+7. At the beginning of the R phase, first `source("/work/scIsoAgent/.pi/scripts/transcript_localization_helpers.r")`.
 8. Prefer helper functions from `transcript_localization_helpers.r` instead of rewriting the same plotting and filtering code inline.
 9. For transcript subset FASTA creation, prefer helper-based extraction (`extract_subset_fasta_by_transcript_ids()`), or generate shell AWK via `prepare_subset_fasta_command()` and run it in `tmux`.
 10. Do not reload the DeepLocRNA output or the mapping table for every gene unless the user changes inputs.

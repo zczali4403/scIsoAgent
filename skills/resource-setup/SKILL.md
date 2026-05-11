@@ -20,7 +20,7 @@ This skill covers project-specific resource preparation only. It is not the plac
 
 Execution source of truth:
 
-- `/work/.pi/scripts/resource_file_creation.r`
+- `/work/scIsoAgent/.pi/scripts/resource_file_creation.r`
 
 Prefer the script as the execution source of truth.
 
@@ -42,7 +42,7 @@ The merged geneSymbol matrix produced here is intended to feed the downstream sa
 
 1. First confirm all required input paths before drafting commands or code.
 2. Prefer calling the project script directly:
-   - `/work/.pi/scripts/resource_file_creation.r`
+   - `/work/scIsoAgent/.pi/scripts/resource_file_creation.r`
 3. Collect the script parameters explicitly from the user before execution.
 4. First confirm which upstream tool produced the inputs:
    - `isoquant`
@@ -211,7 +211,7 @@ Project rule:
 Preferred execution pattern:
 
 ```bash
-conda run -n downstream Rscript /work/.pi/scripts/resource_file_creation.r \
+conda run -n downstream Rscript /work/scIsoAgent/.pi/scripts/resource_file_creation.r \
   --tool=isoquant \
   --output_gtf_file=/abs/path/to/output.gtf \
   --reference_gtf_file=/abs/path/to/reference.gtf \
@@ -226,7 +226,7 @@ conda run -n downstream Rscript /work/.pi/scripts/resource_file_creation.r \
 FLAIR route:
 
 ```bash
-conda run -n downstream Rscript /work/.pi/scripts/resource_file_creation.r \
+conda run -n downstream Rscript /work/scIsoAgent/.pi/scripts/resource_file_creation.r \
   --tool=flair \
   --flair_counts_tsv=/abs/path/to/flair_quantify.counts.tsv \
   --reference_gtf_file=/abs/path/to/reference.gtf \

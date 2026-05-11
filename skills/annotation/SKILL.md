@@ -46,7 +46,7 @@ For automatic annotation, it also uses:
 
 Primary local helper script:
 
-- `/work/.pi/scripts/annotation_helpers.r`
+- `/work/scIsoAgent/.pi/scripts/annotation_helpers.r`
 
 loaded from:
 
@@ -56,7 +56,7 @@ loaded from:
 At the start of the annotation session, prefer:
 
 ```r
-source("/work/.pi/scripts/annotation_helpers.r")
+source("/work/scIsoAgent/.pi/scripts/annotation_helpers.r")
 ```
 
 Then call helper functions from that script instead of repeatedly rewriting the same annotation code in the terminal.
@@ -69,7 +69,7 @@ At the start of an annotation request:
 2. Start one persistent `tmux` R session and keep it open for the whole annotation workflow.
 3. If the session is entered with `conda activate`, first run `source "$(conda info --base)/etc/profile.d/conda.sh"` inside `tmux`, then `conda activate downstream`, then start `R`.
 4. Resolve the merged Seurat RDS path to annotate.
-5. In that session, `source("/work/.pi/scripts/annotation_helpers.r")`.
+5. In that session, `source("/work/scIsoAgent/.pi/scripts/annotation_helpers.r")`.
 6. Read the Seurat object once in that session.
 7. Derive the output directory for annotation artifacts from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
 8. Use `13_annotation` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
@@ -84,7 +84,7 @@ At the start of an annotation request:
 
 Within the persistent R session:
 
-- `source("/work/.pi/scripts/annotation_helpers.r")`
+- `source("/work/scIsoAgent/.pi/scripts/annotation_helpers.r")`
 - load the helper-managed libraries
 - read the Seurat object RDS
 
@@ -257,7 +257,7 @@ Prefer using:
 ## Mandatory Rules
 
 1. Keep the whole workflow in one persistent `tmux` R session until the user says to exit.
-2. At the beginning of the session, first `source("/work/.pi/scripts/annotation_helpers.r")`.
+2. At the beginning of the session, first `source("/work/scIsoAgent/.pi/scripts/annotation_helpers.r")`.
 3. Prefer calling helper functions from `annotation_helpers.r` instead of rewriting the same blocks manually in the terminal.
 4. First show the cluster UMAP before annotation decisions.
 5. First compute cluster-level marker genes and isoforms before asking the user to choose annotation mode.

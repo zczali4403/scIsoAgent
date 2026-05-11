@@ -27,8 +27,8 @@ This skill depends on these packages and project scripts:
 - `IsoformSwitchAnalyzeR`
 - `rtracklayer`
 - `Seurat`
-- `/work/.pi/scripts/IsoformSwitchAnalyzeR_patch.r`
-- `/work/.pi/scripts/differential_transcript_usage_helpers.r`
+- `/work/scIsoAgent/.pi/scripts/IsoformSwitchAnalyzeR_patch.r`
+- `/work/scIsoAgent/.pi/scripts/differential_transcript_usage_helpers.r`
 
 At the start of the DTU R session, prefer:
 
@@ -39,8 +39,8 @@ library(stageR)
 library(IsoformSwitchAnalyzeR)
 library(rtracklayer)
 library(Seurat)
-source("/work/.pi/scripts/IsoformSwitchAnalyzeR_patch.r")
-source("/work/.pi/scripts/differential_transcript_usage_helpers.r")
+source("/work/scIsoAgent/.pi/scripts/IsoformSwitchAnalyzeR_patch.r")
+source("/work/scIsoAgent/.pi/scripts/differential_transcript_usage_helpers.r")
 ```
 
 ## Use This Skill When
@@ -151,8 +151,8 @@ If the tool is neither `flair` nor `isoquant`:
 Inside the persistent R session:
 
 - load all required packages
-- `source("/work/.pi/scripts/IsoformSwitchAnalyzeR_patch.r")`
-- `source("/work/.pi/scripts/differential_transcript_usage_helpers.r")`
+- `source("/work/scIsoAgent/.pi/scripts/IsoformSwitchAnalyzeR_patch.r")`
+- `source("/work/scIsoAgent/.pi/scripts/differential_transcript_usage_helpers.r")`
 - read the Seurat-object RDS once and keep it in memory for the whole DTU session, preferably with `read_dtu_seurat_object()`
 
 ### 3. Build Pseudobulk Isoform Matrix
@@ -304,12 +304,12 @@ Do not assume one fixed gene or one fixed pair of conditions.
 
 1. Keep the whole DTU workflow in one persistent `tmux` R session until the user says to exit.
 2. Before the R workflow starts, first confirm whether a shell FASTA-preparation step is needed.
-3. At the beginning of the R session, load the required libraries, `source("/work/.pi/scripts/IsoformSwitchAnalyzeR_patch.r")`, and `source("/work/.pi/scripts/differential_transcript_usage_helpers.r")`.
+3. At the beginning of the R session, load the required libraries, `source("/work/scIsoAgent/.pi/scripts/IsoformSwitchAnalyzeR_patch.r")`, and `source("/work/scIsoAgent/.pi/scripts/differential_transcript_usage_helpers.r")`.
 4. Do not reload the Seurat object for every subtask.
 5. Do not assume the parsed condition field from grouped pseudobulk column names; show it and ask the user to confirm.
 6. Do not assume the GTF path, FASTA path, or resource-table path; ask the user to confirm each of them.
 7. Do not silently use preFilter or DTU-testing thresholds; show the defaults and ask the user to confirm them.
-8. Prefer helper functions from `/work/.pi/scripts/differential_transcript_usage_helpers.r` for FASTA command generation, pseudobulk aggregation, design-matrix construction, GTF subsetting, switch-list initialization, filtering, gene-symbol injection, DTU testing, result export, and switch plotting instead of rewriting the same code inline.
+8. Prefer helper functions from `/work/scIsoAgent/.pi/scripts/differential_transcript_usage_helpers.r` for FASTA command generation, pseudobulk aggregation, design-matrix construction, GTF subsetting, switch-list initialization, filtering, gene-symbol injection, DTU testing, result export, and switch plotting instead of rewriting the same code inline.
 9. Do not collapse DTU requests into ordinary differential gene expression.
 10. Before any substantial command or code block is executed, show the exact intended code or command and wait for confirmation.
 11. Do not claim DTU analysis is complete until the expected result tables and requested switch plots exist and are non-empty.
