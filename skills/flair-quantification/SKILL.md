@@ -32,18 +32,19 @@ Primary skill file:
 8. If the workflow uses `flair combine`, require the command to include `-c` / `--convert_gtf`.
 9. In this project, do not treat `-c` as optional once `flair combine` is selected, because the combined transcriptome should also be converted to GTF.
 10. Run every FLAIR command block inside a persistent `tmux` session.
-11. Confirm all command blocks before execution, including `intronProspector`, `flair transcriptome`, optional `flair combine`, `flair quantify`, and matrix recovery, and show the planned `tmux` session name.
-12. After launch, do not exit that `tmux` session until the active FLAIR command block has finished.
-13. Execute confirmed FLAIR commands directly in the shell or in `tmux`; do not generate temporary `.sh` wrappers unless the user explicitly asks for them.
-14. Resolve the FLAIR output subdirectory automatically from the already confirmed workflow-level results root and ask the user to confirm the resolved path rather than asking for a new output directory.
-15. Use `04_flair` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
-16. When showing a `flair combine` command for confirmation, explicitly check that `-c` or `--convert_gtf` is present.
-17. After `flair quantify`, run the project script:
+11. If the session is entered with `conda activate`, first run `source "$(conda info --base)/etc/profile.d/conda.sh"` inside `tmux`, then `conda activate flair`.
+12. Confirm all command blocks before execution, including `intronProspector`, `flair transcriptome`, optional `flair combine`, `flair quantify`, and matrix recovery, and show the planned `tmux` session name.
+13. After launch, do not exit that `tmux` session until the active FLAIR command block has finished.
+14. Execute confirmed FLAIR commands directly in the shell or in `tmux`; do not generate temporary `.sh` wrappers unless the user explicitly asks for them.
+15. Resolve the FLAIR output subdirectory automatically from the already confirmed workflow-level results root and ask the user to confirm the resolved path rather than asking for a new output directory.
+16. Use `04_flair` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
+17. When showing a `flair combine` command for confirmation, explicitly check that `-c` or `--convert_gtf` is present.
+18. After `flair quantify`, run the project script:
    - `/work/.pi/scripts/recover_sc_matrix.py`
-18. Before matrix recovery, verify read names follow:
+19. Before matrix recovery, verify read names follow:
    - `barcode_umi#read_uuid_strand`
-19. In multi-sample runs, run `/work/.pi/scripts/recover_sc_matrix.py` only on the per-sample `isoform.read.map.txt` files produced by `flair quantify`.
-20. Do not use the multi-sample `combine` result as the input for `recover_sc_matrix.py`.
+20. In multi-sample runs, run `/work/.pi/scripts/recover_sc_matrix.py` only on the per-sample `isoform.read.map.txt` files produced by `flair quantify`.
+21. Do not use the multi-sample `combine` result as the input for `recover_sc_matrix.py`.
 
 ## Output Handling
 

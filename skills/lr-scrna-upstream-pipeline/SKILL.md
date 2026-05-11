@@ -32,13 +32,14 @@ Primary skill file:
    - `FLAIR` -> `flair`
    - `IsoQuant` -> `isoquant`
 7. Run every long-running upstream step inside a persistent `tmux` session.
-8. Before executing any step command, show the exact final command, the planned `tmux` session name, and wait for confirmation.
-9. After launch, do not exit that `tmux` session until the active step command has finished.
-10. Execute confirmed step commands directly in the shell or in `tmux`; do not generate temporary `.sh` wrapper scripts unless the user explicitly asks for them.
-11. Confirm one top-level results root once at the start of the upstream workflow, then derive step-specific subdirectories under that root instead of repeatedly asking for new output directories.
-12. Show each resolved step output path to the user for confirmation before execution.
-13. If dependencies are missing or invalid, stop and report clearly.
-14. Do not silently rerun long jobs if outputs may already exist.
+8. If a `tmux` step is entered with `conda activate`, first run `source "$(conda info --base)/etc/profile.d/conda.sh"` inside `tmux`, then activate the step-specific environment before launching the command.
+9. Before executing any step command, show the exact final command, the planned `tmux` session name, and wait for confirmation.
+10. After launch, do not exit that `tmux` session until the active step command has finished.
+11. Execute confirmed step commands directly in the shell or in `tmux`; do not generate temporary `.sh` wrapper scripts unless the user explicitly asks for them.
+12. Confirm one top-level results root once at the start of the upstream workflow, then derive step-specific subdirectories under that root instead of repeatedly asking for new output directories.
+13. Show each resolved step output path to the user for confirmation before execution.
+14. If dependencies are missing or invalid, stop and report clearly.
+15. Do not silently rerun long jobs if outputs may already exist.
 
 ## Branches
 

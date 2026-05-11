@@ -32,11 +32,12 @@ Primary skill file:
 6. Confirm thread count explicitly.
 7. Derive `--outdir` under the workflow-level results root.
 8. Run the final Nextflow command or command block inside a persistent `tmux` session.
-9. Before execution, show the exact final Nextflow command or command block, the planned `tmux` session name, and wait for confirmation.
-10. After launch, do not exit that `tmux` session until the bambu workflow command has finished.
-11. Execute the confirmed bambu workflow command directly in the shell or in `tmux`; do not generate a temporary `.sh` wrapper unless the user explicitly asks for one.
-12. Resolve the bambu output subdirectory automatically from the already confirmed workflow-level results root and ask the user to confirm the resolved path rather than asking for a new output directory.
-13. Use `04_bambu` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
+9. If the session is entered with `conda activate`, first run `source "$(conda info --base)/etc/profile.d/conda.sh"` inside `tmux`, then activate the bambu runtime environment before launching the final workflow command.
+10. Before execution, show the exact final Nextflow command or command block, the planned `tmux` session name, and wait for confirmation.
+11. After launch, do not exit that `tmux` session until the bambu workflow command has finished.
+12. Execute the confirmed bambu workflow command directly in the shell or in `tmux`; do not generate a temporary `.sh` wrapper unless the user explicitly asks for one.
+13. Resolve the bambu output subdirectory automatically from the already confirmed workflow-level results root and ask the user to confirm the resolved path rather than asking for a new output directory.
+14. Use `04_bambu` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
 
 ## Runtime Notes
 

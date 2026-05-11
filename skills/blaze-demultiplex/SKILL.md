@@ -29,11 +29,12 @@ Primary skill file:
 5. Confirm one whitelist-generation mode explicitly unless running demux-only mode.
 6. Derive output paths under the workflow-level results root.
 7. Run the BLAZE command inside a persistent `tmux` session.
-8. Before execution, show the exact BLAZE command, the planned `tmux` session name, and wait for confirmation.
-9. After launch, do not exit that `tmux` session until the BLAZE command has finished.
-10. Execute the confirmed BLAZE command directly in the shell or in `tmux`; do not generate a temporary `.sh` wrapper unless the user explicitly asks for one.
-11. Resolve the BLAZE output subdirectory automatically from the already confirmed workflow-level results root and ask the user to confirm the resolved path rather than asking for a new output directory.
-12. Use `01_blaze` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
+8. If the session is entered with `conda activate`, first run `source "$(conda info --base)/etc/profile.d/conda.sh"` inside `tmux`, then `conda activate blaze`.
+9. Before execution, show the exact BLAZE command, the planned `tmux` session name, and wait for confirmation.
+10. After launch, do not exit that `tmux` session until the BLAZE command has finished.
+11. Execute the confirmed BLAZE command directly in the shell or in `tmux`; do not generate a temporary `.sh` wrapper unless the user explicitly asks for one.
+12. Resolve the BLAZE output subdirectory automatically from the already confirmed workflow-level results root and ask the user to confirm the resolved path rather than asking for a new output directory.
+13. Use `01_blaze` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
 
 ## Key Decisions To Ask
 

@@ -35,17 +35,18 @@ Primary skill file:
 12. Confirm thread count explicitly.
 13. Derive the output directory under the workflow-level results root.
 14. Run every IsoQuant command inside a persistent `tmux` session.
-15. Before execution, show the full final command or command block, the planned `tmux` session name, and wait for confirmation.
-16. After launch, do not exit that `tmux` session until the active IsoQuant command or command block has finished.
-17. Execute confirmed IsoQuant commands directly in the shell or in `tmux`; do not generate temporary `.sh` wrappers unless the user explicitly asks for them.
-18. Resolve the IsoQuant output subdirectory automatically from the already confirmed workflow-level results root and ask the user to confirm the resolved path rather than asking for a new output directory.
-19. Use `04_isoquant` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
-20. If the user chooses multi-sample mode, do not run one joint single-cell quantification across all samples as the final quantification step.
-21. In multi-sample mode, use this required two-stage workflow:
+15. If the session is entered with `conda activate`, first run `source "$(conda info --base)/etc/profile.d/conda.sh"` inside `tmux`, then `conda activate isoquant`.
+16. Before execution, show the full final command or command block, the planned `tmux` session name, and wait for confirmation.
+17. After launch, do not exit that `tmux` session until the active IsoQuant command or command block has finished.
+18. Execute confirmed IsoQuant commands directly in the shell or in `tmux`; do not generate temporary `.sh` wrappers unless the user explicitly asks for them.
+19. Resolve the IsoQuant output subdirectory automatically from the already confirmed workflow-level results root and ask the user to confirm the resolved path rather than asking for a new output directory.
+20. Use `04_isoquant` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
+21. If the user chooses multi-sample mode, do not run one joint single-cell quantification across all samples as the final quantification step.
+22. In multi-sample mode, use this required two-stage workflow:
    - first run joint transcript discovery in pseudo-bulk mode on the combined BAM files from all samples with `--mode bulk` to produce one comprehensive `transcript_models.gtf`
    - then run IsoQuant separately for each sample using that GTF as `--genedb` together with `--no_model_construction`
-22. In the per-sample quantification stage of multi-sample mode, keep samples separate to avoid barcode collisions while preserving consistent transcript definitions across samples.
-23. In the per-sample quantification stage of multi-sample mode, ask the user which single-cell `--mode` should be used for per-sample quantification.
+23. In the per-sample quantification stage of multi-sample mode, keep samples separate to avoid barcode collisions while preserving consistent transcript definitions across samples.
+24. In the per-sample quantification stage of multi-sample mode, ask the user which single-cell `--mode` should be used for per-sample quantification.
 
 ## Project Defaults
 
