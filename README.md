@@ -67,7 +67,7 @@ Raw FASTQ
 #### PacBio
 
 ```text
-Raw FASTQ
+Input BAM
   -> one of:
        - IsoQuant
        - bambu

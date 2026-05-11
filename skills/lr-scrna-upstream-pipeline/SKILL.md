@@ -43,7 +43,7 @@ Primary skill file:
 ## Branches
 
 - `ONT`: `BLAZE -> minimap2 -> samtools -> one of {IsoQuant, bambu, FLAIR}`
-- `PacBio`: `one of {IsoQuant, bambu}` from raw FASTQ
+- `PacBio`: `one of {IsoQuant, bambu}` from BAM
 
 ## Tool Skills To Load
 
