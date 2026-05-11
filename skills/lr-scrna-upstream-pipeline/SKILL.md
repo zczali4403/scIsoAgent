@@ -24,20 +24,21 @@ Primary skill file:
 2. First confirm one top-level results root name under `results`.
 3. Ask questions progressively, only when each step is reached.
 4. At Step 4, explicitly ask which compatible tool to use.
-5. Use fixed conda environments by tool:
+5. If the user has multiple samples, explicitly remind them to choose a multi-sample mode rather than a one-sample-per-run route.
+6. Use fixed conda environments by tool:
    - `BLAZE` -> `blaze`
    - `minimap2` -> `minimap2`
    - `samtools` -> `samtools`
    - `FLAIR` -> `flair`
    - `IsoQuant` -> `isoquant`
-6. Run every long-running upstream step inside a persistent `tmux` session.
-7. Before executing any step command, show the exact final command, the planned `tmux` session name, and wait for confirmation.
-8. After launch, do not exit that `tmux` session until the active step command has finished.
-9. Execute confirmed step commands directly in the shell or in `tmux`; do not generate temporary `.sh` wrapper scripts unless the user explicitly asks for them.
-10. Confirm one top-level results root once at the start of the upstream workflow, then derive step-specific subdirectories under that root instead of repeatedly asking for new output directories.
-11. Show each resolved step output path to the user for confirmation before execution.
-12. If dependencies are missing or invalid, stop and report clearly.
-13. Do not silently rerun long jobs if outputs may already exist.
+7. Run every long-running upstream step inside a persistent `tmux` session.
+8. Before executing any step command, show the exact final command, the planned `tmux` session name, and wait for confirmation.
+9. After launch, do not exit that `tmux` session until the active step command has finished.
+10. Execute confirmed step commands directly in the shell or in `tmux`; do not generate temporary `.sh` wrapper scripts unless the user explicitly asks for them.
+11. Confirm one top-level results root once at the start of the upstream workflow, then derive step-specific subdirectories under that root instead of repeatedly asking for new output directories.
+12. Show each resolved step output path to the user for confirmation before execution.
+13. If dependencies are missing or invalid, stop and report clearly.
+14. Do not silently rerun long jobs if outputs may already exist.
 
 ## Branches
 

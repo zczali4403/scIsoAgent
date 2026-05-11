@@ -24,18 +24,19 @@ Primary skill file:
 2. First ask how samples should be organized:
    - one sample per run
    - or multi-sample joint run
-3. Confirm the correct input route explicitly:
+3. If the user provides multiple samples or multiple sample-specific input files, explicitly remind them that they should choose the multi-sample joint run.
+4. Confirm the correct input route explicitly:
    - `--bams` for ONT aligned-BAM route
    - `--reads` for direct raw-read route
-4. For PacBio direct runs, confirm chemistry explicitly.
-5. Confirm thread count explicitly.
-6. Derive `--outdir` under the workflow-level results root.
-7. Run the final Nextflow command or command block inside a persistent `tmux` session.
-8. Before execution, show the exact final Nextflow command or command block, the planned `tmux` session name, and wait for confirmation.
-9. After launch, do not exit that `tmux` session until the bambu workflow command has finished.
-10. Execute the confirmed bambu workflow command directly in the shell or in `tmux`; do not generate a temporary `.sh` wrapper unless the user explicitly asks for one.
-11. Resolve the bambu output subdirectory automatically from the already confirmed workflow-level results root and ask the user to confirm the resolved path rather than asking for a new output directory.
-12. Use `04_bambu` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
+5. For PacBio direct runs, confirm chemistry explicitly.
+6. Confirm thread count explicitly.
+7. Derive `--outdir` under the workflow-level results root.
+8. Run the final Nextflow command or command block inside a persistent `tmux` session.
+9. Before execution, show the exact final Nextflow command or command block, the planned `tmux` session name, and wait for confirmation.
+10. After launch, do not exit that `tmux` session until the bambu workflow command has finished.
+11. Execute the confirmed bambu workflow command directly in the shell or in `tmux`; do not generate a temporary `.sh` wrapper unless the user explicitly asks for one.
+12. Resolve the bambu output subdirectory automatically from the already confirmed workflow-level results root and ask the user to confirm the resolved path rather than asking for a new output directory.
+13. Use `04_bambu` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
 
 ## Runtime Notes
 

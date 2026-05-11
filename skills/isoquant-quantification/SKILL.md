@@ -1,6 +1,6 @@
 ---
 name: isoquant-quantification
-description: Runs project-specific IsoQuant single-cell transcript discovery and quantification for ONT aligned-BAM input or PacBio CCS raw FASTQ input, with explicit run organization, barcode route, and command confirmation.
+description: Runs project-specific IsoQuant single-cell transcript discovery and quantification for ONT aligned-BAM input or PacBio CCS BAM input, with explicit run organization, barcode route, and command confirmation.
 ---
 
 # IsoQuant Quantification
@@ -15,7 +15,7 @@ Primary skill file:
 
 - the user selected `IsoQuant`
 - ONT input is a sorted and indexed BAM from the upstream alignment route
-- or PacBio CCS input is raw FASTQ for direct single-cell processing
+- or PacBio CCS input is a BAM file
 
 ## Mandatory Rules
 
@@ -24,27 +24,28 @@ Primary skill file:
 3. First ask how samples should be organized:
    - one sample per run
    - or multi-sample mode
-4. Confirm the correct input route and data type explicitly.
-5. Confirm the barcode route explicitly.
-6. Confirm thread count explicitly.
-7. Derive the output directory under the workflow-level results root.
-8. Run every IsoQuant command inside a persistent `tmux` session.
-9. Before execution, show the full final command or command block, the planned `tmux` session name, and wait for confirmation.
-10. After launch, do not exit that `tmux` session until the active IsoQuant command or command block has finished.
-11. Execute confirmed IsoQuant commands directly in the shell or in `tmux`; do not generate temporary `.sh` wrappers unless the user explicitly asks for them.
-12. Resolve the IsoQuant output subdirectory automatically from the already confirmed workflow-level results root and ask the user to confirm the resolved path rather than asking for a new output directory.
-13. Use `04_isoquant` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
-14. If the user chooses multi-sample mode, do not run one joint single-cell quantification across all samples as the final quantification step.
-15. In multi-sample mode, use this required two-stage workflow:
+4. If the user provides multiple samples or multiple sample-specific input files, explicitly remind them that they should choose `multi-sample mode`.
+5. Confirm the correct input route and data type explicitly.
+6. Confirm the barcode route explicitly.
+7. Confirm thread count explicitly.
+8. Derive the output directory under the workflow-level results root.
+9. Run every IsoQuant command inside a persistent `tmux` session.
+10. Before execution, show the full final command or command block, the planned `tmux` session name, and wait for confirmation.
+11. After launch, do not exit that `tmux` session until the active IsoQuant command or command block has finished.
+12. Execute confirmed IsoQuant commands directly in the shell or in `tmux`; do not generate temporary `.sh` wrappers unless the user explicitly asks for them.
+13. Resolve the IsoQuant output subdirectory automatically from the already confirmed workflow-level results root and ask the user to confirm the resolved path rather than asking for a new output directory.
+14. Use `04_isoquant` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
+15. If the user chooses multi-sample mode, do not run one joint single-cell quantification across all samples as the final quantification step.
+16. In multi-sample mode, use this required two-stage workflow:
    - first run joint transcript discovery in pseudo-bulk mode on the combined BAM files from all samples with `--mode bulk` to produce one comprehensive `transcript_models.gtf`
    - then run IsoQuant separately for each sample using that GTF as `--genedb` together with `--no_model_construction`
-16. In the per-sample quantification stage of multi-sample mode, keep samples separate to avoid barcode collisions while preserving consistent transcript definitions across samples.
-17. In the per-sample quantification stage of multi-sample mode, ask the user which single-cell `--mode` should be used for per-sample quantification.
+17. In the per-sample quantification stage of multi-sample mode, keep samples separate to avoid barcode collisions while preserving consistent transcript definitions across samples.
+18. In the per-sample quantification stage of multi-sample mode, ask the user which single-cell `--mode` should be used for per-sample quantification.
 
 ## Project Defaults
 
 - ONT route: `--bam`, `--data_type nanopore`, `--mode tenX_v3`, `--barcoded_bam`
-- PacBio route: `--fastq`, `--data_type pacbio_ccs`, `--mode tenX_v3`, plus explicit barcode route
+- PacBio route: `--bam`, `--data_type pacbio_ccs`, `--mode tenX_v3`, plus explicit barcode route
 
 ## Multi-Sample Mode Rule
 
