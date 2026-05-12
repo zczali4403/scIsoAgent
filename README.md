@@ -144,14 +144,19 @@ Run scIsoAgent in interactive mode:
 docker run -it --name scisoagent chengzhizhaofd/scisoagent:latest /bin/bash
 ```
 
+If you plan to run the Orthrus sequence-model module, start the container with GPU access enabled by adding `--gpus all`.
+
 Recommended: mount a local project directory
 
 ```bash
 docker run -it \
+  --gpus all \
   -v /path/to/your/project:/work \
   --name scisoagent \
   chengzhizhaofd/scisoagent:latest /bin/bash
 ```
+
+Use `--gpus all` when you want to run Orthrus. If you do not need Orthrus, other parts of the workflow may still run without GPU access.
 
 Inside the container, work under:
 
