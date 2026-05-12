@@ -76,6 +76,8 @@ At the start of an Orthrus-model request:
    - pretrained probes: `/work/scIsoAgent/orthrus_trained_probes`
    - label maps: `/work/scIsoAgent/orthrus_label_maps`
 8. Confirm the `mrna_bench_data` directory path used by Orthrus embedding inference.
+   - tell the user that this is typically a user-created directory
+   - the user may create an empty or dedicated data directory first, then provide that directory path for Orthrus embedding setup
 9. Start or reuse one persistent `tmux` shell session in the `orthrus` environment.
 10. If the session is entered with `conda activate`, first run `source "$(conda info --base)/etc/profile.d/conda.sh"` inside `tmux`, then `conda activate orthrus`.
 11. Run any FASTA-preparation step first if needed.
@@ -146,6 +148,8 @@ Rules:
 Once the gene-specific FASTA exists, generate one embedding per transcript.
 
 Before computing embeddings, first confirm or let the user specify the `mrna_bench_data` directory path, then set it in the terminal session.
+
+The skill should explicitly tell the user that `mrna_bench_data` is typically a directory they create themselves for Orthrus or `mrna_bench` data files, then pass that directory path into the workflow.
 
 Preferred data-path setup pattern:
 
