@@ -1,393 +1,266 @@
 ---
 name: summary
-description: Summarizes completed long-read single-cell RNA-seq analysis runs with emphasis on post-annotation isoform analysis and sequence-model outputs, then produces an evidence-grounded result summary plus optional discussion-style interpretation based mainly on those downstream findings.
+description: Summarizes completed long-read single-cell RNA-seq runs using deep results-style integrative writing, with emphasis on post-annotation isoform analysis, sequence-model outputs, transcript-level events, gene-function interpretation, and literature-grounded condition-specific consequences.
 ---
 
 # Analysis Summary
 
-Use this skill when the user wants a final summary after one or more upstream or downstream workflow steps have already finished.
+Use this skill when the user wants a final writeup from completed outputs.
 
-This skill is for reading existing outputs and synthesizing them into a concise report. It is not for rerunning analysis, changing thresholds, or inventing results that are not supported by the saved artifacts.
+This skill is for reading saved artifacts and writing a manuscript-style, results-focused integrative summary. It is not for rerunning analysis, changing thresholds, or inventing unsupported findings.
 
-By default, this skill should emphasize results generated after annotation, especially:
+## Goal
 
-- isoform-focused downstream analysis
-- sequence-based isoform functional inference
-- cross-step interpretation connecting annotation-aware isoform findings to sequence-model outputs
+Default writing target:
 
-Preferred report route for this skill:
+- `deep results-style integrative writing`
 
-- generate a structured report body from the detected evidence
-- produce a Markdown report as the default formal deliverable
+Default emphasis:
 
+1. annotation and later downstream outputs
+2. isoform-focused events
+3. sequence-model evidence
+4. earlier technical stages only as supporting context
+
+Default formal artifact:
+
+- `16_summary/summary_report.md`
 
 ## Use This Skill When
 
-- the user wants a summary of a completed workflow run
-- the user wants a stepwise recap of what each finished module produced
-- the user wants plots, CSV files, TSV files, and other saved outputs interpreted together
-- the user wants language that may help write a results section or discussion section
-- the user wants a high-level biological interpretation after technical analysis is complete
-- the user wants a detailed, literature-grounded biological interpretation
-- the user wants deep discussion-style writing supported by online literature search when available
-
-## Scope
-
-This summary skill may read outputs from any completed stage, but the default synthesis priority is:
-
-1. annotation and post-annotation downstream outputs
-2. isoform-focused analysis outputs
-3. sequence-model outputs
-4. earlier technical stages only as supporting context
-
-Readable stages may include:
-
-1. upstream processing outputs
-2. resource setup
-3. split gene count by sample
-4. empty-droplet removal
-5. QC
-6. sample merging and optional batch correction
-7. isoform object generation and merging
-8. add-iso-to-gene integration
-9. annotation
-10. feature plotting and isoform exploration
-11. isoform classification
-12. isoform diversity profiling
-13. differential transcript usage
-14. transcript localization
-15. TIS/TTS analysis
-16. Orthrus-based sequence functional prediction
-
-## Evidence Sources
-
-Prefer summarizing from saved outputs that the user can inspect directly, such as:
-
-- PDF plots
-- PNG or JPG figures if present
-- CSV or TSV summary tables
-- TXT reports
-- RDS-derived summary files if companion text outputs exist
-- manifest files
-- log files only when they clarify success, failure, warnings, or sample counts
-
-When both figures and tables exist for the same step, use both:
-
-- figures for qualitative interpretation
-- tables for explicit counts, rates, categories, and ranked results
-
-## Mandatory Rules
-
-1. Treat this skill as a read-and-summarize workflow, not as a rerun workflow.
-2. First confirm which workflow run or results root should be summarized.
-3. Prefer scanning the selected run directory automatically instead of asking the user to enumerate every file manually.
-4. Before producing conclusions, explicitly report which step directories and output files were actually found.
-5. Distinguish clearly between:
-   - outputs that exist and were read
-   - outputs that were expected but missing
-   - and biological interpretation inferred from the available evidence
-6. Do not claim that a workflow step succeeded unless output artifacts for that step exist and are non-empty.
-7. Do not fabricate biological findings from plot file names or directory names alone.
-8. If an artifact cannot be read directly, summarize only what can be supported from adjacent summary files, manifests, or file naming, and say so explicitly.
-9. Keep technical summary and biological interpretation separate.
-10. Discussion-style text must be framed as interpretation supported by the available outputs, not as a definitive biological claim beyond the evidence.
-11. If the user wants manuscript-ready prose, first summarize the evidence and then provide a clearly labeled draft paragraph.
-12. If a requested stage has no readable outputs, say so explicitly instead of inventing a placeholder summary.
-13. Reuse the confirmed workflow-level results root and summary scope instead of re-asking for already established context.
-14. By default, treat the Markdown report as the main output artifact for this skill.
-15. The default report language for this skill is English unless the user explicitly requests another language.
-16. Use `16_summary` as the default subdirectory name under the confirmed workflow-level results root unless the user explicitly asks for a different name.
-17. For biological interpretation statements, assign an explicit evidence grade:
-   - `A`: direct quantitative evidence from readable tables (CSV/TSV/TXT)
-   - `B`: figure-supported trend from readable plots
-   - `C`: cross-step inference supported by at least two independent artifacts
-17. Every major biological interpretation must include an `Evidence:` line listing concrete source files used.
-18. Do not present `B` or `C` evidence as if it were `A`; keep uncertainty explicit.
-19. If the user requests `deep` interpretation depth, biological discussion, manuscript-style discussion support, or a detailed summary, perform targeted online literature search before writing the final biological interpretation, unless network tools are unavailable.
-20. For `deep` summaries, the report must be substantially more detailed than a stepwise recap and must include explicit biological interpretation plus discussion-style synthesis.
-21. When online literature search is available, use it to gather field context, supporting studies, and relevant caveats for the main biological themes emerging from the detected outputs.
-22. The final deep discussion must integrate:
-   - direct run-specific evidence
-   - literature-based background or plausibility support
-   - limitations and uncertainty
-   - and clearly labeled hypotheses when applicable.
-23. When literature search is used, the final report must include an explicit reference list citing the main articles, reviews, or online sources used for biological interpretation.
-24. Distinguish clearly between:
-   - direct run-specific evidence from the summarized outputs
-   - literature-based background or plausibility support
-   - and new hypotheses generated by combining the two.
-25. If online literature search is unavailable, state that limitation explicitly and restrict the report to artifact-grounded interpretation plus any user-provided literature.
-26. When the user requests a detailed summary, prioritize interpretive depth over brevity.
-27. If discussion-style interpretation is requested in deep mode, the discussion section should be detailed and substantial; by default, target at least 500 Chinese characters or an equivalently substantial English paragraph block unless the user asks for shorter text.
-28. By default, discussion-style writing should be based mainly on annotation-afterward results, especially isoform-focused analysis and sequence-model outputs, rather than on the full workflow.
-29. Earlier upstream or QC-related outputs may be mentioned briefly as workflow context, but they should not dominate the discussion unless the user explicitly asks for a full-run discussion.
-
-## Entry Procedure
-
-At the start of a summary request:
-
-1. Confirm the workflow run or top-level results root to summarize.
-2. Confirm whether the user wants:
-   - technical step summary only
-   - biological interpretation only
-   - or both technical summary plus biological interpretation
-3. Confirm the report language; default to English unless the user explicitly requests another language.
-4. Ask whether the user also wants discussion-style writing support.
-5. Confirm interpretation depth:
-   - `basic`
-   - `standard`
-   - `deep`
-5. If the user requests detailed summary, biological interpretation, or discussion-style writing, default to `deep` interpretation unless the user explicitly asks for a lighter mode.
-6. Confirm interpretation boundary:
-   - strict evidence-only interpretation
-   - or evidence-grounded hypothesis generation
-7. Confirm summary emphasis:
-   - annotation and later results only
-   - annotation plus selected earlier context
-   - or full workflow recap
-8. If the user does not specify otherwise, default to `annotation and later results only`.
-9. If the user wants `deep` interpretation or discussion-style writing, state whether targeted online literature search will be used.
-10. Derive the summary output directory from the already confirmed workflow-level results root and ask the user to confirm the resolved path.
-11. Scan the selected results root and identify which stage directories are present.
-12. Within each detected stage directory, identify readable summary artifacts such as CSV, TSV, TXT, PDF, and image files.
-13. For `deep` interpretation when network tools are available, identify 2-4 main biological themes from the detected post-annotation outputs, then perform targeted literature search around those themes before writing the final biological interpretation.
-14. Report the detected stage list and the main files that will be used as evidence before writing the final summary.
-
-Only after the available evidence has been identified should this skill produce the final synthesis.
-
-## Default Workflow
-
-Use this default order:
-
-1. detect completed stage directories under the selected results root
-2. prioritize annotation and post-annotation stage directories
-3. collect readable evidence files for prioritized stages
-4. summarize prioritized stages separately
-5. add only brief supporting context from earlier stages when needed
-6. extract cross-stage themes and major findings, emphasizing isoform and sequence-model outputs
-7. if requested, draft discussion-style interpretation grounded mainly in the prioritized outputs
-8. if `deep` interpretation is requested and network tools are available, perform targeted literature search on the main biological themes
-9. assemble the final report in a structure suitable for Markdown delivery
-
-## Stage Summary Rules
-
-### 1. Upstream Summary
-
-If upstream outputs are present, summarize items such as:
-
-- whether raw reads were demultiplexed
-- whether alignment and BAM preparation outputs exist
-- which quantification route was used
-- whether transcript or gene matrices were produced
-
-Do not over-interpret upstream steps biologically. Keep this section technical unless downstream evidence supports biological interpretation.
-
-### 2. QC And Sample Processing Summary
-
-If downstream QC-related outputs are present, summarize items such as:
-
-- per-sample matrices generated
-- empty-droplet removal outputs and retained-cell summaries
-- QC thresholding and singlet retention summaries
-- sample merge and batch-correction decisions
-
-Prefer explicit counts and summary tables over qualitative statements.
-
-### 3. Cell Type And Feature Summary
-
-If annotation and exploration outputs are present, summarize items such as:
-
-- annotated cell populations or cluster labels
-- major marker-supported interpretations
-- notable genes or isoforms highlighted in saved plots
-
-When possible, separate:
-
-- cluster-level technical annotation outcomes
-- biologically meaningful cell-state patterns
-
-### 4. Isoform-Focused Summary
-
-If isoform modules are present, summarize items such as:
-
-- isoform integration into the gene-level object
-- structural category summaries
-- coding versus noncoding patterns
-- isoform diversity findings
-- celltype-specific isoform findings
-- DTU comparisons and switch-like patterns
-
-Prefer quoting categories, counts, rankings, and group comparisons from saved summary tables where available.
-
-### 5. Sequence-Model Summary
-
-If sequence-model modules are present, summarize items such as:
-
-- transcript localization patterns across isoforms
-- TIS/TTS differences across isoforms from the same gene
-- Orthrus-based predicted differences in transcript properties
-- convergence or disagreement between structural isoform findings and sequence-model outputs
-
-Prefer linking these findings back to annotated cell types, condition comparisons, or isoform classes when the evidence supports it.
-
-### 6. Cross-Stage Synthesis
-
-After stepwise summaries, produce a cross-stage synthesis covering:
-
-- the main technical outcome of the workflow
-- the main biological signals supported by the post-annotation outputs
-- any repeated theme appearing across annotation, isoform classification, diversity, DTU, transcript localization, TIS/TTS, or Orthrus prediction
-- any important caveat caused by missing steps, weak outputs, or incomplete summaries
-
-## How To Read Post-Annotation Results
-
-When summarizing results after annotation, interpret them in the following order.
-
-### 1. Annotation As Biological Context
-
-Treat annotation as the biological background layer for later isoform interpretation.
-
-Focus on:
-
-- which cell types or states were identified
-- how confident or well-supported the labels appear from saved plots or marker summaries
-- which cell populations are most relevant for later isoform findings
-
-Do not stop at restating labels. Use annotation to define the biological context in which later isoform and sequence-model findings should be interpreted.
-
-### 2. Isoform-Focused Results As The Core Signal
-
-Treat post-annotation isoform analysis as the main evidence layer for biological interpretation.
-
-Focus on:
-
-- whether specific genes show multiple isoforms with distinct patterns
-- whether certain isoforms are enriched in particular cell types, clusters, or conditions
-- whether structural categories, coding status, diversity metrics, or DTU results converge on the same genes or cell populations
-
-When multiple isoform-focused modules point to the same gene, cell type, or condition contrast, treat that convergence as stronger support than any single isolated result.
-
-### 3. Sequence-Model Results As Functional Support
-
-Treat transcript localization, TIS/TTS, and Orthrus predictions as functional interpretation layers that may help explain isoform differences.
-
-Use them to ask:
-
-- do different isoforms from the same gene show different predicted localization patterns?
-- do they show differences in predicted start/stop usage or transcript structural endpoints?
-- do Orthrus predictions suggest differences in stability, translation-related properties, lifecycle, or localization?
-
-These outputs should usually be interpreted as functional plausibility support rather than definitive proof.
-
-### 4. Integrate The Three Layers
-
-For the strongest summary and discussion, connect:
-
-1. annotated biological context
-2. isoform-level structural or usage differences
-3. sequence-model-based functional interpretation
-
-Preferred logic pattern:
-
-- `Context`: which annotated cell type, state, or comparison is involved
-- `Isoform evidence`: what structural, abundance, diversity, or DTU difference is observed
-- `Functional interpretation`: what localization, TIS/TTS, or Orthrus result may help explain that difference
-
-### 5. What To Prioritize In Discussion
-
-By default, prioritize cases where:
-
-- one gene has multiple isoforms with clearly different downstream signatures
-- isoform-focused modules and sequence-model modules point in the same direction
-- the same biological theme appears across more than one output type
-
-Do not prioritize:
-
-- isolated technical outputs with no biological connection to later findings
-- single weak hints unsupported by other post-annotation evidence
-- sequence-model predictions that contradict all other evidence unless explicitly framed as uncertainty or a hypothesis
-
-## Discussion-Style Writing
-
-If the user asks for discussion help, produce a separate section that may include:
-
-- the biological significance of the observed annotated celltype or isoform patterns
-- possible mechanistic explanations suggested by post-annotation isoform and sequence-model outputs
-- links between structural isoform differences, predicted sequence-level properties, and cell-state or condition differences
-- caveats, limitations, and follow-up validation ideas
-
-By default, this section should be built mainly from:
-
-- annotation-aware isoform findings
-- isoform classification, diversity, and DTU outputs
-- transcript localization, TIS/TTS, and Orthrus outputs
-
-Do not default to a full-workflow discussion unless the user explicitly asks for it.
-
-This section must:
-
-- be explicitly labeled as interpretation
-- stay consistent with the detected outputs
-- avoid overclaiming causality
-- note when claims are tentative or hypothesis-generating
-- include literature grounding when literature search was performed
-- be detailed rather than schematic in `deep` mode
-
-Use a three-layer interpretation format:
-
-1. `Observed` (what is directly seen in artifacts)
-2. `Inferred` (evidence-grounded interpretation)
-3. `Hypothesis` (testable, explicitly tentative statement)
-
-When interpretation depth is `basic`, keep mostly `Observed` with minimal `Inferred`.
-When interpretation depth is `standard`, include `Observed` + `Inferred`.
-When interpretation depth is `deep`, include all three layers with explicit evidence grading.
-
-For `deep` discussion requests, the discussion should be a substantial narrative rather than bullet-only text, and should normally exceed 500 Chinese characters (or comparable English length) unless the user explicitly requests brevity.
-
-## Preferred Report Structure
-
-When the user wants a report-oriented output, prefer the following structure:
-
-1. title and run identifier
-2. analyzed results root and detected stages
-3. evidence inventory
-4. annotation and post-annotation technical summary
-5. key isoform and sequence-model findings
-6. literature-supported biological interpretation
-7. discussion-style interpretation focused on annotation-afterward results
-8. references
-9. caveats and missing outputs
-10. candidate follow-up or validation directions
-
-Preferred report outputs at this stage:
-
-- `summary_report.md`
-- `evidence_index.tsv` (key interpretation statements mapped to evidence files and grades)
-- optionally, when literature search is used: `literature_context.md` or a literature-supported section embedded in `summary_report.md`
-- when literature search is used: a `References` section in `summary_report.md`, and optionally `references.bib` or `references.md`
-
-## Expected Deliverables
-
-For a normal successful summary request, deliver only what the user asked for, for example:
-
-- a detected-stage inventory
-- a stepwise technical summary
-- a biological interpretation summary
-- a discussion-style draft paragraph or short section
-- a clear list of missing or unreadable stages that limited interpretation
-- `summary_report.md` as the default formal report artifact
-
-## Response Style
-
-Be explicit and evidence-aware:
-
-- say which run directory was summarized
-- say which stages were detected
-- say which files or file types supported the summary
-- separate direct evidence from interpretation
-- keep the technical recap ordered by workflow stage
-- write the report in English by default unless the user explicitly requests another language
-- when the user requests a detailed summary, prefer a long-form, evidence-rich narrative instead of a short recap
-- if discussion text is requested, present it as a labeled draft rather than as a definitive conclusion
-- if the user asks for a report, organize the response in a structure suitable for direct Markdown delivery
+- the user wants a final summary of a completed run
+- the user wants manuscript-style results writing with integrated interpretation
+- the user wants concrete transcript-level examples explaining isoform shifts
+- the user wants sequence-model outputs interpreted together with gene function and condition context
+
+## Core Workflow
+
+1. Confirm the results root and scan readable outputs.
+2. Detect completed stages and readable evidence files.
+3. Prioritize transcript events supported by post-annotation outputs.
+4. Rank prioritized events as:
+   - `anchor event`
+   - `strong supporting event`
+   - `secondary supporting event`
+5. For each prioritized event:
+   - identify the concrete transcripts involved
+   - identify which transcript increases and which decreases across the relevant condition or cell type
+   - compare Orthrus, TIS/TTS, and localization outputs across those transcripts
+   - classify the cross-model signal as:
+     - `convergent`
+     - `partially convergent`
+     - `discordant`
+   - infer the most plausible transcript-state contrast
+   - interpret how that contrast may affect the known function of the gene in the relevant condition
+6. Perform targeted literature search for prioritized genes, pathways, cell states, or mechanisms.
+7. Insert citations directly into the relevant result paragraphs and also provide a final reference list.
+8. Draft the final text in event-centered paragraphs, then run adversarial self-review.
+
+## Evidence Rules
+
+- Prefer direct evidence from CSV, TSV, TXT, PDF, PNG, JPG, and readable manifest or log files.
+- Do not claim a stage succeeded unless non-empty artifacts exist.
+- Do not fabricate findings from filenames or directory names alone.
+- Every major biological claim must include:
+  - run-specific evidence
+  - literature support when available
+  - an explicit evidence grade:
+    - `A`: direct quantitative support from readable tables
+    - `B`: figure-supported trend
+    - `C`: cross-step inference supported by at least two independent artifacts or by user-provided prior context plus readable outputs
+- If a requested stage has no readable outputs, say so explicitly.
+
+## Sequence-Model Semantics
+
+Use these semantics when interpreting sequence-model outputs.
+
+### Orthrus
+
+#### Mean Ribosome Load (MRL)
+- Meaning:
+  - predicts the mean number of ribosomes associated with a transcript
+- Use:
+  - compare relative translational loading tendency across transcripts
+- Do not overclaim:
+  - do not equate directly with measured protein abundance
+
+#### RNA Half-life
+- Meaning:
+  - reflects transcript stability-related behavior
+- Use:
+  - compare whether one transcript appears more stability-compatible than another
+- Do not overclaim:
+  - do not state a definitive in vivo half-life without direct measurement
+
+#### Translation Efficiency
+- Meaning:
+  - reflects predicted translation efficiency from ribosome profiling and RNA-seq integration
+- Use:
+  - compare whether transcripts differ in translation-competent state
+- Do not overclaim:
+  - do not state that a transcript is experimentally proven to translate more
+
+#### Protein Localization
+- Meaning:
+  - predicts the subcellular compartments of the encoded protein
+- Use:
+  - discuss whether transcript switches may alter the functional context of the protein product
+- Do not overclaim:
+  - do not confuse this with RNA localization
+
+#### RNA Lifecycle
+- Meaning:
+  - reflects dominant transcript state across release, export, and polysome-loading flow
+- Use:
+  - discuss whether transcripts appear more associated with export, retention, or translation-associated flow states
+- Do not overclaim:
+  - treat this as transcript-state tendency, not direct kinetic proof
+
+#### RNA Localization
+- Meaning:
+  - predicts subcellular compartments where the mRNA is found
+- Use:
+  - discuss compartmental routing or localization-compatible fate
+- Do not overclaim:
+  - do not treat as direct localization proof
+
+### DeepLocRNA / transcript localization
+
+- Meaning:
+  - predicts transcript-level subcellular localization tendency
+- Use:
+  - compare whether isoforms from the same gene are predicted to occupy different RNA compartments
+- Do not overclaim:
+  - do not equate prediction with direct localization measurement
+
+### TranslationAI / TIS-TTS
+
+- Meaning:
+  - predicts coding-compatible signals such as ORF presence and initiation/termination-related structure
+- Use:
+  - discuss whether transcripts differ in coding compatibility or translation-related structure
+- Do not overclaim:
+  - ORF detection does not prove stable protein production
+  - predicted TIS/TTS differences are supportive signals, not proteomic confirmation
+
+## Interpretation Rules
+
+- Prefer within-gene transcript-to-transcript comparison over absolute interpretation.
+- Treat sequence-model outputs as interpretable evidence layers, not decorative annotations.
+- Do not list Orthrus, TIS/TTS, and localization outputs separately without synthesis.
+- For each prioritized event, explicitly answer:
+  - what changed
+  - why the direction of the change may matter biologically
+  - whether the models are convergent, partially convergent, or discordant
+  - what transcript state they collectively imply
+  - how that state may affect the known function of the gene
+  - what that may mean in the compared condition or cell-type context
+- If a result is counterintuitive relative to transcript structure, IR status, or DTU direction, do not smooth it away; explain the tension.
+- If sequence-model outputs do not converge, say so explicitly.
+- Use concrete transcript-level examples rather than only high-level biological themes.
+- Do not replace concrete transcript explanation with abstract phrases such as `transcript-state redistribution` unless the transcript example has already been established.
+- Prefer direct but still evidence-bounded language.
+- Use language such as:
+  - `indicates`
+  - `points to`
+  - `suggests`
+  - `is associated with`
+  - `shows a more productive / less productive transcript profile`
+- Avoid repetitive template phrasing such as:
+  - `compatible with`
+  - `consistent with`
+  - `transcript state` repeated in every paragraph
+- Avoid language such as:
+  - `proves`
+  - `demonstrates`
+  - `confirms protein production`
+
+## Gene-Function And Condition Interpretation
+
+For each anchor or strong supporting event:
+
+- explain the known function of the gene
+- explain why that function matters in the relevant condition, cell type, or disease context
+- explain how the transcript shift could plausibly change that role
+- explicitly state what the event may mean for the biological condition being compared
+- do not stop at transcript-level interpretation or gene-function description alone
+- after describing the gene's known function, explain how the transcript shift could plausibly modify that function in the disease state or cell-type context
+- the final sentence of each anchor-event paragraph should state the likely significance of the event for the relevant condition, disease state, or cell-type program
+- distinguish explicitly between:
+  - disease-state interpretation
+  - cell-type-specific interpretation
+- do not force a disease interpretation onto a cell-type-specific event, or a cell-identity interpretation onto a within-cell-type disease comparison
+- for each anchor or strong supporting event, explicitly answer:
+  - what transcript shift occurred
+  - what the sequence-model contrasts imply
+  - how this could alter the known function of the gene
+  - why that may matter for the compared condition or cell-type context
+- discuss whether the shift is more indicative of:
+  - adaptive remodeling
+  - impaired productive output
+  - altered RNA handling
+  - altered localization-compatible fate
+  - altered stress-response behavior
+
+Use literature both for:
+
+- transcript-event interpretation
+- gene-function and disease-context interpretation
+
+## Writing Rules
+
+- Write the main body as continuous manuscript-style prose.
+- Keep one paragraph for one message.
+- The first sentence of each paragraph should state the paragraph's main claim or role.
+- Do not organize the final main text as a stepwise recap of module outputs.
+- It is acceptable to organize the main text around prioritized transcript events, but each paragraph must contain explicit sequence-model interpretation.
+- Insert citations directly into the relevant paragraphs, not only in a terminal bibliography.
+- Prefer natural manuscript prose over repeated template expressions.
+- Do not give equal narrative weight to all genes.
+- Anchor the main narrative on the strongest events.
+- Do not use report-style headers such as technical recap or evidence inventory inside the main results body.
+
+## Output Shape
+
+Prefer this order:
+
+1. anchor event paragraph(s)
+2. strong supporting event paragraph(s)
+3. secondary supporting event paragraph(s)
+4. brief integrative synthesis paragraph
+5. caveats integrated with claim strength
+6. references
+
+Within each event paragraph, prefer:
+
+1. name the event and the direction of transcript change
+2. compare key model outputs across the transcripts
+3. classify convergence
+4. interpret the biological meaning of the directional contrast
+5. connect the event to gene function and condition context
+6. insert relevant literature citations in the paragraph
+
+## Deep Mode
+
+This skill should use `deep` interpretation mode by default.
+
+Deep mode requires:
+
+- targeted literature search
+- event ranking by evidential strength
+- transcript-level sequence-model comparison
+- gene-function and condition-specific interpretation
+- explicit treatment of model convergence or discordance
+- substantial manuscript-style prose rather than short recap blocks
+
+## Self-Review
+
+Before finalizing, check:
+
+- is each paragraph centered on one event or one integrative message
+- are the strongest events clearly prioritized
+- are sequence-model outputs synthesized rather than listed
+- is gene function actually used to explain why the event matters
+- are any claims stronger than the evidence allows
+- are citations inserted where the claim is made
+- is any paragraph generic background instead of interpretation of the current run
