@@ -47,8 +47,6 @@ scIsoAgent currently supports:
 - ONT long-read single-cell RNA-seq
 - PacBio CCS long-read single-cell RNA-seq
 
-Note: `bambu`-related functionality is not yet officially enabled in the current public workflow bundle.
-
 ### Upstream ⬆️
 
 Upstream processing turns raw reads into transcript- or gene-level outputs.
@@ -74,6 +72,8 @@ Input BAM
        - IsoQuant
        - bambu
 ```
+
+Note: `bambu`-related functionality is not yet officially enabled in the current public workflow bundle.
 
 ### Downstream ⬇️
 
