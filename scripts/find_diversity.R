@@ -1,3 +1,9 @@
+# ------------------------------------------------------------------------------
+# Script: find_diversity.R
+# Purpose: Compute normalized isoform entropy to profile per-gene isoform diversity.
+# Note: Documentation/layout update only; analysis logic was not changed.
+# ------------------------------------------------------------------------------
+
 # Modified from Sefi Prawer's scripts
 # sefi.prawer@unimelb.edu.au
 #' Compute Gene Isoform Entropy Matrix

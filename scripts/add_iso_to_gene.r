@@ -1,8 +1,19 @@
+# ------------------------------------------------------------------------------
+# Script: add_iso_to_gene.r
+# Purpose: Merge isoform assay and reduction into a merged gene-level Seurat object.
+# Note: Documentation/layout update only; analysis logic was not changed.
+# ------------------------------------------------------------------------------
+
 suppressPackageStartupMessages({
   library(Seurat)
   library(data.table)
 })
 
+# Parse command-line arguments.
+# Brief: Parse command-line arguments written as `--key=value` pairs.
+# Args:
+#   args: Raw trailing command-line arguments passed to the script.
+# Returns: Named list/dictionary of parsed command-line options.
 parse_args <- function(args) {
   parsed <- list()
 
@@ -25,6 +36,11 @@ parse_args <- function(args) {
   parsed
 }
 
+# Brief: Check that required command-line options were supplied before running a stage.
+# Args:
+#   parsed: Named argument list produced by the script argument parser.
+#   required_keys: Argument names that must be present before continuing.
+# Returns: No return value; raises an error when any required option is missing.
 require_args <- function(parsed, required_keys) {
   missing_keys <- required_keys[!required_keys %in% names(parsed)]
   if (length(missing_keys) > 0) {
@@ -46,10 +62,21 @@ require_args <- function(parsed, required_keys) {
   }
 }
 
+# Brief: Create the parent directory for an output file when it is missing.
+# Args:
+#   path: Filesystem path to create, read, or write.
+# Returns: Ensures the output file parent directory exists; no analysis object is returned.
 ensure_parent_dir <- function(path) {
   dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
 }
 
+# Brief: Copy isoform UMAP embeddings into a reduction object aligned to shared cells.
+# Args:
+#   isoform_obj: Isoform-level Seurat object.
+#   common_cells: Cell barcode or cell-level metadata used for filtering or grouping.
+#   reduction_name: Resolved dimensional reduction name.
+#   new_reduction_name: Reduction name used when copying isoform embeddings into another object.
+# Returns: Constructed isoform reduction object/table.
 build_isoform_reduction <- function(isoform_obj,
                                     common_cells,
                                     reduction_name = "umap",
@@ -72,6 +99,17 @@ build_isoform_reduction <- function(isoform_obj,
   )
 }
 
+# Brief: Write a compact run summary table for the current script.
+# Args:
+#   output_rds: Path where the output Seurat RDS object should be saved.
+#   gene_rds: Merged gene-level Seurat RDS path.
+#   isoform_rds: Merged isoform-level Seurat RDS path.
+#   common_cells: Cell barcode or cell-level metadata used for filtering or grouping.
+#   gene_obj: Gene-level Seurat object.
+#   isoform_obj: Isoform-level Seurat object.
+#   assay_name: Seurat assay name to set or validate.
+#   reduction_added: Dimensional reduction name used for embedding operations.
+# Returns: Writes the module-specific summary TSV next to the main output file.
 write_summary <- function(output_rds,
                           gene_rds,
                           isoform_rds,
@@ -113,6 +151,10 @@ write_summary <- function(output_rds,
   )
 }
 
+# Main workflow entrypoint.
+# Brief: Run the script-specific command-line workflow.
+# Args: None.
+# Returns: No return value; executes the selected workflow and writes configured outputs.
 main <- function() {
   args <- parse_args(commandArgs(trailingOnly = TRUE))
   require_args(args, c("gene_rds", "isoform_rds", "output_rds"))

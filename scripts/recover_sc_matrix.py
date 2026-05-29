@@ -1,4 +1,9 @@
-#!/usr/bin/env python3
+# ------------------------------------------------------------------------------
+# Script: recover_sc_matrix.py
+# Purpose: Recover transcript-by-cell and gene-by-cell matrices from FLAIR read-map output.
+# Note: Documentation/layout update only; analysis logic was not changed.
+# ------------------------------------------------------------------------------
+
 """
 Usage example:
 python /home4/zcz/zcz_proj1/IsoAgent/output/flair/recover_sc_matrix.py \
@@ -12,7 +17,6 @@ from collections import defaultdict
 import os
 import shutil
 import zlib
-
 
 parser = argparse.ArgumentParser(
     description=(

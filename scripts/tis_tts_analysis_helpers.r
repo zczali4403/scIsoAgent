@@ -1,13 +1,30 @@
+# ------------------------------------------------------------------------------
+# Script: tis_tts_analysis_helpers.r
+# Purpose: Helper utilities for TranslationAI TIS/TTS parsing and visualization.
+# Note: Documentation/layout update only; analysis logic was not changed.
+# ------------------------------------------------------------------------------
+
 suppressPackageStartupMessages({
   library(data.table)
   library(dplyr)
   library(ggplot2)
 })
 
+# Brief: Create an output directory when it is missing.
+# Args:
+#   path: Filesystem path to create, read, or write.
+# Returns: Ensures the target directory exists; no analysis object is returned.
 ensure_dir <- function(path) {
   dir.create(path, recursive = TRUE, showWarnings = FALSE)
 }
 
+# Brief: Write a ggplot-compatible plot object to a PDF file.
+# Args:
+#   plot_obj: Plot object to save.
+#   file_path: Filesystem path for an input or output file.
+#   width: Figure width in inches.
+#   height: Figure height in inches.
+# Returns: Writes the provided plot object to a PDF file.
 save_plot_pdf <- function(plot_obj, file_path, width = 10, height = 6) {
   ensure_dir(dirname(file_path))
   pdf(file = file_path, width = width, height = height, bg = "white")
@@ -15,6 +32,10 @@ save_plot_pdf <- function(plot_obj, file_path, width = 10, height = 6) {
   dev.off()
 }
 
+# Brief: Parse TranslationAI ORF output into transcript TIS/TTS coordinates and scores.
+# Args:
+#   orf_file: TranslationAI ORF prediction output file.
+# Returns: Loaded translationai orf output object/table from disk or package resources.
 read_translationai_orf_output <- function(orf_file) {
   lines <- readLines(orf_file, warn = FALSE)
   lines <- lines[nzchar(trimws(lines))]
@@ -55,6 +76,10 @@ read_translationai_orf_output <- function(orf_file) {
   do.call(rbind, parsed)
 }
 
+# Brief: Read the transcript-to-gene mapping table produced during resource setup.
+# Args:
+#   mapping_file: Transcript-to-gene mapping CSV produced by resource setup.
+# Returns: Loaded transcript gene mapping object/table from disk or package resources.
 read_transcript_gene_mapping <- function(mapping_file) {
   dict_df <- data.table::fread(mapping_file, data.table = FALSE)
 
@@ -78,6 +103,11 @@ read_transcript_gene_mapping <- function(mapping_file) {
     distinct(transcript_id, .keep_all = TRUE)
 }
 
+# Brief: Find all transcript records matching a gene symbol or gene ID.
+# Args:
+#   gene_query: Gene symbol or gene ID requested by the user.
+#   mapping_df: Loaded transcript-to-gene mapping data frame.
+# Returns: Resolved gene transcripts value or matching records.
 resolve_gene_transcripts <- function(gene_query, mapping_df) {
   if (is.null(gene_query) || gene_query == "") {
     stop("gene_query must be a non-empty gene symbol or gene_id")
@@ -97,6 +127,12 @@ resolve_gene_transcripts <- function(gene_query, mapping_df) {
     arrange(gene_symbol, gene_id, transcript_id)
 }
 
+# Brief: Join TranslationAI predictions with transcript mapping for one selected gene.
+# Args:
+#   gene_query: Gene symbol or gene ID requested by the user.
+#   orf_df: Parsed TranslationAI ORF prediction table.
+#   mapping_df: Loaded transcript-to-gene mapping data frame.
+# Returns: Prepared gene tis tts table object/table for the next step.
 prepare_gene_tis_tts_table <- function(gene_query, orf_df, mapping_df) {
   gene_tx <- resolve_gene_transcripts(gene_query, mapping_df)
   merged_df <- gene_tx %>%
@@ -115,11 +151,22 @@ prepare_gene_tis_tts_table <- function(gene_query, orf_df, mapping_df) {
   merged_df
 }
 
+# Brief: Write a gene-specific TIS/TTS coordinate table.
+# Args:
+#   gene_df: Gene-specific transcript table with prediction coordinates or scores.
+#   output_file: Destination path for the generated table or figure.
+# Returns: Writes gene-specific TIS/TTS CSV table.
 write_gene_tis_tts_table <- function(gene_df, output_file) {
   ensure_dir(dirname(output_file))
   write.csv(gene_df, output_file, row.names = FALSE)
 }
 
+# Brief: Plot predicted TIS and TTS coordinates for transcripts of one gene.
+# Args:
+#   gene_df: Gene-specific transcript table with prediction coordinates or scores.
+#   gene_query: Gene symbol or gene ID requested by the user.
+#   output_file: Destination path for the generated table or figure.
+# Returns: Plot object for gene tis tts; writes a PDF when an output path is provided.
 plot_gene_tis_tts <- function(gene_df,
                               gene_query,
                               output_file = NULL) {

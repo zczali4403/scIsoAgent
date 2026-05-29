@@ -1,4 +1,9 @@
-#!/usr/bin/env python
+# ------------------------------------------------------------------------------
+# Script: orthrus_model_helpers.py
+# Purpose: Helper CLI for Orthrus embedding inference, task prediction, and result aggregation.
+# Note: Documentation/layout update only; analysis logic was not changed.
+# ------------------------------------------------------------------------------
+
 """Helpers for Orthrus-based gene-specific isoform functional inference.
 
 This helper supports four stages:
@@ -33,23 +38,59 @@ TASK_DISPLAY_NAMES = {
     "rna-loc-fazal": "RNA Localization",
 }
 
-
 DEFAULT_PROBE_DIR = Path("/work/scIsoAgent/orthrus_trained_probes")
 DEFAULT_LABEL_MAP_DIR = Path("/work/scIsoAgent/orthrus_label_maps")
 DEFAULT_TASK_SPECS = [
-    {"task_name": "mrl-sugimoto", "probe_filename": "mrl-sugimoto_probe.joblib", "task": "regression", "label_map_filename": ""},
-    {"task_name": "rnahl-human", "probe_filename": "rnahl-human_probe.joblib", "task": "regression", "label_map_filename": ""},
-    {"task_name": "translation-efficiency-human", "probe_filename": "translation-efficiency-human_probe.joblib", "task": "regression", "label_map_filename": ""},
-    {"task_name": "prot-loc", "probe_filename": "prot-loc_probe.joblib", "task": "multilabel", "label_map_filename": "prot-loc_label_map.json"},
-    {"task_name": "rna-lifecycle-ietswaart", "probe_filename": "rna-lifecycle-ietswaart_probe.joblib", "task": "multilabel", "label_map_filename": "rna-lifecycle-ietswaart_label_map.json"},
-    {"task_name": "rna-loc-fazal", "probe_filename": "rna-loc-fazal_probe.joblib", "task": "multilabel", "label_map_filename": "rna-loc-fazal_label_map.json"},
+    {
+        "task_name": "mrl-sugimoto",
+        "probe_filename": "mrl-sugimoto_probe.joblib",
+        "task": "regression",
+        "label_map_filename": "",
+    },
+    {
+        "task_name": "rnahl-human",
+        "probe_filename": "rnahl-human_probe.joblib",
+        "task": "regression",
+        "label_map_filename": "",
+    },
+    {
+        "task_name": "translation-efficiency-human",
+        "probe_filename": "translation-efficiency-human_probe.joblib",
+        "task": "regression",
+        "label_map_filename": "",
+    },
+    {
+        "task_name": "prot-loc",
+        "probe_filename": "prot-loc_probe.joblib",
+        "task": "multilabel",
+        "label_map_filename": "prot-loc_label_map.json",
+    },
+    {
+        "task_name": "rna-lifecycle-ietswaart",
+        "probe_filename": "rna-lifecycle-ietswaart_probe.joblib",
+        "task": "multilabel",
+        "label_map_filename": "rna-lifecycle-ietswaart_label_map.json",
+    },
+    {
+        "task_name": "rna-loc-fazal",
+        "probe_filename": "rna-loc-fazal_probe.joblib",
+        "task": "multilabel",
+        "label_map_filename": "rna-loc-fazal_label_map.json",
+    },
 ]
 
-
+# Brief: Create the parent directory for a Python output path when it is missing.
+# Args:
+#   path: Filesystem path to create, read, or write.
+# Returns: Ensures the output file parent directory exists; no analysis object is returned.
 def ensure_parent(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
 
 
+# Brief: Read FASTA records as transcript ID and sequence pairs.
+# Args:
+#   path: Filesystem path to create, read, or write.
+# Returns: Loaded fasta object/table from disk or package resources.
 def read_fasta(path: Path) -> list[tuple[str, str]]:
     records: list[tuple[str, str]] = []
     current_id: str | None = None
@@ -82,6 +123,11 @@ def read_fasta(path: Path) -> list[tuple[str, str]]:
     return records
 
 
+# Brief: Write transcript ID and sequence pairs to a FASTA file.
+# Args:
+#   path: Filesystem path to create, read, or write.
+#   records: FASTA records represented as transcript ID and sequence pairs.
+# Returns: Writes the FASTA file; no object is returned.
 def write_fasta(path: Path, records: Iterable[tuple[str, str]]) -> None:
     ensure_parent(path)
     with path.open("w") as handle:
@@ -91,6 +137,13 @@ def write_fasta(path: Path, records: Iterable[tuple[str, str]]) -> None:
                 handle.write(sequence[start : start + 80] + "\n")
 
 
+# Brief: Read and validate the transcript-to-gene mapping table used for gene lookup.
+# Args:
+#   path: Filesystem path to create, read, or write.
+#   transcript_id_col: Transcript/isoform identifier or transcript-level data used by the analysis.
+#   gene_id_col: Column name containing gene IDs in the mapping table.
+#   gene_symbol_col: Column name containing gene symbols in the mapping table.
+# Returns: Loaded mapping table object/table from disk or package resources.
 def read_mapping_table(
     path: Path,
     transcript_id_col: str = "transcript_id",
@@ -113,15 +166,31 @@ def read_mapping_table(
     return out
 
 
+# Brief: Find all transcript records matching a gene symbol or gene ID.
+# Args:
+#   gene_query: Gene symbol or gene ID requested by the user.
+#   mapping_df: Loaded transcript-to-gene mapping data frame.
+# Returns: Resolved gene transcripts value or matching records.
 def resolve_gene_transcripts(gene_query: str, mapping_df: pd.DataFrame) -> pd.DataFrame:
     matches = mapping_df[
-        (mapping_df["gene_symbol"] == gene_query) | (mapping_df["gene_id"] == gene_query)
+        (mapping_df["gene_symbol"] == gene_query)
+        | (mapping_df["gene_id"] == gene_query)
     ].copy()
     if matches.empty:
         raise ValueError(f"No transcripts found for gene query: {gene_query}")
     return matches.sort_values(["gene_symbol", "gene_id", "transcript_id"])
 
 
+# Brief: Extract FASTA records for all transcripts belonging to one queried gene.
+# Args:
+#   mapping_csv: Transcript-to-gene mapping CSV used for gene-specific FASTA extraction.
+#   input_fasta: Input transcript FASTA file.
+#   gene_query: Gene symbol or gene ID requested by the user.
+#   output_fasta: Output FASTA file to create.
+#   transcript_id_col: Transcript/isoform identifier or transcript-level data used by the analysis.
+#   gene_id_col: Column name containing gene IDs in the mapping table.
+#   gene_symbol_col: Column name containing gene symbols in the mapping table.
+# Returns: Path to the written gene-specific FASTA file.
 def extract_gene_fasta(
     mapping_csv: Path,
     input_fasta: Path,
@@ -150,6 +219,10 @@ def extract_gene_fasta(
 
 
 class _MambaGenerationOutput(dict):
+    # Brief: Initialize a compatibility dictionary/object used by patched model-generation code.
+    # Args:
+    #   kwargs: Compatibility keyword payload stored on the dict-like output object.
+    # Returns: Initialized dict-like compatibility object with keyword values exposed as attributes.
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.__dict__.update(kwargs)
@@ -172,7 +245,14 @@ try:
 except ImportError:
     pass
 
-
+# Brief: Run the Orthrus/mRNA-bench model to generate one embedding per transcript sequence.
+# Args:
+#   records: FASTA records represented as transcript ID and sequence pairs.
+#   model_name: mRNA-bench model family name used for embedding inference.
+#   model_version: mRNA-bench model version used for embedding inference.
+#   device: Torch device used for embedding inference.
+#   mrna_bench_data_path: Optional local data directory for the mRNA-bench package.
+# Returns: Inferred embeddings values.
 def infer_embeddings(
     records: list[tuple[str, str]],
     model_name: str,
@@ -183,7 +263,9 @@ def infer_embeddings(
     try:
         import mrna_bench as mb
     except ImportError as exc:
-        raise ImportError("mrna_bench is required for Orthrus embedding inference.") from exc
+        raise ImportError(
+            "mrna_bench is required for Orthrus embedding inference."
+        ) from exc
 
     if mrna_bench_data_path is not None:
         mb.update_data_path(str(mrna_bench_data_path))
@@ -201,7 +283,15 @@ def infer_embeddings(
     return np.stack(embeddings)
 
 
-def write_embedding_csv(path: Path, transcript_ids: list[str], embeddings: np.ndarray) -> None:
+# Brief: Write an embedding matrix to CSV with transcript IDs.
+# Args:
+#   path: Filesystem path to create, read, or write.
+#   transcript_ids: Transcript identifiers aligned with sequence records or embeddings.
+#   embeddings: Numeric transcript embedding matrix to write.
+# Returns: Writes embedding CSV; no object is returned.
+def write_embedding_csv(
+    path: Path, transcript_ids: list[str], embeddings: np.ndarray
+) -> None:
     ensure_parent(path)
     header = ["transcript_id"] + [f"embedding_{i}" for i in range(embeddings.shape[1])]
     with path.open("w") as handle:
@@ -211,6 +301,16 @@ def write_embedding_csv(path: Path, transcript_ids: list[str], embeddings: np.nd
             handle.write(",".join(values) + "\n")
 
 
+# Brief: Read FASTA, infer Orthrus embeddings, and save NPZ/optional CSV outputs.
+# Args:
+#   fasta: Transcript FASTA file used for sequence-based analysis.
+#   output: Output path for the current CLI subcommand.
+#   csv_output: Optional CSV path for embedding export.
+#   model_name: mRNA-bench model family name used for embedding inference.
+#   model_version: mRNA-bench model version used for embedding inference.
+#   device: Torch device used for embedding inference.
+#   mrna_bench_data_path: Optional local data directory for the mRNA-bench package.
+# Returns: Result object/table from the embedding inference step.
 def run_embedding_inference(
     fasta: Path,
     output: Path,
@@ -242,6 +342,10 @@ def run_embedding_inference(
     return output
 
 
+# Brief: Load a pretrained Orthrus downstream probe and optional metadata.
+# Args:
+#   path: Filesystem path to create, read, or write.
+# Returns: Tuple of (model, metadata) loaded from a joblib probe file.
 def _load_probe(path: Path) -> tuple[object, dict]:
     obj = joblib.load(path)
     if isinstance(obj, dict) and "model" in obj:
@@ -249,11 +353,21 @@ def _load_probe(path: Path) -> tuple[object, dict]:
     return obj, {}
 
 
-def _load_embeddings(npz_path: Path, embedding_key: str | None, id_key: str) -> tuple[np.ndarray, np.ndarray]:
+# Brief: Load embeddings and transcript IDs from an NPZ file.
+# Args:
+#   npz_path: NPZ path containing saved embeddings.
+#   embedding_key: NPZ key containing the embedding matrix.
+#   id_key: NPZ key containing transcript IDs.
+# Returns: Tuple of (embedding_matrix, transcript_id_array).
+def _load_embeddings(
+    npz_path: Path, embedding_key: str | None, id_key: str
+) -> tuple[np.ndarray, np.ndarray]:
     with np.load(npz_path, allow_pickle=False) as data:
         if embedding_key is not None:
             if embedding_key not in data:
-                raise ValueError(f"Embedding key '{embedding_key}' not found in {npz_path}.")
+                raise ValueError(
+                    f"Embedding key '{embedding_key}' not found in {npz_path}."
+                )
             embeddings = data[embedding_key]
         elif "embeddings" in data:
             embeddings = data["embeddings"]
@@ -280,6 +394,12 @@ def _load_embeddings(npz_path: Path, embedding_key: str | None, id_key: str) -> 
     return embeddings, transcript_ids
 
 
+# Brief: Infer the prediction task type from probe metadata or model capabilities.
+# Args:
+#   model: Loaded prediction model/probe object.
+#   metadata: Probe metadata dictionary.
+#   task_override: Explicit task type overriding inferred probe metadata.
+# Returns: Detected/inferred task label used by the Orthrus prediction workflow.
 def _infer_task(model: object, metadata: dict, task_override: str | None) -> str:
     if task_override:
         return task_override
@@ -293,6 +413,10 @@ def _infer_task(model: object, metadata: dict, task_override: str | None) -> str
     return "regression"
 
 
+# Brief: Load a label-index-to-name mapping JSON file.
+# Args:
+#   path: Filesystem path to create, read, or write.
+# Returns: Dictionary mapping class indices to labels, or None when no label map is provided.
 def _load_label_map(path: Path | None) -> dict[int, str] | None:
     if path is None:
         return None
@@ -301,6 +425,18 @@ def _load_label_map(path: Path | None) -> dict[int, str] | None:
     return {int(k): str(v) for k, v in raw.items()}
 
 
+# Brief: Apply one pretrained probe to Orthrus embeddings and write prediction CSV output.
+# Args:
+#   probe_path: Path to a trained Orthrus downstream probe.
+#   embedding_npz: NPZ file containing transcript embeddings.
+#   output_csv: Prediction CSV path to write.
+#   task: Prediction task type for a probe.
+#   label_map_json: JSON file mapping label indices to class names.
+#   embedding_key: NPZ key containing the embedding matrix.
+#   id_key: NPZ key containing transcript IDs.
+#   threshold: Probability threshold for multilabel positive calls.
+#   save_metadata: Whether to write probe metadata alongside predictions.
+# Returns: Path to the written probe prediction CSV file.
 def predict_with_probe(
     probe_path: Path,
     embedding_npz: Path,
@@ -314,7 +450,9 @@ def predict_with_probe(
 ) -> Path:
     model, metadata = _load_probe(probe_path)
     label_map = _load_label_map(label_map_json)
-    X, transcript_ids = _load_embeddings(embedding_npz, embedding_key=embedding_key, id_key=id_key)
+    X, transcript_ids = _load_embeddings(
+        embedding_npz, embedding_key=embedding_key, id_key=id_key
+    )
 
     if hasattr(model, "n_features_in_") and model.n_features_in_ != X.shape[1]:
         raise ValueError(
@@ -331,7 +469,9 @@ def predict_with_probe(
             out_df["prediction"] = y_pred
         else:
             n_targets = y_pred.shape[1]
-            target_labels = metadata.get("target_labels") or [f"target_{i}" for i in range(n_targets)]
+            target_labels = metadata.get("target_labels") or [
+                f"target_{i}" for i in range(n_targets)
+            ]
             for i in range(n_targets):
                 out_df[f"prediction_{target_labels[i]}"] = y_pred[:, i]
 
@@ -339,7 +479,9 @@ def predict_with_probe(
         pred = model.predict(X)
         out_df["prediction"] = pred
         if label_map is not None:
-            out_df["prediction_label"] = [label_map.get(int(x), str(x)) for x in np.ravel(pred)]
+            out_df["prediction_label"] = [
+                label_map.get(int(x), str(x)) for x in np.ravel(pred)
+            ]
         if hasattr(model, "predict_proba"):
             probs = model.predict_proba(X)
             if np.ndim(probs) == 2 and probs.shape[1] > 1:
@@ -353,7 +495,10 @@ def predict_with_probe(
         probs = model.predict_proba(X)
         if isinstance(probs, list):
             score_mat = np.stack(
-                [p[:, 1] if p.ndim == 2 and p.shape[1] > 1 else np.ravel(p) for p in probs],
+                [
+                    p[:, 1] if p.ndim == 2 and p.shape[1] > 1 else np.ravel(p)
+                    for p in probs
+                ],
                 axis=1,
             )
         else:
@@ -367,12 +512,18 @@ def predict_with_probe(
         if not isinstance(target_labels, list) or len(target_labels) != n_labels:
             target_labels = [f"label_{i}" for i in range(n_labels)]
         if label_map is not None:
-            target_labels = [label_map.get(i, target_labels[i]) for i in range(n_labels)]
+            target_labels = [
+                label_map.get(i, target_labels[i]) for i in range(n_labels)
+            ]
 
         prediction_strings = []
         for row in pred_mat:
-            positive_labels = [target_labels[i] for i, value in enumerate(row) if value >= 1]
-            prediction_strings.append("|".join(positive_labels) if positive_labels else "None")
+            positive_labels = [
+                target_labels[i] for i, value in enumerate(row) if value >= 1
+            ]
+            prediction_strings.append(
+                "|".join(positive_labels) if positive_labels else "None"
+            )
         out_df["prediction"] = prediction_strings
 
         for i, label in enumerate(target_labels):
@@ -392,6 +543,12 @@ def predict_with_probe(
     return output_csv
 
 
+# Brief: Create the default Orthrus task manifest from packaged probes and label maps.
+# Args:
+#   output: Output path for the current CLI subcommand.
+#   probe_dir: Directory containing packaged Orthrus probe files.
+#   label_map_dir: Directory containing packaged Orthrus label-map files.
+# Returns: Constructed default task manifest object/table.
 def build_default_task_manifest(
     output: Path,
     probe_dir: Path = DEFAULT_PROBE_DIR,
@@ -417,6 +574,10 @@ def build_default_task_manifest(
     return output
 
 
+# Brief: Read and validate an Orthrus task manifest table.
+# Args:
+#   path: Filesystem path to create, read, or write.
+# Returns: Loaded task manifest object/table from disk or package resources.
 def load_task_manifest(path: Path) -> pd.DataFrame:
     if path.suffix.lower() in {".tsv", ".txt"}:
         df = pd.read_csv(path, sep="\t")
@@ -425,10 +586,20 @@ def load_task_manifest(path: Path) -> pd.DataFrame:
     required = ["task_name", "probe_path"]
     missing = [col for col in required if col not in df.columns]
     if missing:
-        raise ValueError("Task manifest is missing required columns: " + ", ".join(missing))
+        raise ValueError(
+            "Task manifest is missing required columns: " + ", ".join(missing)
+        )
     return df.fillna("")
 
 
+# Brief: Run all Orthrus tasks listed in a manifest against one embedding file.
+# Args:
+#   task_manifest: CSV/TSV manifest describing Orthrus prediction tasks.
+#   embedding_npz: NPZ file containing transcript embeddings.
+#   output_dir: Directory where output files should be written.
+#   embedding_key: NPZ key containing the embedding matrix.
+#   id_key: NPZ key containing transcript IDs.
+# Returns: List of prediction CSV paths produced by all manifest tasks.
 def run_task_manifest(
     task_manifest: Path,
     embedding_npz: Path,
@@ -447,7 +618,11 @@ def run_task_manifest(
         task_type = str(row.get("task", "")).strip() or None
         label_map_json = str(row.get("label_map_json", "")).strip()
         threshold = float(row.get("threshold", 0.5) or 0.5)
-        save_metadata = str(row.get("save_metadata", "")).strip().lower() in {"1", "true", "yes"}
+        save_metadata = str(row.get("save_metadata", "")).strip().lower() in {
+            "1",
+            "true",
+            "yes",
+        }
         output_csv = output_dir / f"{task_name}_predictions.csv"
         predict_with_probe(
             probe_path=probe_path,
@@ -472,10 +647,16 @@ def run_task_manifest(
             }
         )
 
-    pd.DataFrame(resolved_rows).to_csv(output_dir / "resolved_task_manifest.csv", index=False)
+    pd.DataFrame(resolved_rows).to_csv(
+        output_dir / "resolved_task_manifest.csv", index=False
+    )
     return produced
 
 
+# Brief: Detect whether a prediction table contains regression, classification, or multilabel output.
+# Args:
+#   df: Prediction table inspected for task-type detection.
+# Returns: Detected/inferred task label used by the Orthrus prediction workflow.
 def _detect_task_type(df: pd.DataFrame) -> str:
     has_pred_cols = any(c.startswith("pred_") for c in df.columns)
     has_score_cols = any(c.startswith("score_") for c in df.columns)
@@ -491,6 +672,10 @@ def _detect_task_type(df: pd.DataFrame) -> str:
     return "classification"
 
 
+# Brief: Min-max scale numeric predictions for heatmap visualization.
+# Args:
+#   col: Numeric pandas Series to scale into the [0, 1] interval.
+# Returns: Numeric values scaled into the [0, 1] interval.
 def _minmax_scale(col: pd.Series) -> pd.Series:
     mn = col.min()
     mx = col.max()
@@ -501,6 +686,10 @@ def _minmax_scale(col: pd.Series) -> pd.Series:
     return (col - mn) / (mx - mn)
 
 
+# Brief: Sort Orthrus tasks in a preferred display order.
+# Args:
+#   task_name: Orthrus task identifier used for preferred report ordering.
+# Returns: Sort key tuple used to order Orthrus tasks in reports.
 def _task_sort_key(task_name: str) -> tuple[int, str]:
     preferred = ["prot-loc", "rna-lifecycle-ietswaart", "rna-loc-fazal"]
     if task_name in preferred:
@@ -508,7 +697,14 @@ def _task_sort_key(task_name: str) -> tuple[int, str]:
     return (len(preferred), task_name)
 
 
-def _build_multilabel_score_matrix(task_df: pd.DataFrame, transcript_order: list[str]) -> pd.DataFrame:
+# Brief: Build a transcript-by-class score matrix from multilabel prediction output.
+# Args:
+#   task_df: Per-task Orthrus prediction table containing transcript IDs and class columns.
+#   transcript_order: Transcript/isoform identifier or transcript-level data used by the analysis.
+# Returns: DataFrame matrix assembled for Orthrus report plotting.
+def _build_multilabel_score_matrix(
+    task_df: pd.DataFrame, transcript_order: list[str]
+) -> pd.DataFrame:
     score_cols = [c for c in task_df.columns if c.startswith("score_")]
     pred_cols = [c for c in task_df.columns if c.startswith("pred_")]
     if not score_cols and not pred_cols:
@@ -528,7 +724,14 @@ def _build_multilabel_score_matrix(task_df: pd.DataFrame, transcript_order: list
     return score_df
 
 
-def _build_multilabel_pred_matrix(task_df: pd.DataFrame, transcript_order: list[str]) -> pd.DataFrame:
+# Brief: Build a transcript-by-class binary prediction matrix from multilabel output.
+# Args:
+#   task_df: Per-task Orthrus prediction table containing transcript IDs and class columns.
+#   transcript_order: Transcript/isoform identifier or transcript-level data used by the analysis.
+# Returns: DataFrame matrix assembled for Orthrus report plotting.
+def _build_multilabel_pred_matrix(
+    task_df: pd.DataFrame, transcript_order: list[str]
+) -> pd.DataFrame:
     pred_cols = [c for c in task_df.columns if c.startswith("pred_")]
     if not pred_cols:
         return pd.DataFrame(index=transcript_order)
@@ -541,6 +744,15 @@ def _build_multilabel_pred_matrix(task_df: pd.DataFrame, transcript_order: list[
     return pred_df
 
 
+# Brief: Merge Orthrus task outputs, write summary tables, and render the PDF report.
+# Args:
+#   result_dir: Directory containing per-task Orthrus prediction CSV files.
+#   output_table: CSV path for the aggregated Orthrus prediction table.
+#   output_category_map: JSON path for categorical-code mappings.
+#   output_pdf: PDF path for the aggregated Orthrus report.
+#   task_files: Optional explicit task prediction filenames to aggregate.
+#   join: Join mode used when merging per-task prediction tables.
+# Returns: Tuple of output paths: aggregated table, category map JSON, and PDF figure.
 def aggregate_results_to_pdf(
     result_dir: Path,
     output_table: Path,
@@ -588,7 +800,9 @@ def aggregate_results_to_pdf(
                 continue
             task_col = df["prediction"].astype(str)
 
-        slim = pd.DataFrame({"transcript_id": df["transcript_id"].astype(str), task_name: task_col})
+        slim = pd.DataFrame(
+            {"transcript_id": df["transcript_id"].astype(str), task_name: task_col}
+        )
         if merged_df is None:
             merged_df = slim
         else:
@@ -611,14 +825,18 @@ def aggregate_results_to_pdf(
         category_code_map[task_name] = {val: i for i, val in enumerate(unique_vals)}
 
     ensure_parent(output_category_map)
-    output_category_map.write_text(json.dumps(category_code_map, indent=2, ensure_ascii=False))
+    output_category_map.write_text(
+        json.dumps(category_code_map, indent=2, ensure_ascii=False)
+    )
 
     transcript_order = merged_df["transcript_id"].astype(str).tolist()
     reg_tasks = [t for t in task_cols if task_types.get(t) == "regression"]
     reg_df = pd.DataFrame(index=transcript_order)
     for task_name in reg_tasks:
         numeric = pd.to_numeric(merged_df[task_name], errors="coerce")
-        reg_df[TASK_DISPLAY_NAMES.get(task_name, task_name)] = _minmax_scale(numeric).to_numpy()
+        reg_df[TASK_DISPLAY_NAMES.get(task_name, task_name)] = _minmax_scale(
+            numeric
+        ).to_numpy()
 
     multilabel_tasks = sorted(
         [t for t in task_cols if task_types.get(t) == "multilabel"],
@@ -659,7 +877,13 @@ def aggregate_results_to_pdf(
             pred_df = _build_multilabel_pred_matrix(task_df, transcript_order)
             if score_df.shape[1] == 0:
                 ax.axis("off")
-                ax.text(0.5, 0.5, f"{task_name}\n(no score columns)", ha="center", va="center")
+                ax.text(
+                    0.5,
+                    0.5,
+                    f"{task_name}\n(no score columns)",
+                    ha="center",
+                    va="center",
+                )
                 continue
             vmax = float(np.nanmax(score_df.to_numpy())) if score_df.size else 1.0
             if not np.isfinite(vmax) or vmax <= 0:
@@ -708,11 +932,16 @@ def aggregate_results_to_pdf(
     return output_table, output_category_map, output_pdf
 
 
+# Brief: Define the Orthrus helper command-line interface and subcommands.
+# Args: None.
+# Returns: Constructed parser object/table.
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Orthrus model helper utilities.")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    p_extract = subparsers.add_parser("extract-gene-fasta", help="Extract one gene's transcripts into a FASTA.")
+    p_extract = subparsers.add_parser(
+        "extract-gene-fasta", help="Extract one gene's transcripts into a FASTA."
+    )
     p_extract.add_argument("--mapping-csv", type=Path, required=True)
     p_extract.add_argument("--input-fasta", type=Path, required=True)
     p_extract.add_argument("--gene-query", required=True)
@@ -721,7 +950,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_extract.add_argument("--gene-id-col", default="gene_id")
     p_extract.add_argument("--gene-symbol-col", default="gene_symbol")
 
-    p_embed = subparsers.add_parser("infer-embeddings", help="Infer Orthrus embeddings from a FASTA.")
+    p_embed = subparsers.add_parser(
+        "infer-embeddings", help="Infer Orthrus embeddings from a FASTA."
+    )
     p_embed.add_argument("--fasta", type=Path, required=True)
     p_embed.add_argument("--output", type=Path, required=True)
     p_embed.add_argument("--csv-output", type=Path, default=None)
@@ -734,19 +965,27 @@ def build_parser() -> argparse.ArgumentParser:
         help="Torch device, for example cuda, cuda:0, or cpu.",
     )
 
-    p_manifest = subparsers.add_parser("build-default-manifest", help="Build a task manifest from the packaged Orthrus probe and label-map directories.")
+    p_manifest = subparsers.add_parser(
+        "build-default-manifest",
+        help="Build a task manifest from the packaged Orthrus probe and label-map directories.",
+    )
     p_manifest.add_argument("--output", type=Path, required=True)
     p_manifest.add_argument("--probe-dir", type=Path, default=DEFAULT_PROBE_DIR)
     p_manifest.add_argument("--label-map-dir", type=Path, default=DEFAULT_LABEL_MAP_DIR)
 
-    p_predict = subparsers.add_parser("predict-tasks", help="Run all tasks from a manifest on one embedding NPZ.")
+    p_predict = subparsers.add_parser(
+        "predict-tasks", help="Run all tasks from a manifest on one embedding NPZ."
+    )
     p_predict.add_argument("--embedding-npz", type=Path, required=True)
     p_predict.add_argument("--task-manifest", type=Path, required=True)
     p_predict.add_argument("--output-dir", type=Path, required=True)
     p_predict.add_argument("--embedding-key", default=None)
     p_predict.add_argument("--id-key", default="transcript_ids")
 
-    p_agg = subparsers.add_parser("aggregate-results", help="Aggregate task outputs and render the aggregated plot as a PDF figure.")
+    p_agg = subparsers.add_parser(
+        "aggregate-results",
+        help="Aggregate task outputs and render the aggregated plot as a PDF figure.",
+    )
     p_agg.add_argument("--result-dir", type=Path, required=True)
     p_agg.add_argument("--output-table", type=Path, required=True)
     p_agg.add_argument("--output-category-map", type=Path, required=True)
@@ -757,6 +996,9 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+# Brief: Run the script-specific command-line workflow.
+# Args: None.
+# Returns: No return value; executes the selected workflow and writes configured outputs.
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
@@ -828,5 +1070,6 @@ def main() -> None:
     raise ValueError(f"Unsupported command: {args.command}")
 
 
+# Main CLI flow.
 if __name__ == "__main__":
     main()

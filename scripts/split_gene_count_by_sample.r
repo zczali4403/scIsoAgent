@@ -1,7 +1,18 @@
+# ------------------------------------------------------------------------------
+# Script: split_gene_count_by_sample.r
+# Purpose: Split merged gene-count matrices into per-sample files by barcode prefix.
+# Note: Documentation/layout update only; analysis logic was not changed.
+# ------------------------------------------------------------------------------
+
 suppressPackageStartupMessages({
   library(data.table)
 })
 
+# Parse command-line arguments.
+# Brief: Parse command-line arguments written as `--key=value` pairs.
+# Args:
+#   args: Raw trailing command-line arguments passed to the script.
+# Returns: Named list/dictionary of parsed command-line options.
 parse_args <- function(args) {
   parsed <- list()
 
@@ -24,6 +35,11 @@ parse_args <- function(args) {
   parsed
 }
 
+# Brief: Check that required command-line options were supplied before running a stage.
+# Args:
+#   parsed: Named argument list produced by the script argument parser.
+#   required_keys: Argument names that must be present before continuing.
+# Returns: No return value; raises an error when any required option is missing.
 require_args <- function(parsed, required_keys) {
   missing_keys <- required_keys[!required_keys %in% names(parsed)]
   if (length(missing_keys) > 0) {
@@ -43,10 +59,18 @@ require_args <- function(parsed, required_keys) {
   }
 }
 
+# Brief: Create an output directory when it is missing.
+# Args:
+#   path: Filesystem path to create, read, or write.
+# Returns: Ensures the target directory exists; no analysis object is returned.
 ensure_dir <- function(path) {
   dir.create(path, recursive = TRUE, showWarnings = FALSE)
 }
 
+# Brief: Infer a sample name from a prefixed barcode string.
+# Args:
+#   barcode: Cell barcode or cell-level metadata used for filtering or grouping.
+# Returns: Inferred sample name values.
 infer_sample_name <- function(barcode) {
   parts <- strsplit(barcode, "_", fixed = TRUE)[[1]]
   if (length(parts) < 2) {
@@ -55,6 +79,12 @@ infer_sample_name <- function(barcode) {
   parts[[1]]
 }
 
+# Brief: Split a merged gene-count matrix into one file per sample using barcode prefixes.
+# Args:
+#   gene_count_file: Gene-by-cell count matrix CSV used by downstream steps.
+#   output_dir: Directory where output files should be written.
+#   strip_prefix: Whether to remove sample prefixes from barcodes after splitting or extraction.
+# Returns: Writes per-sample gene-count CSV files and split_manifest.tsv; returns invisibly.
 split_gene_count_by_sample <- function(gene_count_file, output_dir, strip_prefix = FALSE) {
   ensure_dir(output_dir)
 
@@ -104,6 +134,10 @@ split_gene_count_by_sample <- function(gene_count_file, output_dir, strip_prefix
   fwrite(manifest, file.path(output_dir, "split_manifest.tsv"), sep = "\t")
 }
 
+# Main workflow entrypoint.
+# Brief: Run the script-specific command-line workflow.
+# Args: None.
+# Returns: No return value; executes the selected workflow and writes configured outputs.
 main <- function() {
   args <- parse_args(commandArgs(trailingOnly = TRUE))
   require_args(args, c("gene_count_file", "output_dir"))

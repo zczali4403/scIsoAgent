@@ -1,3 +1,9 @@
+# ------------------------------------------------------------------------------
+# Script: remove_droplets.r
+# Purpose: Run empty-droplet detection and generate filtered Seurat outputs.
+# Note: Documentation/layout update only; analysis logic was not changed.
+# ------------------------------------------------------------------------------
+
 suppressPackageStartupMessages({
   library(SCP)
   library(DropletUtils)
@@ -10,6 +16,11 @@ suppressPackageStartupMessages({
   library(data.table)
 })
 
+# Parse command-line arguments.
+# Brief: Parse command-line arguments written as `--key=value` pairs.
+# Args:
+#   args: Raw trailing command-line arguments passed to the script.
+# Returns: Named list/dictionary of parsed command-line options.
 parse_args <- function(args) {
   parsed <- list()
 
@@ -32,6 +43,11 @@ parse_args <- function(args) {
   parsed
 }
 
+# Brief: Check that required command-line options were supplied before running a stage.
+# Args:
+#   parsed: Named argument list produced by the script argument parser.
+#   required_keys: Argument names that must be present before continuing.
+# Returns: No return value; raises an error when any required option is missing.
 require_args <- function(parsed, required_keys) {
   missing_keys <- required_keys[!required_keys %in% names(parsed)]
   if (length(missing_keys) > 0) {
@@ -54,20 +70,37 @@ require_args <- function(parsed, required_keys) {
   }
 }
 
+# Brief: Create an output directory when it is missing.
+# Args:
+#   path: Filesystem path to create, read, or write.
+# Returns: Ensures the target directory exists; no analysis object is returned.
 ensure_dir <- function(path) {
   dir.create(path, recursive = TRUE, showWarnings = FALSE)
 }
 
+# Brief: Convert a dense count matrix into a sparse Seurat-compatible count matrix.
+# Args:
+#   count_matrix: Gene-by-cell count matrix used to create a sparse Seurat counts layer.
+# Returns: Constructed dgcmatrix object/table.
 make_dgcmatrix <- function(count_matrix) {
   seurat_object <- CreateSeuratObject(counts = count_matrix, project = "singlecell")
   GetAssayData(seurat_object, assay = "RNA", slot = "counts")
 }
 
+# Brief: Extract cell IDs from a clustered Seurat object for overlap checks with emptyDrops results.
+# Args:
+#   seurat_object: Seurat object being processed or plotted.
+# Returns: Data frame containing cell_id values from Seurat cluster metadata.
 overlap_true_cell <- function(seurat_object) {
   seurat_cluster.df <- as.data.frame(seurat_object$seurat_clusters)
   tibble::rownames_to_column(seurat_cluster.df, "cell_id")
 }
 
+# Brief: Convert emptyDrops FDR values into cell-versus-empty-droplet metadata labels.
+# Args:
+#   e.out: emptyDrops result object containing per-barcode FDR values.
+#   fdr_threshold: FDR cutoff used to classify emptyDrops cell calls.
+# Returns: Metadata data frame containing FDR and Cells/Empty_drops classification for each barcode.
 true_cells_metadata <- function(e.out, fdr_threshold) {
   cells <- as.data.frame(e.out@rownames)
   fdr <- as.data.frame(e.out$FDR)
@@ -84,6 +117,10 @@ true_cells_metadata <- function(e.out, fdr_threshold) {
     )
 }
 
+# Brief: Create a barcode rank plot showing knee and inflection points.
+# Args:
+#   br.out: barcodeRanks result object used to draw knee/inflection diagnostics.
+# Returns: ggplot/plot object for rankplot.
 build_rankplot <- function(br.out) {
   knee_value <- metadata(br.out)$knee
   inflection_value <- metadata(br.out)$inflection
@@ -134,6 +171,13 @@ build_rankplot <- function(br.out) {
     )
 }
 
+# Brief: Create a table grob summarizing empty-droplet filtering results.
+# Args:
+#   fdr_threshold: FDR cutoff used to classify emptyDrops cell calls.
+#   lower: Lower total-count threshold passed to emptyDrops.
+#   count_true_cells: Cell barcode or cell-level metadata used for filtering or grouping.
+#   count_empty_drops: Number of barcodes classified as empty droplets.
+# Returns: Constructed summary grob object/table.
 build_summary_grob <- function(fdr_threshold, lower, count_true_cells, count_empty_drops) {
   summary_table <- data.frame(
     Metric = c("FDR threshold", "Lower count cutoff", "Detected cells", "Removed empty droplets"),
@@ -157,6 +201,15 @@ build_summary_grob <- function(fdr_threshold, lower, count_true_cells, count_emp
   )
 }
 
+# Brief: Run emptyDrops, generate QC plots, and save pre/post-filter Seurat objects.
+# Args:
+#   output_path: Directory path used for this step’s output files.
+#   gene_count_file: Gene-by-cell count matrix CSV used by downstream steps.
+#   output_seurat_file: Filesystem input or output location used by this step.
+#   fdr_threshold: FDR cutoff used to classify emptyDrops cell calls.
+#   lower: Lower total-count threshold passed to emptyDrops.
+#   project_name: Project label stored in newly created Seurat objects.
+# Returns: Writes emptyDrops plots, summary CSV, and with/removed-empty Seurat RDS files.
 perform_empty_drops_analysis <- function(output_path,
                                          gene_count_file,
                                          output_seurat_file,
@@ -291,6 +344,10 @@ perform_empty_drops_analysis <- function(output_path,
   saveRDS(seurat_obj_rm_empty, file = file.path(output_path, paste0("removed_empty_", output_seurat_file, ".rds")))
 }
 
+# Main workflow entrypoint.
+# Brief: Run the script-specific command-line workflow.
+# Args: None.
+# Returns: No return value; executes the selected workflow and writes configured outputs.
 main <- function() {
   args <- parse_args(commandArgs(trailingOnly = TRUE))
   required_keys <- c("gene_count_file", "output_path", "output_seurat_file")

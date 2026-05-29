@@ -1,3 +1,9 @@
+# ------------------------------------------------------------------------------
+# Script: transcript_localization_helpers.r
+# Purpose: Helper utilities for DeepLocRNA transcript localization parsing and plotting.
+# Note: Documentation/layout update only; analysis logic was not changed.
+# ------------------------------------------------------------------------------
+
 suppressPackageStartupMessages({
   library(data.table)
   library(dplyr)
@@ -6,10 +12,21 @@ suppressPackageStartupMessages({
   library(tidyr)
 })
 
+# Brief: Create an output directory when it is missing.
+# Args:
+#   path: Filesystem path to create, read, or write.
+# Returns: Ensures the target directory exists; no analysis object is returned.
 ensure_dir <- function(path) {
   dir.create(path, recursive = TRUE, showWarnings = FALSE)
 }
 
+# Brief: Write a ggplot-compatible plot object to a PDF file.
+# Args:
+#   plot_obj: Plot object to save.
+#   file_path: Filesystem path for an input or output file.
+#   width: Figure width in inches.
+#   height: Figure height in inches.
+# Returns: Writes the provided plot object to a PDF file.
 save_plot_pdf <- function(plot_obj, file_path, width = 9, height = 6) {
   ensure_dir(dirname(file_path))
   pdf(file = file_path, width = width, height = height, bg = "white")
@@ -17,6 +34,10 @@ save_plot_pdf <- function(plot_obj, file_path, width = 9, height = 6) {
   dev.off()
 }
 
+# Brief: Parse a DeepLocRNA prediction table into transcript scores and predicted classes.
+# Args:
+#   prediction_file: DeepLocRNA prediction output file.
+# Returns: Loaded deeplocrna predictions object/table from disk or package resources.
 read_deeplocrna_predictions <- function(prediction_file) {
   lines <- readLines(prediction_file, warn = FALSE)
   lines <- lines[nzchar(trimws(lines))]
@@ -75,15 +96,28 @@ read_deeplocrna_predictions <- function(prediction_file) {
   pred_df
 }
 
+# Brief: Return DeepLocRNA compartment score columns.
+# Args:
+#   pred_df: DeepLocRNA prediction data frame.
+# Returns: Retrieved localization score columns values.
 get_localization_score_columns <- function(pred_df) {
   setdiff(colnames(pred_df), c("transcript_id", "Prediction"))
 }
 
+# Brief: Count transcripts assigned to each DeepLocRNA prediction class.
+# Args:
+#   pred_df: DeepLocRNA prediction data frame.
+# Returns: Summary table for prediction counts.
 summarize_prediction_counts <- function(pred_df) {
   pred_df %>%
     dplyr::count(Prediction, name = "transcript_count", sort = TRUE)
 }
 
+# Brief: Plot transcript counts per DeepLocRNA localization class.
+# Args:
+#   summary_df: Summary table used for plotting or writing results.
+#   output_file: Destination path for the generated table or figure.
+# Returns: Plot object for prediction class counts; writes a PDF when an output path is provided.
 plot_prediction_class_counts <- function(summary_df, output_file = NULL) {
   plot_df <- summary_df %>%
     mutate(
@@ -143,6 +177,10 @@ plot_prediction_class_counts <- function(summary_df, output_file = NULL) {
   p
 }
 
+# Brief: Read the transcript-to-gene mapping table produced during resource setup.
+# Args:
+#   mapping_file: Transcript-to-gene mapping CSV produced by resource setup.
+# Returns: Loaded transcript gene mapping object/table from disk or package resources.
 read_transcript_gene_mapping <- function(mapping_file) {
   dict_df <- data.table::fread(mapping_file, data.table = FALSE)
 
@@ -166,6 +204,11 @@ read_transcript_gene_mapping <- function(mapping_file) {
     distinct(transcript_id, .keep_all = TRUE)
 }
 
+# Brief: Find all transcript records matching a gene symbol or gene ID.
+# Args:
+#   gene_query: Gene symbol or gene ID requested by the user.
+#   mapping_df: Loaded transcript-to-gene mapping data frame.
+# Returns: Resolved gene transcripts value or matching records.
 resolve_gene_transcripts <- function(gene_query, mapping_df) {
   if (is.null(gene_query) || gene_query == "") {
     stop("gene_query must be a non-empty gene symbol or gene_id")
@@ -185,6 +228,11 @@ resolve_gene_transcripts <- function(gene_query, mapping_df) {
     arrange(gene_symbol, gene_id, transcript_id)
 }
 
+# Brief: Write selected transcript IDs to a plain-text file.
+# Args:
+#   transcript_df: Transcript mapping subset for one selected gene.
+#   output_file: Destination path for the generated table or figure.
+# Returns: Writes transcript ID text file and invisibly returns the output path.
 write_transcript_ids_file <- function(transcript_df, output_file) {
   if (!"transcript_id" %in% colnames(transcript_df)) {
     stop("transcript_df must contain a transcript_id column")
@@ -195,6 +243,12 @@ write_transcript_ids_file <- function(transcript_df, output_file) {
   invisible(output_file)
 }
 
+# Brief: Build an AWK command that extracts selected transcript records from FASTA.
+# Args:
+#   transcript_ids_file: Plain-text file listing transcript IDs to extract from FASTA.
+#   input_fasta: Input transcript FASTA file.
+#   output_fasta: Output FASTA file to create.
+# Returns: Shell command string ready to inspect and execute.
 prepare_subset_fasta_command <- function(transcript_ids_file,
                                          input_fasta,
                                          output_fasta) {
@@ -211,6 +265,12 @@ prepare_subset_fasta_command <- function(transcript_ids_file,
   )
 }
 
+# Brief: Extract selected transcript FASTA records using an ID list.
+# Args:
+#   transcript_ids_file: Plain-text file listing transcript IDs to extract from FASTA.
+#   input_fasta: Input transcript FASTA file.
+#   output_fasta: Output FASTA file to create.
+# Returns: List with output FASTA path and number of transcripts kept.
 extract_subset_fasta_by_transcript_ids <- function(transcript_ids_file,
                                                    input_fasta,
                                                    output_fasta) {
@@ -255,6 +315,13 @@ extract_subset_fasta_by_transcript_ids <- function(transcript_ids_file,
   invisible(list(output_fasta = output_fasta, kept_transcripts = n_kept))
 }
 
+# Brief: Join DeepLocRNA predictions with mapping records for one selected gene.
+# Args:
+#   gene_query: Gene symbol or gene ID requested by the user.
+#   pred_df: DeepLocRNA prediction data frame.
+#   mapping_df: Loaded transcript-to-gene mapping data frame.
+#   keep_prediction_col: Whether to keep the predicted DeepLocRNA class in gene-level output tables.
+# Returns: List containing gene transcript table, score matrix, and score-column names.
 prepare_gene_localization_scores <- function(gene_query,
                                              pred_df,
                                              mapping_df,
@@ -286,11 +353,24 @@ prepare_gene_localization_scores <- function(gene_query,
   )
 }
 
+# Brief: Write a gene-specific transcript localization score table.
+# Args:
+#   localization_obj: List containing gene-specific localization table and score matrix.
+#   output_file: Destination path for the generated table or figure.
+# Returns: Writes gene-level localization score CSV.
 write_gene_localization_table <- function(localization_obj, output_file) {
   ensure_dir(dirname(output_file))
   write.csv(localization_obj$transcript_table, output_file, row.names = FALSE)
 }
 
+# Brief: Plot gene-specific DeepLocRNA scores relative to compartment thresholds.
+# Args:
+#   localization_obj: List containing gene-specific localization table and score matrix.
+#   gene_query: Gene symbol or gene ID requested by the user.
+#   output_file: Destination path for the generated table or figure.
+#   cluster_rows: Whether heatmap rows should be clustered.
+#   cluster_cols: Whether heatmap columns should be clustered.
+# Returns: Plot object for gene localization heatmap; writes a PDF when an output path is provided.
 plot_gene_localization_heatmap <- function(localization_obj,
                                            gene_query,
                                            output_file = NULL,
@@ -364,20 +444,18 @@ plot_gene_localization_heatmap <- function(localization_obj,
   }
 
   finite_vals <- relative_margin_mat[is.finite(relative_margin_mat)]
-    min_margin <- if (length(finite_vals) > 0) {
-        min(finite_vals, na.rm = TRUE)
-    }
-    else {
-        -0.25
-    }
-    max_margin <- if (length(finite_vals) > 0) {
-        max(finite_vals, na.rm = TRUE)
-    }
-    else {
-        0.25
-    }
-    min_margin <- min(min_margin, -0.02)
-    max_margin <- max(max_margin, 0.02)
+  min_margin <- if (length(finite_vals) > 0) {
+    min(finite_vals, na.rm = TRUE)
+  } else {
+    -0.25
+  }
+  max_margin <- if (length(finite_vals) > 0) {
+    max(finite_vals, na.rm = TRUE)
+  } else {
+    0.25
+  }
+  min_margin <- min(min_margin, -0.02)
+  max_margin <- max(max_margin, 0.02)
 
   neg_palette <- grDevices::colorRampPalette(
     c("#24557A", "#7DB7D8", "#EAF4FF")
@@ -386,10 +464,16 @@ plot_gene_localization_heatmap <- function(localization_obj,
     c("#F6D38B", "#E58F65", "#B23A48")
   )(80)
   margin_palette <- c(neg_palette, pos_palette)
-  neg_breaks <- seq(min_margin, 0, length.out = length(neg_palette) + 
-        1)
-    pos_breaks <- seq(0, max_margin, length.out = length(pos_palette) + 
-        1)
+  neg_breaks <- seq(
+    min_margin,
+    0,
+    length.out = length(neg_palette) + 1
+  )
+  pos_breaks <- seq(
+    0,
+    max_margin,
+    length.out = length(pos_palette) + 1
+  )
   breaks_vec <- c(neg_breaks, pos_breaks[-1])
 
   plot_width <- max(11.5, 1.85 * ncol(score_mat) + 3.8)
@@ -398,7 +482,11 @@ plot_gene_localization_heatmap <- function(localization_obj,
   heat_cellheight <- max(20, min(34, 300 / max(1, nrow(score_mat))))
   legend_breaks <- c(min_margin, 0, max_margin)
   legend_labels <- c("Below", "At threshold", "Above")
-    draw_heatmap <- function() {
+
+  # Brief: Draw the already prepared DeepLocRNA heatmap inside the enclosing function.
+  # Args: None.
+  # Returns: Renders the nested DeepLocRNA pheatmap for the prepared localization matrix.
+  draw_heatmap <- function() {
     pheatmap::pheatmap(
       relative_margin_mat,
       cluster_rows = cluster_rows,
@@ -409,8 +497,7 @@ plot_gene_localization_heatmap <- function(localization_obj,
       main = paste0(
         "Transcript Localization Relative To Threshold: ",
         gene_query,
-        "
-Negative = below threshold, positive = above threshold"
+        "\nNegative = below threshold, positive = above threshold"
       ),
       annotation_row = annotation_row,
       annotation_colors = annotation_colors,
@@ -442,4 +529,3 @@ Negative = below threshold, positive = above threshold"
 
   draw_heatmap()
 }
-

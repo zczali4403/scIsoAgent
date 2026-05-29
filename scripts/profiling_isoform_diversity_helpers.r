@@ -1,3 +1,9 @@
+# ------------------------------------------------------------------------------
+# Script: profiling_isoform_diversity_helpers.r
+# Purpose: Helper utilities for entropy-based isoform diversity profiling and plotting.
+# Note: Documentation/layout update only; analysis logic was not changed.
+# ------------------------------------------------------------------------------
+
 suppressPackageStartupMessages({
   library(Seurat)
   library(dplyr)
@@ -19,10 +25,21 @@ color_palette_21 <- c(
   "#C8A2C8"
 )
 
+# Brief: Create an output directory when it is missing.
+# Args:
+#   path: Filesystem path to create, read, or write.
+# Returns: Ensures the target directory exists; no analysis object is returned.
 ensure_dir <- function(path) {
   dir.create(path, recursive = TRUE, showWarnings = FALSE)
 }
 
+# Brief: Write a ggplot-compatible plot object to a PDF file.
+# Args:
+#   plot_obj: Plot object to save.
+#   file_path: Filesystem path for an input or output file.
+#   width: Figure width in inches.
+#   height: Figure height in inches.
+# Returns: Writes the provided plot object to a PDF file.
 save_plot_pdf <- function(plot_obj, file_path, width = 8, height = 6) {
   ensure_dir(dirname(file_path))
   pdf(file = file_path, width = width, height = height, bg = "white")
@@ -30,6 +47,12 @@ save_plot_pdf <- function(plot_obj, file_path, width = 8, height = 6) {
   dev.off()
 }
 
+# Brief: Locate the isoform-to-gene-symbol dictionary for diversity labeling.
+# Args:
+#   gene_symbol_dict_csv: Optional path to the resource-setup isoform_gene_symbol_dict.csv file.
+#   output_rds: Path where the output Seurat RDS object should be saved.
+#   output_root: Workflow results root used to auto-discover the resource-setup dictionary.
+# Returns: Resolved gene symbol dict value or matching records.
 resolve_gene_symbol_dict <- function(gene_symbol_dict_csv = NULL, output_rds = NULL, output_root = NULL) {
   if (!is.null(gene_symbol_dict_csv) && gene_symbol_dict_csv != "" && file.exists(gene_symbol_dict_csv)) {
     return(gene_symbol_dict_csv)
@@ -59,6 +82,10 @@ resolve_gene_symbol_dict <- function(gene_symbol_dict_csv = NULL, output_rds = N
   NULL
 }
 
+# Brief: Load and validate a gene-symbol dictionary table.
+# Args:
+#   dict_csv: Candidate gene-symbol dictionary CSV path.
+# Returns: Loaded gene symbol dict object/table from disk or package resources.
 load_gene_symbol_dict <- function(dict_csv) {
   if (is.null(dict_csv) || dict_csv == "" || !file.exists(dict_csv)) {
     return(NULL)
@@ -83,6 +110,11 @@ load_gene_symbol_dict <- function(dict_csv) {
   dict
 }
 
+# Brief: Replace gene IDs with gene symbols while preserving unique row names.
+# Args:
+#   gene_ids: Gene identifiers to map or summarize.
+#   dict_df: Loaded gene ID to gene symbol dictionary table.
+# Returns: Character vector of gene symbols with unmapped IDs preserved and names made unique.
 map_gene_ids_to_symbols <- function(gene_ids, dict_df = NULL) {
   if (is.null(dict_df) || length(gene_ids) == 0) {
     return(gene_ids)
@@ -94,6 +126,11 @@ map_gene_ids_to_symbols <- function(gene_ids, dict_df = NULL) {
   make.unique(mapped)
 }
 
+# Brief: Load the Seurat object used for entropy-based isoform diversity analysis.
+# Args:
+#   input_rds: Path to the Seurat RDS object used as input.
+#   celltype_col: Metadata column containing cell type labels.
+# Returns: Loaded Seurat object with a usable celltype metadata field for diversity analysis.
 read_isoform_diversity_object <- function(input_rds, celltype_col = NULL) {
   seurat_obj <- readRDS(input_rds)
   if (!is.null(celltype_col) && celltype_col != "" && celltype_col %in% colnames(seurat_obj@meta.data)) {
@@ -104,6 +141,12 @@ read_isoform_diversity_object <- function(input_rds, celltype_col = NULL) {
   seurat_obj
 }
 
+# Brief: Subset the Seurat object to one selected cell type for diversity analysis.
+# Args:
+#   seurat_obj: Seurat object being read, modified, plotted, or summarized.
+#   subset_col: Metadata column used to choose a cell subset.
+#   subset_value: Metadata value identifying the cell subset to keep.
+# Returns: Seurat object containing only cells matching the requested metadata value.
 subset_diversity_celltype <- function(seurat_obj, subset_col, subset_value) {
   if (!subset_col %in% colnames(seurat_obj@meta.data)) {
     stop(paste0("Metadata column not found: ", subset_col))
@@ -117,6 +160,18 @@ subset_diversity_celltype <- function(seurat_obj, subset_col, subset_value) {
   subset(seurat_obj, cells = keep_cells)
 }
 
+# Brief: Convert Seurat isoform counts to SingleCellExperiment format and compute isoform entropy.
+# Args:
+#   seurat_obj: Seurat object being read, modified, plotted, or summarized.
+#   genes: Gene identifiers or symbols selected for analysis.
+#   min_counts_per_cell: Minimum gene or isoform counts per cell required for entropy analysis.
+#   assay: Seurat assay name or SingleCellExperiment assay name to use.
+#   output_rds: Path where the output Seurat RDS object should be saved.
+#   threads: Number of worker threads to use.
+#   show_progress: Whether to display progress messages during long computations.
+#   gene_symbol_dict_csv: Optional path to the resource-setup isoform_gene_symbol_dict.csv file.
+#   map_to_gene_symbol: Whether entropy result rows should be relabeled from gene IDs to gene symbols.
+# Returns: List containing normalized_entropy and raw_entropy matrices; optionally saved as RDS.
 run_isoform_diversity <- function(seurat_obj,
                                   genes = rownames(seurat_obj),
                                   min_counts_per_cell = 10,
@@ -258,6 +313,15 @@ run_isoform_diversity <- function(seurat_obj,
   res
 }
 
+# Brief: Draw a heatmap of normalized isoform entropy values.
+# Args:
+#   normalized_entropy: Matrix of normalized isoform entropy values.
+#   output_file: Destination path for the generated table or figure.
+#   cluster_rows: Whether heatmap rows should be clustered.
+#   cluster_cols: Whether heatmap columns should be clustered.
+#   main: Main title text for a heatmap.
+#   na_col: Color used for missing entropy values in the heatmap.
+# Returns: Plot object for entropy heatmap; writes a PDF when an output path is provided.
 plot_entropy_heatmap <- function(normalized_entropy,
                                  output_file = NULL,
                                  cluster_rows = TRUE,
@@ -296,6 +360,10 @@ plot_entropy_heatmap <- function(normalized_entropy,
   )
 }
 
+# Brief: Compute median isoform entropy per gene.
+# Args:
+#   normalized_entropy: Matrix of normalized isoform entropy values.
+# Returns: Summary table for entropy by gene.
 summarize_entropy_by_gene <- function(normalized_entropy) {
   data.frame(
     gene = rownames(normalized_entropy),
@@ -304,6 +372,11 @@ summarize_entropy_by_gene <- function(normalized_entropy) {
   )
 }
 
+# Brief: Select genes with the lowest and highest median isoform entropy.
+# Args:
+#   entropy_summary: Per-gene entropy summary table.
+#   n: Number of items to select or display.
+# Returns: List containing global median plus low- and high-entropy gene tables.
 get_low_high_entropy_genes <- function(entropy_summary, n = 25) {
   global_median <- median(entropy_summary$median_entropy, na.rm = TRUE)
 
@@ -326,6 +399,12 @@ get_low_high_entropy_genes <- function(entropy_summary, n = 25) {
   )
 }
 
+# Brief: Plot high-entropy and low-entropy genes with a global median reference.
+# Args:
+#   entropy_summary: Per-gene entropy summary table.
+#   n: Number of items to select or display.
+#   output_file: Destination path for the generated table or figure.
+# Returns: List containing combined plot, low/high gene tables, and global median.
 plot_high_low_entropy_genes <- function(entropy_summary,
                                         n = 25,
                                         output_file = NULL) {
@@ -361,6 +440,13 @@ plot_high_low_entropy_genes <- function(entropy_summary,
   )
 }
 
+# Brief: Reshape selected gene entropy values into long format with cell metadata.
+# Args:
+#   normalized_entropy: Matrix of normalized isoform entropy values.
+#   seurat_obj: Seurat object being read, modified, plotted, or summarized.
+#   genes: Gene identifiers or symbols selected for analysis.
+#   celltype_col: Metadata column containing cell type labels.
+# Returns: Prepared gene entropy long object/table for the next step.
 prepare_gene_entropy_long <- function(normalized_entropy,
                                       seurat_obj,
                                       genes,
@@ -379,6 +465,13 @@ prepare_gene_entropy_long <- function(normalized_entropy,
   df_long
 }
 
+# Brief: Plot per-cell entropy values for one selected gene.
+# Args:
+#   df_long: Long-format entropy or expression table used for plotting.
+#   gene_name: Gene label used in a gene-specific plot.
+#   group_col: Metadata column defining the groups for plotting or summaries.
+#   output_file: Destination path for the generated table or figure.
+# Returns: Plot object for gene entropy; writes a PDF when an output path is provided.
 plot_gene_entropy <- function(df_long,
                               gene_name,
                               group_col = "celltype",
@@ -414,6 +507,13 @@ plot_gene_entropy <- function(df_long,
   p
 }
 
+# Brief: Combine gene-specific entropy plots for multiple selected genes.
+# Args:
+#   df_long: Long-format entropy or expression table used for plotting.
+#   genes: Gene identifiers or symbols selected for analysis.
+#   group_col: Metadata column defining the groups for plotting or summaries.
+#   output_file: Destination path for the generated table or figure.
+# Returns: Plot object for gene entropy batch; writes a PDF when an output path is provided.
 plot_gene_entropy_batch <- function(df_long,
                                     genes,
                                     group_col = "celltype",
@@ -430,6 +530,19 @@ plot_gene_entropy_batch <- function(df_long,
   combined_plot
 }
 
+# Brief: Draw per-cell pie charts of isoform proportions for one gene.
+# Args:
+#   seurat_obj: Seurat object being read, modified, plotted, or summarized.
+#   gene: Gene symbol or gene ID to analyze.
+#   assay: Seurat assay name or SingleCellExperiment assay name to use.
+#   slot: Assay data slot or layer to read from.
+#   top_n: Number of dominant isoforms retained separately before grouping the rest as other.
+#   n_cells: Number of cells to include in a per-cell visualization.
+#   plot_col: Number of columns in a multi-panel plot layout.
+#   output_file: Destination path for the generated table or figure.
+#   gene_symbol_dict_csv: Optional path to the resource-setup isoform_gene_symbol_dict.csv file.
+#   output_root: Workflow results root used to auto-discover the resource-setup dictionary.
+# Returns: Plot object for plotisoformpiecells; writes a PDF when an output path is provided.
 plotIsoformPieCells <- function(seurat_obj,
                                 gene,
                                 assay = "iso",

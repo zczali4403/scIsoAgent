@@ -1,3 +1,9 @@
+# ------------------------------------------------------------------------------
+# Script: annotation_helpers.r
+# Purpose: Helper utilities for downstream cell-type annotation and marker-based summaries.
+# Note: Documentation/layout update only; analysis logic was not changed.
+# ------------------------------------------------------------------------------
+
 suppressPackageStartupMessages({
   library(Seurat)
   library(SCP)
@@ -6,6 +12,10 @@ suppressPackageStartupMessages({
   library(data.table)
 })
 
+# Brief: Load optional annotation-related R packages when they are installed.
+# Args:
+#   extra_packages: Optional package names to load when available.
+# Returns: Loaded annotation libraries object/table from disk or package resources.
 load_annotation_libraries <- function(extra_packages = c("HGNChelper", "ggraph", "igraph", "tidyverse", "data.tree")) {
   invisible(lapply(extra_packages, function(pkg) {
     if (requireNamespace(pkg, quietly = TRUE)) {
@@ -14,25 +24,51 @@ load_annotation_libraries <- function(extra_packages = c("HGNChelper", "ggraph",
   }))
 }
 
+# Brief: Load ScType helper functions from their upstream source URLs.
+# Args: None.
+# Returns: Loaded sctype functions object/table from disk or package resources.
 load_sctype_functions <- function() {
   source("https://raw.githubusercontent.com/IanevskiAleksandr/sc-type/master/R/gene_sets_prepare.R")
   source("https://raw.githubusercontent.com/IanevskiAleksandr/sc-type/master/R/sctype_score_.R")
 }
 
+# Brief: Create an output directory when it is missing.
+# Args:
+#   path: Filesystem path to create, read, or write.
+# Returns: Ensures the target directory exists; no analysis object is returned.
 ensure_dir <- function(path) {
   dir.create(path, recursive = TRUE, showWarnings = FALSE)
 }
 
+# Brief: Write a ggplot-compatible plot object to a PDF file.
+# Args:
+#   plot_obj: Plot object to save.
+#   file_path: Filesystem path for an input or output file.
+#   width: Figure width in inches.
+#   height: Figure height in inches.
+# Returns: Writes the provided plot object to a PDF file.
 save_plot_pdf <- function(plot_obj, file_path, width = 8, height = 8) {
   pdf(file = file_path, width = width, height = height, bg = "white")
   print(plot_obj)
   dev.off()
 }
 
+# Brief: Load the Seurat object to annotate.
+# Args:
+#   input_rds: Path to the Seurat RDS object used as input.
+# Returns: Loaded Seurat object for annotation.
 read_annotation_object <- function(input_rds) {
   readRDS(input_rds)
 }
 
+# Brief: Plot clusters on an embedding before or during annotation.
+# Args:
+#   seurat_obj: Seurat object being read, modified, plotted, or summarized.
+#   group_by: Metadata column(s) used to aggregate, compare, or plot cell groups.
+#   output_file: Destination path for the generated table or figure.
+#   reduction: Dimensional reduction name used for embedding plots.
+#   title: Plot title text.
+# Returns: Plot object for cluster umap; writes a PDF when an output path is provided.
 plot_cluster_umap <- function(seurat_obj,
                               group_by,
                               output_file = NULL,
@@ -54,6 +90,16 @@ plot_cluster_umap <- function(seurat_obj,
   p
 }
 
+# Brief: Find cluster marker features for a selected assay and threshold set.
+# Args:
+#   seurat_obj: Seurat object being read, modified, plotted, or summarized.
+#   assay: Seurat assay name or SingleCellExperiment assay name to use.
+#   logfc.threshold: Minimum log fold-change threshold for marker detection.
+#   min.pct: Minimum fraction of cells expressing a marker feature.
+#   only.pos: Whether marker detection should return only positive markers.
+#   p_adj_cutoff: Adjusted p-value cutoff for filtering marker or DE results.
+#   output_file: Destination path for the generated table or figure.
+# Returns: Computed cluster markers table or vector.
 compute_cluster_markers <- function(seurat_obj,
                                     assay = "RNA",
                                     logfc.threshold = 0.5,
@@ -79,6 +125,18 @@ compute_cluster_markers <- function(seurat_obj,
   markers
 }
 
+# Brief: Run ScType scoring and add predicted cell-type labels to Seurat metadata.
+# Args:
+#   seurat_obj: Seurat object being read, modified, plotted, or summarized.
+#   db_: ScType marker database identifier or path.
+#   tissue: Tissue name used to select ScType marker sets.
+#   gs_removal_list: ScType gene-set names to remove before scoring.
+#   metadata_col_prefix: Metadata column name used to store ScType labels.
+#   figure_prefix: Text prefix used in annotation plot titles or filenames.
+#   cluster_res: Clustering resolution used by Seurat FindClusters.
+#   reduction: Dimensional reduction name used for embedding plots.
+#   output_pdf: PDF path for the aggregated Orthrus report.
+# Returns: List containing updated Seurat object, ScType score table, and annotation UMAP plot.
 perform_sctype_annotation <- function(seurat_obj,
                                       db_,
                                       tissue,
@@ -160,6 +218,13 @@ perform_sctype_annotation <- function(seurat_obj,
   )
 }
 
+# Brief: Apply user-provided cluster-to-celltype labels to Seurat identities and metadata.
+# Args:
+#   seurat_obj: Seurat object being read, modified, plotted, or summarized.
+#   cluster_to_celltype: Named mapping from cluster IDs to final cell type labels.
+#   cluster_col: Metadata column containing cluster identities.
+#   celltype_col: Metadata column containing cell type labels.
+# Returns: Seurat object with identities renamed and the celltype metadata column updated.
 rename_clusters_manually <- function(seurat_obj,
                                      cluster_to_celltype,
                                      cluster_col = NULL,
@@ -173,6 +238,14 @@ rename_clusters_manually <- function(seurat_obj,
   seurat_obj
 }
 
+# Brief: Plot annotated cell types on a Seurat embedding.
+# Args:
+#   seurat_obj: Seurat object being read, modified, plotted, or summarized.
+#   group_by: Metadata column(s) used to aggregate, compare, or plot cell groups.
+#   reduction: Dimensional reduction name used for embedding plots.
+#   output_file: Destination path for the generated table or figure.
+#   title: Plot title text.
+# Returns: Plot object for celltype umap; writes a PDF when an output path is provided.
 plot_celltype_umap <- function(seurat_obj,
                                group_by = "celltype",
                                reduction = "umap",
@@ -194,6 +267,15 @@ plot_celltype_umap <- function(seurat_obj,
   p
 }
 
+# Brief: Run celltype-level differential expression or differential isoform testing with SCP.
+# Args:
+#   seurat_obj: Seurat object being read, modified, plotted, or summarized.
+#   group_by: Metadata column(s) used to aggregate, compare, or plot cell groups.
+#   assay: Seurat assay name or SingleCellExperiment assay name to use.
+#   fc.threshold: Fold-change threshold for SCP differential testing.
+#   only.pos: Whether marker detection should return only positive markers.
+#   output_file: Destination path for the generated table or figure.
+# Returns: List containing the updated Seurat object and the celltype DE marker table.
 run_celltype_de <- function(seurat_obj,
                             group_by = "celltype",
                             assay = "RNA",
@@ -222,6 +304,14 @@ run_celltype_de <- function(seurat_obj,
   )
 }
 
+# Brief: Create per-celltype volcano plots from SCP differential-test results.
+# Args:
+#   seurat_obj: Seurat object being read, modified, plotted, or summarized.
+#   group_by: Metadata column(s) used to aggregate, compare, or plot cell groups.
+#   output_file: Destination path for the generated table or figure.
+#   width: Figure width in inches.
+#   height: Figure height in inches.
+# Returns: Plot object for volcano; writes a PDF when an output path is provided.
 plot_volcano <- function(seurat_obj,
                          group_by = "celltype",
                          output_file = NULL,
@@ -240,6 +330,21 @@ plot_volcano <- function(seurat_obj,
   cowplot::plot_grid(plotlist = p_list2, ncol = 2)
 }
 
+# Brief: Generate feature heatmaps for celltype-level marker or DE features.
+# Args:
+#   seurat_obj: Seurat object being read, modified, plotted, or summarized.
+#   de_table: Differential expression/feature table used to select plot features.
+#   group_by: Metadata column(s) used to aggregate, compare, or plot cell groups.
+#   species: Species name used by SCP annotation/enrichment helpers.
+#   assay: Seurat assay name or SingleCellExperiment assay name to use.
+#   db: Database name(s) used for annotation, enrichment, or feature annotation.
+#   fc_cutoff: Fold-change cutoff used to select features for plotting.
+#   p_adj_cutoff: Adjusted p-value cutoff for filtering marker or DE results.
+#   anno_terms: Whether to add pathway or ontology annotations to a heatmap.
+#   output_file: Destination path for the generated table or figure.
+#   height: Figure height in inches.
+#   width: Figure width in inches.
+# Returns: List containing the updated Seurat object and heatmap object.
 plot_celltype_heatmap <- function(seurat_obj,
                                   de_table,
                                   group_by = "celltype",
@@ -322,6 +427,14 @@ plot_celltype_heatmap <- function(seurat_obj,
   )
 }
 
+# Brief: Run pathway or gene-set enrichment analysis for celltype DE results.
+# Args:
+#   seurat_obj: Seurat object being read, modified, plotted, or summarized.
+#   group_by: Metadata column(s) used to aggregate, compare, or plot cell groups.
+#   db: Database name(s) used for annotation, enrichment, or feature annotation.
+#   species: Species name used by SCP annotation/enrichment helpers.
+#   de_threshold: Expression used by SCP to filter DE features for enrichment.
+# Returns: Result object/table from the celltype enrichment step.
 run_celltype_enrichment <- function(seurat_obj,
                                     group_by = "celltype",
                                     db = "GO_BP",
@@ -336,6 +449,17 @@ run_celltype_enrichment <- function(seurat_obj,
   )
 }
 
+# Brief: Plot enrichment results for selected celltype groups.
+# Args:
+#   seurat_obj: Seurat object being read, modified, plotted, or summarized.
+#   group_by: Metadata column(s) used to aggregate, compare, or plot cell groups.
+#   group_use: Selected group(s) to display in an enrichment plot.
+#   plot_type: Enrichment plot style to produce.
+#   word_type: Wordcloud term type used by SCP enrichment plotting.
+#   output_file: Destination path for the generated table or figure.
+#   width: Figure width in inches.
+#   height: Figure height in inches.
+# Returns: Plot object for enrichment; writes a PDF when an output path is provided.
 plot_enrichment <- function(seurat_obj,
                             group_by = "celltype",
                             group_use,
@@ -364,6 +488,16 @@ plot_enrichment <- function(seurat_obj,
   p
 }
 
+# Brief: Plot cell composition summaries across metadata groupings.
+# Args:
+#   seurat_obj: Seurat object being read, modified, plotted, or summarized.
+#   stat.by: Metadata variable used for cell composition statistics.
+#   group.by: Metadata variable used for grouping cells in Seurat/SCP calls.
+#   label: Whether labels should be shown on a composition plot.
+#   output_file: Destination path for the generated table or figure.
+#   width: Figure width in inches.
+#   height: Figure height in inches.
+# Returns: Plot object for cell statistics; writes a PDF when an output path is provided.
 plot_cell_statistics <- function(seurat_obj,
                                  stat.by,
                                  group.by,

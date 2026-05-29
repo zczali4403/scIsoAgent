@@ -1,3 +1,9 @@
+# ------------------------------------------------------------------------------
+# Script: merge_remove_batch.r
+# Purpose: Merge per-sample Seurat objects and optionally apply batch correction.
+# Note: Documentation/layout update only; analysis logic was not changed.
+# ------------------------------------------------------------------------------
+
 suppressPackageStartupMessages({
   library(Seurat)
   library(SCP)
@@ -5,6 +11,11 @@ suppressPackageStartupMessages({
   library(ggplot2)
 })
 
+# Parse command-line arguments.
+# Brief: Parse command-line arguments written as `--key=value` pairs.
+# Args:
+#   args: Raw trailing command-line arguments passed to the script.
+# Returns: Named list/dictionary of parsed command-line options.
 parse_args <- function(args) {
   parsed <- list()
 
@@ -27,6 +38,11 @@ parse_args <- function(args) {
   parsed
 }
 
+# Brief: Check that required command-line options were supplied before running a stage.
+# Args:
+#   parsed: Named argument list produced by the script argument parser.
+#   required_keys: Argument names that must be present before continuing.
+# Returns: No return value; raises an error when any required option is missing.
 require_args <- function(parsed, required_keys) {
   missing_keys <- required_keys[!required_keys %in% names(parsed)]
   if (length(missing_keys) > 0) {
@@ -54,6 +70,10 @@ require_args <- function(parsed, required_keys) {
   }
 }
 
+# Brief: Convert a comma-separated command-line value into a trimmed character vector.
+# Args:
+#   value: Input string or scalar value to parse or summarize.
+# Returns: Character vector/list of trimmed values from the comma-separated input.
 split_csv_arg <- function(value) {
   if (is.null(value) || value == "") {
     return(character(0))
@@ -61,6 +81,11 @@ split_csv_arg <- function(value) {
   trimws(strsplit(value, ",", fixed = TRUE)[[1]])
 }
 
+# Brief: Convert common textual boolean values into TRUE/FALSE.
+# Args:
+#   value: Input string or scalar value to parse or summarize.
+#   default: Boolean value returned when the input is NULL.
+# Returns: Boolean value parsed from a textual command-line option.
 parse_bool_arg <- function(value, default = FALSE) {
   if (is.null(value)) {
     return(default)
@@ -68,10 +93,18 @@ parse_bool_arg <- function(value, default = FALSE) {
   tolower(value) %in% c("true", "1", "yes", "y")
 }
 
+# Brief: Create an output directory when it is missing.
+# Args:
+#   path: Filesystem path to create, read, or write.
+# Returns: Ensures the target directory exists; no analysis object is returned.
 ensure_dir <- function(path) {
   dir.create(path, recursive = TRUE, showWarnings = FALSE)
 }
 
+# Brief: Infer sample names from input filenames when explicit sample labels are not provided.
+# Args:
+#   paths: Input RDS paths used to infer sample names from filenames.
+# Returns: Inferred sample names values.
 infer_sample_names <- function(paths) {
   sample_names <- basename(paths)
   sample_names <- sub("\\.rds$", "", sample_names, ignore.case = TRUE)
@@ -91,6 +124,11 @@ infer_sample_names <- function(paths) {
   sample_names
 }
 
+# Brief: Ensure that merged-object input files and sample labels are aligned one-to-one.
+# Args:
+#   input_rds_files: Comma-separated/list input paths for per-sample Seurat RDS files.
+#   sample_names: Sample labels aligned with the per-sample inputs.
+# Returns: No return value; raises an error if validation fails.
 validate_input_lengths <- function(input_rds_files, sample_names) {
   if (length(input_rds_files) == 0) {
     stop("At least one input RDS file must be provided")
@@ -100,6 +138,11 @@ validate_input_lengths <- function(input_rds_files, sample_names) {
   }
 }
 
+# Brief: Read per-sample Seurat objects and attach sample metadata labels.
+# Args:
+#   input_rds_files: Comma-separated/list input paths for per-sample Seurat RDS files.
+#   sample_names: Sample labels aligned with the per-sample inputs.
+# Returns: Loaded seurat objects object/table from disk or package resources.
 load_seurat_objects <- function(input_rds_files, sample_names) {
   objects <- vector("list", length(input_rds_files))
 
@@ -113,6 +156,11 @@ load_seurat_objects <- function(input_rds_files, sample_names) {
   objects
 }
 
+# Brief: Merge one or more Seurat objects into a combined object.
+# Args:
+#   objects: List of per-sample Seurat objects.
+#   sample_names: Sample labels aligned with the per-sample inputs.
+# Returns: Merged objects object/table.
 merge_objects <- function(objects, sample_names) {
   if (length(objects) == 1) {
     return(objects[[1]])
@@ -126,6 +174,11 @@ merge_objects <- function(objects, sample_names) {
   )
 }
 
+# Brief: Normalize a merged Seurat object and compute PCA.
+# Args:
+#   merged_obj: Merged Seurat object after combining samples.
+#   npc: Number of PCA dimensions to use.
+# Returns: Merged Seurat object after normalization, variable-feature selection, scaling, and PCA.
 prepare_merged_object <- function(merged_obj, npc) {
   merged_obj <- merged_obj %>%
     NormalizeData(verbose = FALSE) %>%
@@ -135,6 +188,10 @@ prepare_merged_object <- function(merged_obj, npc) {
   merged_obj
 }
 
+# Brief: Create a PCA elbow plot for selecting dimensionality.
+# Args:
+#   merged_obj: Merged Seurat object after combining samples.
+# Returns: ggplot/plot object for elbow plot.
 build_elbow_plot <- function(merged_obj) {
   ElbowPlot(merged_obj, ndims = 50) +
     ggtitle("Elbow Plot") +
@@ -142,6 +199,10 @@ build_elbow_plot <- function(merged_obj) {
     theme(plot.title = element_text(face = "bold"))
 }
 
+# Brief: Create an elbow-style diagnostic plot from Harmony embeddings.
+# Args:
+#   merged_obj: Merged Seurat object after combining samples.
+# Returns: ggplot/plot object for harmony elbow plot.
 build_harmony_elbow_plot <- function(merged_obj) {
   if (!"harmony" %in% names(merged_obj@reductions)) {
     stop("Harmony reduction not found; run Harmony before building a harmony elbow plot")
@@ -166,6 +227,12 @@ build_harmony_elbow_plot <- function(merged_obj) {
     theme(plot.title = element_text(face = "bold"))
 }
 
+# Brief: Apply Harmony batch correction using sample identity as the batch variable.
+# Args:
+#   merged_obj: Merged Seurat object after combining samples.
+#   batch_method: Batch correction method to apply.
+#   npc: Number of PCA dimensions to use.
+# Returns: Result object/table from the batch correction step.
 run_batch_correction <- function(merged_obj, batch_method, npc) {
   if (batch_method != "harmony") {
     stop("Unsupported --batch_method. Currently supported: harmony")
@@ -185,6 +252,13 @@ run_batch_correction <- function(merged_obj, batch_method, npc) {
   merged_obj
 }
 
+# Brief: Run neighbor graph construction, clustering, and UMAP on a selected reduction.
+# Args:
+#   merged_obj: Merged Seurat object after combining samples.
+#   reduction_name: Resolved dimensional reduction name.
+#   dims_to_use: Number of dimensions used for neighbor graph and UMAP.
+#   cluster_res: Clustering resolution used by Seurat FindClusters.
+# Returns: Result object/table from the graph and umap step.
 run_graph_and_umap <- function(merged_obj, reduction_name, dims_to_use, cluster_res) {
   merged_obj <- FindNeighbors(merged_obj, reduction = reduction_name, dims = 1:dims_to_use)
   merged_obj <- FindClusters(merged_obj, resolution = cluster_res)
@@ -192,6 +266,13 @@ run_graph_and_umap <- function(merged_obj, reduction_name, dims_to_use, cluster_
   merged_obj
 }
 
+# Brief: Save a Seurat embedding plot colored by a selected metadata field.
+# Args:
+#   merged_obj: Merged Seurat object after combining samples.
+#   group_by: Metadata column(s) used to aggregate, compare, or plot cell groups.
+#   file_path: Filesystem path for an input or output file.
+#   title_text: Plot title text.
+# Returns: Writes a UMAP/embedding PDF colored by the requested grouping column.
 save_dimplot <- function(merged_obj, group_by, file_path, title_text) {
   p <- CellDimPlot(
     srt = merged_obj,
@@ -206,6 +287,19 @@ save_dimplot <- function(merged_obj, group_by, file_path, title_text) {
   dev.off()
 }
 
+# Brief: Write a table describing merge, clustering, and batch-correction settings.
+# Args:
+#   output_dir: Directory where output files should be written.
+#   output_prefix: Prefix used for naming output files from this stage.
+#   object_label: Text label describing whether the object is gene-level, isoform-level, or custom.
+#   remove_batch: Whether to apply batch correction before final clustering/UMAP.
+#   batch_method: Batch correction method to apply.
+#   npc: Number of PCA dimensions to use.
+#   cluster_res: Clustering resolution used by Seurat FindClusters.
+#   sample_names: Sample labels aligned with the per-sample inputs.
+#   merged_obj: Merged Seurat object after combining samples.
+#   harmony_npc: Number of Harmony dimensions to use after batch correction.
+# Returns: Writes the merge/run parameter summary TSV.
 write_run_summary <- function(output_dir,
                               output_prefix,
                               object_label,
@@ -224,6 +318,17 @@ write_run_summary <- function(output_dir,
   fwrite(run_summary, file.path(output_dir, paste0(output_prefix, "_run_summary.tsv")), sep = "\t")
 }
 
+# Brief: Load, merge, preprocess, optionally batch-correct, and optionally cluster Seurat objects.
+# Args:
+#   input_rds_files: Comma-separated/list input paths for per-sample Seurat RDS files.
+#   sample_names: Sample labels aligned with the per-sample inputs.
+#   npc: Number of PCA dimensions to use.
+#   cluster_res: Clustering resolution used by Seurat FindClusters.
+#   remove_batch: Whether to apply batch correction before final clustering/UMAP.
+#   batch_method: Batch correction method to apply.
+#   run_graph: Whether to run neighbor graph construction, clustering, and UMAP after preprocessing.
+#   graph_dims: Dimension count used for graph construction when overriding the default.
+# Returns: List containing input objects, the merged Seurat object, and the active reduction name.
 build_merged_object <- function(input_rds_files,
                                 sample_names,
                                 npc,
@@ -254,6 +359,14 @@ build_merged_object <- function(input_rds_files,
   )
 }
 
+# Brief: Write per-sample input, cell-count, and feature-count summary tables.
+# Args:
+#   output_dir: Directory where output files should be written.
+#   output_prefix: Prefix used for naming output files from this stage.
+#   sample_names: Sample labels aligned with the per-sample inputs.
+#   input_rds_files: Comma-separated/list input paths for per-sample Seurat RDS files.
+#   objects: List of per-sample Seurat objects.
+# Returns: Writes a per-sample summary TSV for the current module.
 write_sample_summary <- function(output_dir, output_prefix, sample_names, input_rds_files, objects) {
   summary_df <- data.frame(
     sample_name = sample_names,
@@ -265,6 +378,10 @@ write_sample_summary <- function(output_dir, output_prefix, sample_names, input_
   fwrite(summary_df, file.path(output_dir, paste0(output_prefix, "_sample_summary.tsv")), sep = "\t")
 }
 
+# Main workflow entrypoint.
+# Brief: Run the script-specific command-line workflow.
+# Args: None.
+# Returns: No return value; executes the selected workflow and writes configured outputs.
 main <- function() {
   args <- parse_args(commandArgs(trailingOnly = TRUE))
   require_args(args, c("stage", "input_rds_files", "output_dir", "output_prefix"))

@@ -1,3 +1,9 @@
+# ------------------------------------------------------------------------------
+# Script: QC_pipeline.r
+# Purpose: Staged QC pipeline for pre-filtering, PCA, clustering, and doublet removal.
+# Note: Documentation/layout update only; analysis logic was not changed.
+# ------------------------------------------------------------------------------
+
 suppressPackageStartupMessages({
   library(Seurat)
   library(SCP)
@@ -8,6 +14,11 @@ suppressPackageStartupMessages({
   library(DoubletFinder)
 })
 
+# Parse command-line arguments.
+# Brief: Parse command-line arguments written as `--key=value` pairs.
+# Args:
+#   args: Raw trailing command-line arguments passed to the script.
+# Returns: Named list/dictionary of parsed command-line options.
 parse_args <- function(args) {
   parsed <- list()
 
@@ -30,6 +41,11 @@ parse_args <- function(args) {
   parsed
 }
 
+# Brief: Check that required command-line options were supplied before running a stage.
+# Args:
+#   parsed: Named argument list produced by the script argument parser.
+#   required_keys: Argument names that must be present before continuing.
+# Returns: No return value; raises an error when any required option is missing.
 require_args <- function(parsed, required_keys) {
   missing_keys <- required_keys[!required_keys %in% names(parsed)]
   if (length(missing_keys) > 0) {
@@ -42,10 +58,18 @@ require_args <- function(parsed, required_keys) {
   }
 }
 
+# Brief: Create an output directory when it is missing.
+# Args:
+#   path: Filesystem path to create, read, or write.
+# Returns: Ensures the target directory exists; no analysis object is returned.
 ensure_dir <- function(path) {
   dir.create(path, recursive = TRUE, showWarnings = FALSE)
 }
 
+# Brief: Add mitochondrial-percentage metadata when it is absent from a Seurat object.
+# Args:
+#   seurat_object: Seurat object being processed or plotted.
+# Returns: Seurat object with percent.mt metadata present or newly calculated.
 ensure_percent_mt <- function(seurat_object) {
   if (!"percent.mt" %in% colnames(seurat_object@meta.data)) {
     seurat_object[["percent.mt"]] <- PercentageFeatureSet(seurat_object, pattern = "^MT-")
@@ -53,12 +77,27 @@ ensure_percent_mt <- function(seurat_object) {
   seurat_object
 }
 
+# Brief: Write a ggplot-compatible plot object to a PDF file.
+# Args:
+#   plot_obj: Plot object to save.
+#   file_path: Filesystem path for an input or output file.
+#   width: Figure width in inches.
+#   height: Figure height in inches.
+# Returns: Writes the provided plot object to a PDF file.
 save_plot_pdf <- function(plot_obj, file_path, width = 7, height = 6) {
   pdf(file = file_path, width = width, height = height, bg = "white")
   print(plot_obj)
   dev.off()
 }
 
+# Brief: Render a data frame as a PDF table.
+# Args:
+#   df: Data frame to render as a table in a PDF report.
+#   file_path: Filesystem path for an input or output file.
+#   title: Plot title text.
+#   width: Figure width in inches.
+#   height: Figure height in inches.
+# Returns: Writes the provided data frame as a PDF table.
 save_table_pdf <- function(df, file_path, title = NULL, width = 8, height = 5) {
   tbl <- tableGrob(df, rows = NULL)
   pdf(file = file_path, width = width, height = height, bg = "white")
@@ -72,6 +111,10 @@ save_table_pdf <- function(df, file_path, title = NULL, width = 8, height = 5) {
   dev.off()
 }
 
+# Brief: Create a pre-filter scatter plot of total counts versus detected features.
+# Args:
+#   seurat_object: Seurat object being processed or plotted.
+# Returns: ggplot/plot object for scatter plot.
 build_scatter_plot <- function(seurat_object) {
   md <- seurat_object@meta.data
   ggplot(md, aes(x = nCount_RNA, y = nFeature_RNA)) +
@@ -89,6 +132,11 @@ build_scatter_plot <- function(seurat_object) {
     )
 }
 
+# Brief: Create violin plots for QC metrics or isoform-level count summaries.
+# Args:
+#   seurat_object: Seurat object being processed or plotted.
+#   title_text: Plot title text.
+# Returns: ggplot/plot object for violin plot.
 build_violin_plot <- function(seurat_object, title_text) {
   md <- seurat_object@meta.data[, c("nFeature_RNA", "nCount_RNA", "percent.mt"), drop = FALSE]
   long_df <- stack(md)
@@ -108,6 +156,10 @@ build_violin_plot <- function(seurat_object, title_text) {
     )
 }
 
+# Brief: Create a PCA elbow plot for selecting dimensionality.
+# Args:
+#   seurat_object: Seurat object being processed or plotted.
+# Returns: ggplot/plot object for elbow plot.
 build_elbow_plot <- function(seurat_object) {
   ElbowPlot(seurat_object, ndims = 50) +
     ggtitle("Elbow Plot") +
@@ -115,6 +167,12 @@ build_elbow_plot <- function(seurat_object) {
     theme(plot.title = element_text(face = "bold"))
 }
 
+# Brief: Create an embedding plot colored by a metadata column.
+# Args:
+#   seurat_object: Seurat object being processed or plotted.
+#   group_by: Metadata column(s) used to aggregate, compare, or plot cell groups.
+#   title_text: Plot title text.
+# Returns: ggplot/plot object for cell dim plot.
 build_cell_dim_plot <- function(seurat_object, group_by, title_text) {
   CellDimPlot(
     srt = seurat_object,
@@ -125,6 +183,12 @@ build_cell_dim_plot <- function(seurat_object, group_by, title_text) {
   )
 }
 
+# Brief: Create an embedding plot colored by one feature or QC metric.
+# Args:
+#   seurat_object: Seurat object being processed or plotted.
+#   feature_name: Single feature or QC metric to display on an embedding.
+#   title_text: Plot title text.
+# Returns: ggplot/plot object for feature dim plot.
 build_feature_dim_plot <- function(seurat_object, feature_name, title_text) {
   FeatureDimPlot(
     srt = seurat_object,
@@ -135,6 +199,15 @@ build_feature_dim_plot <- function(seurat_object, feature_name, title_text) {
     ggtitle(title_text)
 }
 
+# Brief: Apply QC thresholds and run normalization, variable-feature selection, scaling, and PCA.
+# Args:
+#   input_rds: Path to the Seurat RDS object used as input.
+#   min_features: Minimum detected features required to keep a cell or create an object.
+#   max_features: Maximum detected features allowed for QC filtering.
+#   min_counts: Minimum total counts required for QC filtering.
+#   max_counts: Maximum total counts allowed for QC filtering.
+#   mt_cutoff: Maximum mitochondrial percentage allowed for QC filtering.
+# Returns: Filtered Seurat object with normalized data, variable features, scaling, and PCA.
 prepare_filtered_pca_object <- function(input_rds,
                                         min_features,
                                         max_features,
@@ -162,6 +235,17 @@ prepare_filtered_pca_object <- function(input_rds,
   filt_seurat_object
 }
 
+# Brief: Build a filtered PCA object and add neighbors, clusters, and UMAP coordinates.
+# Args:
+#   input_rds: Path to the Seurat RDS object used as input.
+#   min_features: Minimum detected features required to keep a cell or create an object.
+#   max_features: Maximum detected features allowed for QC filtering.
+#   min_counts: Minimum total counts required for QC filtering.
+#   max_counts: Maximum total counts allowed for QC filtering.
+#   mt_cutoff: Maximum mitochondrial percentage allowed for QC filtering.
+#   npc: Number of PCA dimensions to use.
+#   cluster_res: Clustering resolution used by Seurat FindClusters.
+# Returns: Filtered Seurat object with neighbors, clusters, and UMAP coordinates.
 prepare_clustered_object <- function(input_rds,
                                      min_features,
                                      max_features,
@@ -186,6 +270,12 @@ prepare_clustered_object <- function(input_rds,
   filt_seurat_object
 }
 
+# Brief: Generate QC plots before applying filtering thresholds.
+# Args:
+#   input_rds: Path to the Seurat RDS object used as input.
+#   output_dir: Directory where output files should be written.
+#   sample_id: Sample identifier used in metadata and output filenames.
+# Returns: Writes pre-filter QC scatter and violin PDFs.
 pre_filter_stage <- function(input_rds, output_dir, sample_id) {
   seurat_object <- readRDS(input_rds)
   seurat_object <- ensure_percent_mt(seurat_object)
@@ -198,6 +288,17 @@ pre_filter_stage <- function(input_rds, output_dir, sample_id) {
   save_plot_pdf(violin_plot, file.path(output_dir, "QC_metrics_violin.pdf"), width = 12, height = 5)
 }
 
+# Brief: Apply user-confirmed QC thresholds and generate post-filter/PCA diagnostics.
+# Args:
+#   input_rds: Path to the Seurat RDS object used as input.
+#   output_dir: Directory where output files should be written.
+#   sample_id: Sample identifier used in metadata and output filenames.
+#   min_features: Minimum detected features required to keep a cell or create an object.
+#   max_features: Maximum detected features allowed for QC filtering.
+#   min_counts: Minimum total counts required for QC filtering.
+#   max_counts: Maximum total counts allowed for QC filtering.
+#   mt_cutoff: Maximum mitochondrial percentage allowed for QC filtering.
+# Returns: Writes post-filter violin plot, PCA elbow plot, and filter parameter CSV.
 filter_pca_stage <- function(input_rds,
                              output_dir,
                              sample_id,
@@ -232,6 +333,19 @@ filter_pca_stage <- function(input_rds,
   write.csv(filter_params, file.path(output_dir, "filter_params.csv"), row.names = FALSE)
 }
 
+# Brief: Run clustering and UMAP using user-confirmed PCA dimensions and resolution.
+# Args:
+#   input_rds: Path to the Seurat RDS object used as input.
+#   output_dir: Directory where output files should be written.
+#   sample_id: Sample identifier used in metadata and output filenames.
+#   min_features: Minimum detected features required to keep a cell or create an object.
+#   max_features: Maximum detected features allowed for QC filtering.
+#   min_counts: Minimum total counts required for QC filtering.
+#   max_counts: Maximum total counts allowed for QC filtering.
+#   mt_cutoff: Maximum mitochondrial percentage allowed for QC filtering.
+#   npc: Number of PCA dimensions to use.
+#   cluster_res: Clustering resolution used by Seurat FindClusters.
+# Returns: Runs clustering/UMAP for validation; no file is written by this stage function itself.
 cluster_umap_stage <- function(input_rds,
                                output_dir,
                                sample_id,
@@ -257,6 +371,20 @@ cluster_umap_stage <- function(input_rds,
 
 }
 
+# Brief: Run DoubletFinder, keep singlets, and save final QC outputs.
+# Args:
+#   input_rds: Path to the Seurat RDS object used as input.
+#   output_dir: Directory where output files should be written.
+#   sample_id: Sample identifier used in metadata and output filenames.
+#   min_features: Minimum detected features required to keep a cell or create an object.
+#   max_features: Maximum detected features allowed for QC filtering.
+#   min_counts: Minimum total counts required for QC filtering.
+#   max_counts: Maximum total counts allowed for QC filtering.
+#   mt_cutoff: Maximum mitochondrial percentage allowed for QC filtering.
+#   npc: Number of PCA dimensions to use.
+#   cluster_res: Clustering resolution used by Seurat FindClusters.
+#   doublet_rate: Expected doublet rate used by DoubletFinder.
+# Returns: Writes doublet diagnostics, QC summaries, and final singlet/doublet Seurat RDS files.
 doublet_stage <- function(input_rds,
                           output_dir,
                           sample_id,
@@ -363,6 +491,10 @@ doublet_stage <- function(input_rds,
   write.csv(bcmvn_pbmc, file.path(output_dir, "doubletFinder_pK_scan.csv"), row.names = FALSE)
 }
 
+# Main workflow entrypoint.
+# Brief: Run the script-specific command-line workflow.
+# Args: None.
+# Returns: No return value; executes the selected workflow and writes configured outputs.
 main <- function() {
   args <- parse_args(commandArgs(trailingOnly = TRUE))
   require_args(args, c("stage", "input_rds", "output_dir", "sample_id"))

@@ -1,3 +1,9 @@
+# ------------------------------------------------------------------------------
+# Script: draw_features.r
+# Purpose: One-shot CLI wrapper for drawing selected gene/isoform features on embeddings.
+# Note: Documentation/layout update only; analysis logic was not changed.
+# ------------------------------------------------------------------------------
+
 suppressPackageStartupMessages({
   library(Seurat)
   library(SCP)
@@ -5,6 +11,11 @@ suppressPackageStartupMessages({
   library(ggplot2)
 })
 
+# Parse command-line arguments.
+# Brief: Parse command-line arguments written as `--key=value` pairs.
+# Args:
+#   args: Raw trailing command-line arguments passed to the script.
+# Returns: Named list/dictionary of parsed command-line options.
 parse_args <- function(args) {
   parsed <- list()
 
@@ -27,6 +38,11 @@ parse_args <- function(args) {
   parsed
 }
 
+# Brief: Check that required command-line options were supplied before running a stage.
+# Args:
+#   parsed: Named argument list produced by the script argument parser.
+#   required_keys: Argument names that must be present before continuing.
+# Returns: No return value; raises an error when any required option is missing.
 require_args <- function(parsed, required_keys) {
   missing_keys <- required_keys[!required_keys %in% names(parsed)]
   if (length(missing_keys) > 0) {
@@ -48,6 +64,10 @@ require_args <- function(parsed, required_keys) {
   }
 }
 
+# Brief: Convert a comma-separated command-line value into a trimmed character vector.
+# Args:
+#   value: Input string or scalar value to parse or summarize.
+# Returns: Character vector/list of trimmed values from the comma-separated input.
 split_csv_arg <- function(value) {
   if (is.null(value) || value == "") {
     return(character(0))
@@ -55,10 +75,19 @@ split_csv_arg <- function(value) {
   trimws(strsplit(value, ",", fixed = TRUE)[[1]])
 }
 
+# Brief: Create the parent directory for an output file when it is missing.
+# Args:
+#   path: Filesystem path to create, read, or write.
+# Returns: Ensures the output file parent directory exists; no analysis object is returned.
 ensure_parent_dir <- function(path) {
   dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
 }
 
+# Brief: Resolve a requested reduction name in a Seurat object.
+# Args:
+#   seurat_obj: Seurat object being read, modified, plotted, or summarized.
+#   reduction_arg: User-requested dimensional reduction name.
+# Returns: Resolved reduction name value or matching records.
 resolve_reduction_name <- function(seurat_obj, reduction_arg) {
   reduction_names <- names(seurat_obj@reductions)
   if (length(reduction_names) == 0) {
@@ -85,6 +114,11 @@ resolve_reduction_name <- function(seurat_obj, reduction_arg) {
   )
 }
 
+# Brief: Stop if any requested feature is absent from the active assay.
+# Args:
+#   seurat_obj: Seurat object being read, modified, plotted, or summarized.
+#   features: Feature IDs, gene names, or isoform IDs to plot or summarize.
+# Returns: No return value; raises an error if validation fails.
 validate_features <- function(seurat_obj, features) {
   available_features <- rownames(seurat_obj)
   missing_features <- features[!features %in% available_features]
@@ -99,6 +133,10 @@ validate_features <- function(seurat_obj, features) {
   }
 }
 
+# Brief: Sanitize text so it is safe for filenames or labels.
+# Args:
+#   x: Raw label text to sanitize.
+# Returns: Constructed safe label object/table.
 make_safe_label <- function(x) {
   x <- gsub("[^A-Za-z0-9._-]", "_", x)
   x <- gsub("_+", "_", x)
@@ -110,6 +148,14 @@ make_safe_label <- function(x) {
   x
 }
 
+# Brief: Write a compact run summary table for the current script.
+# Args:
+#   output_file: Destination path for the generated table or figure.
+#   input_rds: Path to the Seurat RDS object used as input.
+#   assay_name: Seurat assay name to set or validate.
+#   reduction_name: Resolved dimensional reduction name.
+#   features: Feature IDs, gene names, or isoform IDs to plot or summarize.
+# Returns: Writes the module-specific summary TSV next to the main output file.
 write_summary <- function(output_file, input_rds, assay_name, reduction_name, features) {
   summary_df <- data.frame(
     metric = c("input_rds", "assay", "reduction", "n_features", "features"),
@@ -123,6 +169,15 @@ write_summary <- function(output_file, input_rds, assay_name, reduction_name, fe
   )
 }
 
+# Brief: Draw and save a one-shot FeatureDimPlot for selected features.
+# Args:
+#   seurat_obj: Seurat object being read, modified, plotted, or summarized.
+#   input_rds: Path to the Seurat RDS object used as input.
+#   features: Feature IDs, gene names, or isoform IDs to plot or summarize.
+#   output_file: Destination path for the generated table or figure.
+#   reduction_arg: User-requested dimensional reduction name.
+#   assay_name: Seurat assay name to set or validate.
+# Returns: Writes the FeatureDimPlot PDF and companion summary TSV for the requested features.
 draw_feature_plot <- function(seurat_obj,
                               input_rds,
                               features,
@@ -170,6 +225,10 @@ draw_feature_plot <- function(seurat_obj,
   )
 }
 
+# Main workflow entrypoint.
+# Brief: Run the script-specific command-line workflow.
+# Args: None.
+# Returns: No return value; executes the selected workflow and writes configured outputs.
 main <- function() {
   args <- parse_args(commandArgs(trailingOnly = TRUE))
   require_args(args, c("input_rds", "features", "output_file"))
