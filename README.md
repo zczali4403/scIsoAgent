@@ -369,3 +369,29 @@ The basic pattern is:
 - review and confirm commands before they run
 
 If you are unsure where to begin, describe your current inputs and your goal.
+
+## Citation
+
+If you use scIsoAgent in your research, please cite:
+
+Zhao C, Liu M, Li X, Li D, Xu Y, Wang Z.  
+**scIsoAgent enables autonomous isoform-resolved characterization and sequence-informed interpretation of long-read single-cell transcriptomes.**  
+bioRxiv, 2026.  
+doi: [10.64898/2026.06.11.731519](https://doi.org/10.64898/2026.06.11.731519)
+
+<details>
+<summary>BibTeX</summary>
+
+```bibtex
+@article{zhaoScIsoAgentEnablesAutonomous2026,
+  title = {scIsoAgent Enables Autonomous Isoform-Resolved Characterization and Sequence-Informed Interpretation of Long-Read Single-Cell Transcriptomes},
+  author = {Zhao, Chengzhi and Liu, Mingyu and Li, Xue and Li, Dongsheng and Xu, Yichi and Wang, Zilong},
+  year = {2026},
+  journal = {bioRxiv},
+  pages = {2026.06.11.731519},
+  doi = {10.64898/2026.06.11.731519},
+  url = {https://www.biorxiv.org/content/10.64898/2026.06.11.731519v1}
+}
+```
+
+</details>
