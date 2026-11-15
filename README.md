@@ -370,6 +370,10 @@ The basic pattern is:
 
 If you are unsure where to begin, describe your current inputs and your goal.
 
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
 ## Citation
 
 If you use scIsoAgent in your research, please cite [this paper](https://www.biorxiv.org/content/10.64898/2026.06.11.731519v1).
